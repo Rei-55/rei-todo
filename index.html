@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>레이 · 이번 주 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root{
+    --paper:#eaecf2;--surface:#fff;--ink:#20233a;--ink-soft:#5c6178;--ink-faint:#8b90a4;--line:#dce0ea;
+    --adsp:#3a6ea5;--hanneung:#a4416a;--korean:#2e8b6b;--opic:#dd8236;--office:#2b8f9e;--jlpt:#6d54c7;--study:#767c8f;--python:#6f9a2e;--rest:#9aa0b2;
+    --display:'Space Grotesk','Pretendard Variable',sans-serif;
+    --body:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--body);background:var(--paper);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;padding:22px 16px 60px;}
+  .wrap{max-width:560px;margin:0 auto;}
+
+  .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .top .k{font-family:var(--display);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+  .top .dt{font-family:var(--display);font-size:12px;color:var(--ink-soft);font-weight:500;}
+
+  /* HERO — this week */
+  .hero{background:var(--ink);color:#fff;border-radius:22px;padding:24px 22px;position:relative;overflow:hidden;}
+  .hero .rail{position:absolute;left:0;top:0;bottom:0;width:6px;}
+  .hero .wk{font-family:var(--display);font-size:12px;letter-spacing:.06em;color:#b7bcd4;font-weight:500;margin-bottom:8px;}
+  .hero h1{font-size:26px;line-height:1.2;font-weight:700;letter-spacing:-.01em;margin-bottom:18px;}
+  .hero .list{display:grid;gap:9px;}
+  .hero .li{display:grid;grid-template-columns:56px 1fr;gap:12px;font-size:14.5px;align-items:baseline;}
+  .hero .li .k2{font-family:var(--display);font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:#9096b4;padding-top:2px;}
+  .hero .li .v{color:#eef0f6;}
+  .hero .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px;}
+  .hero .tag{font-size:11px;font-weight:600;border-radius:20px;padding:3px 11px;color:#fff;}
+
+  /* next exam */
+  .exam-card{margin-top:12px;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:16px;}
+  .exam-card .cd{font-family:var(--display);font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1;}
+  .exam-card .info .l{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .exam-card .info .n{font-size:16px;font-weight:700;margin-top:2px;}
+  .exam-card .info .d{font-family:var(--display);font-size:12px;color:var(--ink-soft);}
+
+  /* always-on */
+  .habits{margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .habit{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 13px;display:flex;gap:9px;align-items:center;font-size:12.5px;font-weight:500;color:var(--ink-soft);}
+  .habit .d{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .habit b{color:var(--ink);font-weight:600;}
+
+  /* mini calendar grid */
+  .mini{margin-top:26px;}
+  .mini .h{font-family:var(--display);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:10px;}
+  .mini .h::after{content:"";flex:1;height:1px;background:var(--line);}
+  .mrow{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:center;margin-bottom:7px;}
+  .mrow .ml{font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink-soft);text-align:right;}
+  .cells{display:flex;gap:5px;}
+  .cell{flex:1;height:34px;border-radius:7px;position:relative;background:var(--c,#d4d8e2);cursor:default;}
+  .cell.dim{opacity:.35;}
+  .cell.now{outline:2.5px solid var(--ink);outline-offset:1.5px;z-index:2;}
+  .cell .ex{position:absolute;top:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid var(--jlpt);}
+  .cell .wn{position:absolute;inset:0;border-radius:7px;border:2px dashed #b06a1e;}
+  .cell .tip{display:none;position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:11px;line-height:1.35;font-weight:500;padding:7px 10px;border-radius:9px;width:150px;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.2);}
+  .cell .tip::after{content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:var(--ink);}
+  .cell:hover .tip{display:block;}
+
+  .legend{display:flex;flex-wrap:wrap;gap:6px 13px;margin-top:18px;padding-top:16px;border-top:1px solid var(--line);}
+  .lg{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink-soft);font-weight:500;}
+  .lg .sw{width:11px;height:11px;border-radius:3px;}
+
+  .cell[data-w]{cursor:pointer;}
+  .cell.sel{outline:2.5px solid var(--hanneung);outline-offset:1.5px;z-index:3;}
+
+  .day-panel{overflow:hidden;max-height:0;opacity:0;transition:max-height .5s cubic-bezier(.4,0,.2,1),opacity .35s;}
+  .day-panel.open{max-height:2000px;opacity:1;margin-top:18px;}
+  .dp-head{font-family:var(--display);font-size:12.5px;letter-spacing:.03em;font-weight:600;color:var(--ink-soft);padding-bottom:10px;margin-bottom:4px;border-bottom:1px solid var(--line);}
+  .dp-head b{color:var(--ink);}
+  .dp-close{float:right;cursor:pointer;color:var(--ink-faint);font-size:15px;line-height:1;}
+  .day{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line);}
+  .day:last-child{border-bottom:none;}
+  .day.today{background:linear-gradient(90deg,rgba(32,35,58,.055),transparent);border-radius:10px;}
+  .day .dd{text-align:center;padding-top:4px;}
+  .day .dd .dw{font-family:var(--display);font-size:11px;font-weight:600;color:var(--ink-faint);}
+  .day .dd .dn{font-family:var(--display);font-size:19px;font-weight:700;color:var(--ink);line-height:1.05;}
+  .day.wknd .dd .dn{color:var(--hanneung);}
+  .day.today .dd .dw{color:var(--ink);}
+  .day .items{display:flex;flex-direction:column;gap:5px;}
+  .day .it{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:baseline;font-size:12.5px;background:#f5f6f9;border-left:3px solid var(--rest);border-radius:6px;padding:6px 10px;}
+  .day .it .tm{font-family:var(--display);font-size:10.5px;font-weight:600;color:var(--ink-soft);letter-spacing:.01em;}
+  .day .it .tx{color:var(--ink);font-weight:500;}
+  .day .it.exam{border:none!important;}
+  .day .it.exam .tm,.day .it.exam .tx{color:#fff;font-weight:700;}
+
+  .goal-box{border-radius:13px;padding:13px 15px;margin:16px 0 4px;}
+  .hero .goal-box{background:rgba(255,255,255,.10);}
+  .goal-label{font-family:var(--display);font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;margin-bottom:9px;}
+  .hero .goal-label{color:#b0b6d4;}
+  .goal{display:flex;align-items:center;gap:8px;font-size:13px;padding:4px 0;flex-wrap:wrap;line-height:1.4;}
+  .goal .gi{flex-shrink:0;font-size:12.5px;}
+  .goal .gt{font-weight:600;}
+  .hero .goal .gt{color:#fff;}
+  .goal .imp{font-size:10.5px;letter-spacing:.06em;font-weight:700;color:var(--opic);}
+  .goal .due{font-size:10px;font-weight:600;padding:1.5px 8px;border-radius:20px;white-space:nowrap;}
+  .hero .goal .due{background:rgba(255,255,255,.16);color:#e6e9f5;}
+  .hero .goal.exam .gt{color:#ffcf9e;}
+  .day-panel .goal-box{background:#f5f6f9;border:1px solid var(--line);margin:12px 0 16px;}
+  .day-panel .goal-label{color:var(--ink-faint);}
+  .day-panel .goal .gt{color:var(--ink);}
+  .day-panel .goal .due{background:var(--ink);color:#fff;}
+  .day-panel .goal.exam .gt{color:var(--jlpt);}
+
+  /* sync badge */
+  .sync{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--ink-faint);}
+  .sync .dot{width:7px;height:7px;border-radius:50%;background:#c3c8d6;transition:.3s;}
+  .sync.on .dot{background:#2e8b6b;}
+  .sync.off .dot{background:#d98a52;}
+
+  /* today todo card */
+  .today-card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:20px 20px 16px;margin-bottom:14px;box-shadow:0 12px 34px rgba(30,34,60,.07);}
+  .tc-top{display:flex;align-items:baseline;justify-content:space-between;}
+  .tc-top .tt{font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--opic);font-weight:700;}
+  .tc-top .dd{font-family:var(--display);font-size:12px;color:var(--ink-faint);}
+  .tc-title{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:5px 0 12px;}
+  .tc-prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px;}
+  .tc-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--opic),var(--hanneung));transition:width .45s;}
+  .tc-pct{font-size:11px;font-weight:600;color:var(--ink-faint);text-align:right;margin-bottom:10px;}
+  .todo{display:flex;align-items:flex-start;gap:11px;padding:9px 2px;border-bottom:1px solid #eef0f6;}
+  .todo:last-of-type{border-bottom:none;}
+  .todo .box{width:21px;height:21px;border-radius:7px;border:2px solid var(--line);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
+  .todo.done .box{background:var(--jlpt);border-color:var(--jlpt);}
+  .todo .box svg{width:12px;height:12px;opacity:0;transition:.15s;}
+  .todo.done .box svg{opacity:1;}
+  .todo .tcont{flex:1;cursor:pointer;min-width:0;}
+  .todo .ttm{font-family:var(--display);font-size:10.5px;font-weight:600;color:var(--ink-faint);}
+  .todo .ttx{font-size:14px;font-weight:500;color:var(--ink);line-height:1.4;}
+  .todo.done .ttx{color:var(--ink-faint);text-decoration:line-through;}
+  .todo .del{color:var(--ink-faint);font-size:16px;padding:0 2px;opacity:.45;cursor:pointer;align-self:center;}
+  .todo .del:hover{opacity:1;color:var(--hanneung);}
+  .tc-empty{font-size:13.5px;color:var(--ink-faint);padding:10px 2px;line-height:1.5;}
+  .tc-add{display:flex;gap:8px;margin-top:13px;}
+  .tc-add input{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-family:var(--body);font-size:13px;color:var(--ink);outline:none;min-width:0;}
+  .tc-add input:focus{border-color:var(--jlpt);}
+  .tc-add button{background:var(--ink);color:#fff;border:none;border-radius:11px;padding:0 16px;font-family:var(--body);font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;}
+
+  /* goal edit button */
+  .goal-edit{float:right;font-size:10px;font-weight:600;letter-spacing:.03em;cursor:pointer;border:1px solid;border-radius:20px;padding:2px 10px;background:transparent;font-family:var(--body);}
+  .hero .goal-edit{color:#c2c7e0;border-color:rgba(255,255,255,.28);}
+  .day-panel .goal-edit{color:var(--ink-faint);border-color:var(--line);}
+
+  /* modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(20,23,40,.5);backdrop-filter:blur(3px);display:none;align-items:flex-end;justify-content:center;z-index:100;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--paper);width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:22px 20px calc(28px + env(safe-area-inset-bottom));max-height:88vh;overflow-y:auto;animation:slideup .28s cubic-bezier(.4,0,.2,1);}
+  @keyframes slideup{from{transform:translateY(30px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+  .modal h3{font-size:17px;font-weight:700;margin-bottom:2px;}
+  .modal .msub{font-size:12px;color:var(--ink-soft);margin-bottom:16px;}
+  .gedit{background:#fff;border:1px solid var(--line);border-radius:13px;padding:12px;margin-bottom:10px;}
+  .gedit .grow{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .gedit .grow:last-child{margin-bottom:0;}
+  .gedit .badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;color:#fff;white-space:nowrap;}
+  .gedit input,.gedit select{flex:1;border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:var(--body);font-size:13px;color:var(--ink);outline:none;min-width:0;background:#fff;}
+  .gedit input:focus,.gedit select:focus{border-color:var(--jlpt);}
+  .gedit .del-g{color:var(--hanneung);font-size:12px;font-weight:600;cursor:pointer;padding:4px;white-space:nowrap;}
+  .madd{display:flex;gap:8px;margin:14px 0;}
+  .madd button{flex:1;border:1px dashed var(--ink-faint);background:transparent;border-radius:10px;padding:11px;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;}
+  .madd button:active{background:#fff;}
+  .msave{display:flex;gap:10px;margin-top:8px;}
+  .msave button{flex:1;border:none;border-radius:12px;padding:13px;font-family:var(--body);font-size:14px;font-weight:700;cursor:pointer;}
+  .msave .save{background:var(--ink);color:#fff;}
+  .msave .cancel{background:transparent;color:var(--ink-soft);border:1px solid var(--line)!important;}
+
+  .foot{margin-top:20px;font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="k">This Week · 레이 대시보드</span><span class="sync off" id="sync"><span class="dot"></span><span id="syncTxt">로컬 모드</span></span></div>
+
+  <div class="today-card" id="todayCard"></div>
+
+  <div class="hero" id="hero"></div>
+  <div class="exam-card" id="examCard"></div>
+
+  <div class="habits">
+    <div class="habit"><span class="d" style="background:var(--rest)"></span><span><b>공고</b> 일 밤 1건</span></div>
+    <div class="habit"><span class="d" style="background:var(--jlpt)"></span><span><b>JLPT 단어</b> 매일 15분</span></div>
+    <div class="habit"><span class="d" style="background:var(--opic)"></span><span><b>운동</b> 주 3~4회</span></div>
+    <div class="habit"><span class="d" style="background:var(--korean)"></span><span><b>강점</b> 지원할 때</span></div>
+  </div>
+
+  <div class="mini">
+    <div class="h">6개월 한눈에 · 주를 누르면 일별로 펼쳐져요</div>
+    <div id="grid"></div>
+    <div class="day-panel" id="dayPanel"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="foot">오늘 날짜 기준 이번 주가 자동으로 강조돼요 · 칸에 마우스를 올리면 그 주 요약 · <span style="border:2px solid var(--jlpt);border-radius:50%;display:inline-block;width:8px;height:8px;"></span> 시험 · <span style="color:#b06a1e">▢</span> 시험 기간</div>
+</div>
+
+
+  <div class="modal-overlay" id="modal"></div>
+
+</div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyBX_yxlzdbkenuCF7ktbyhgjbptWeMVTIc",
+  authDomain: "todolist-2026-7e8fc.firebaseapp.com",
+  projectId: "todolist-2026-7e8fc",
+  storageBucket: "todolist-2026-7e8fc.firebasestorage.app",
+  messagingSenderId: "134858585891",
+  appId: "1:134858585891:web:794038ca3d9dcba4087e96",
+  measurementId: "G-1Y5P1WM5Y8"
+};
+
+/* ================= 정적 계획 데이터 ================= */
+const T={adsp:['ADSP','var(--adsp)'],hanneung:['한능검','var(--hanneung)'],korean:['KBS 한국어','var(--korean)'],opic:['OPIc','var(--opic)'],office:['워드·컴활','var(--office)'],jlpt:['JLPT N2','var(--jlpt)'],study:['학과','var(--study)'],python:['파이썬','var(--python)'],rest:['회복·정리','var(--rest)']};
+const W=[
+ {n:1,s:'2026-07-08',e:'2026-07-12',m:7,h:'ADSP·한능검 시동',day:'ADSP 3과목 진입',eve:'ADSP 개념정리',wk:'한능검 기출 1회',t:['adsp','hanneung']},
+ {n:2,s:'2026-07-13',e:'2026-07-19',m:7,h:'ADSP 3과목에 무게',day:'R·통계·마이닝 집중',eve:'ADSP 기출 시작',wk:'한능검 취약시대+오답',t:['adsp','hanneung']},
+ {n:3,s:'2026-07-20',e:'2026-07-26',m:7,h:'ADSP 기출+취약시대',day:'ADSP 기출 1회독 / 개항기·일제',eve:'번갈아 기출',wk:'한능검 기출 2회',t:['adsp','hanneung']},
+ {n:4,s:'2026-07-27',e:'2026-08-02',m:7,h:'한능검 70→80',day:'취약시대 집중+ADSP 2회독',eve:'요약노트/기출',wk:'실전 모의 각 1회',t:['adsp','hanneung']},
+ {n:5,s:'2026-08-03',e:'2026-08-09',m:8,h:'★시험 주간',day:'요약·오답 최종정리',eve:'가볍게, 밤샘 금지',wk:'토 ADSP → 일 한능검',t:['adsp','hanneung'],ex:1},
+ {n:6,s:'2026-08-10',e:'2026-08-16',m:8,h:'숨 고르기+한국어 전환',day:'KBS 유형 파악',eve:'한국어 기출 1회',wk:'어휘·어법 정리',t:['korean','rest']},
+ {n:7,s:'2026-08-17',e:'2026-08-23',m:8,h:'★KBS 한국어(8/23)',day:'기출 집중, 틀린 유형만',eve:'어휘·어법·듣기',wk:'토 응시',t:['korean'],ex:1},
+ {n:8,s:'2026-08-24',e:'2026-08-30',m:8,h:'결과 확인+OPIc 시동',day:'OPIc 스크립트 정비',eve:'JLPT 단어 재가동',wk:'공고·자소서',t:['opic','jlpt','rest']},
+ {n:9,s:'2026-08-31',e:'2026-09-06',m:9,h:'OPIc+워드 시동',day:'OPIc 말하기 / 워드 실기',eve:'스크립트 소리내어',wk:'워드 실기 반복',t:['opic','office']},
+ {n:10,s:'2026-09-07',e:'2026-09-13',m:9,h:'OPIc 응시(IM2→IH)',day:'OPIc 모의 / 워드 마무리',eve:'OPIc 리허설',wk:'OPIc 응시(상시)',t:['opic','office'],dot:1},
+ {n:11,s:'2026-09-14',e:'2026-09-20',m:9,h:'워드 실기+컴활 필기',day:'워드 응시 / 컴활 이론',eve:'컴활 필기 기출',wk:'컴활 필기 풀이',t:['office'],dot:1},
+ {n:12,s:'2026-09-21',e:'2026-09-27',m:9,h:'컴활 필기+JLPT 출발',day:'컴활 필기 / JLPT 문법',eve:'JLPT 독해 30분',wk:'컴활 필기 모의',t:['office','jlpt']},
+ {n:13,s:'2026-09-28',e:'2026-10-04',m:10,h:'컴활 필기 마무리',day:'컴활 응시준비 / JLPT',eve:'JLPT 문법·단어',wk:'컴활 필기 응시',t:['office','jlpt'],dot:1},
+ {n:14,s:'2026-10-05',e:'2026-10-11',m:10,h:'JLPT 메인+컴활 실기',day:'JLPT 독해·청해 / 실기',eve:'JLPT',wk:'컴활 실기 실습',t:['jlpt','office']},
+ {n:15,s:'2026-10-12',e:'2026-10-18',m:10,h:'중간고사 직전',day:'학과↑, JLPT 단어만',eve:'학과 대비',wk:'학과 집중',t:['study','jlpt']},
+ {n:16,s:'2026-10-19',e:'2026-10-24',m:10,h:'⚠중간고사',day:'학업 올인',eve:'학과 대비',wk:'—',t:['study'],warn:1},
+ {n:17,s:'2026-10-25',e:'2026-10-31',m:10,h:'회복+JLPT 재가속',day:'JLPT 문법·독해 복귀 / 컴활 실기',eve:'JLPT',wk:'실기 / 파이썬 재개',t:['jlpt','office','python']},
+ {n:18,s:'2026-11-02',e:'2026-11-08',m:11,h:'JLPT 집중+실기 마무리',day:'JLPT 3영역 / 컴활 실기',eve:'JLPT 청해',wk:'컴활 실기 응시',t:['jlpt','office'],dot:1},
+ {n:19,s:'2026-11-09',e:'2026-11-15',m:11,h:'JLPT 기출·모의',day:'JLPT 기출 1회분',eve:'오답·문법',wk:'모의 1회 실전',t:['jlpt']},
+ {n:20,s:'2026-11-16',e:'2026-11-22',m:11,h:'JLPT 약점 보강',day:'취약 영역 집중',eve:'문법·단어',wk:'모의 2회차',t:['jlpt']},
+ {n:21,s:'2026-11-23',e:'2026-11-29',m:11,h:'JLPT 실전 모드',day:'시간 재고 실전 모의',eve:'청해 집중',wk:'최종 모의+오답',t:['jlpt']},
+ {n:22,s:'2026-11-30',e:'2026-12-06',m:12,h:'★JLPT N2 → 시험',day:'요약·오답 총정리',eve:'청해 유지, 밤샘 금지',wk:'12/6 JLPT 응시',t:['jlpt'],ex:1},
+ {n:23,s:'2026-12-07',e:'2026-12-14',m:12,h:'JLPT 끝+기말 시동',day:'학과 공부 시작',eve:'학과 정리',wk:'학과 집중',t:['study','rest']},
+ {n:24,s:'2026-12-15',e:'2026-12-21',m:12,h:'⚠기말고사',day:'학업 올인',eve:'학과 대비',wk:'—',t:['study'],warn:1},
+ {n:25,s:'2026-12-22',e:'2026-12-31',m:12,h:'한 해 정리',day:'성과 정리',eve:'재충전',wk:'상반기 공고 리서치',t:['rest']},
+];
+const EXAMS=[{l:'ADSP',d:'2026-08-08',c:'var(--adsp)'},{l:'한능검',d:'2026-08-09',c:'var(--hanneung)'},{l:'KBS 한국어',d:'2026-08-23',c:'var(--korean)'},{l:'OPIc',d:'2026-09-12',c:'var(--opic)'},{l:'JLPT N2',d:'2026-12-06',c:'var(--jlpt)'}];
+const IMP={5:'★★★★★',4:'★★★★',3:'★★★',2:'★★',1:'★'};
+const DEFAULT_GOALS={
+ 1:[{type:'job',name:'LG AI연구원 사업전략·기획 인턴',imp:5,due:'수시 · 최우선'},{type:'todo',text:'ADSP 3과목(R·통계) 궤도 올리기'}],
+ 2:[{type:'job',name:'오늘의집 CEO Staff Assistant',imp:4,due:'수시'},{type:'job',name:'카카오페이 어시스턴트·브랜드마케팅',imp:3,due:'채용시 마감'},{type:'todo',text:'ADSP 기출 회독 착수'}],
+ 3:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'ADSP 기출 1회독 · 한능검 취약시대 정리'}],
+ 4:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'한능검 70→80 · ADSP 최종 점검'}],
+ 5:[{type:'exam',text:'ADSP·한능검 둘 다 합격! (이번 주 공고는 STOP)'}],
+ 6:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'KBS 한국어 유형 파악'}],
+ 7:[{type:'exam',text:'KBS 한국어 응시 (8/23)'}],
+ 8:[{type:'todo',text:'밀린 공고 몰아서 지원 + 자소서 정비'},{type:'todo',text:'OPIc 스크립트 완성'}],
+ 9:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'OPIc·워드 실기 궤도'}],
+ 10:[{type:'exam',text:'OPIc 응시 — IH 목표'},{type:'todo',text:'공고 체크'}],
+ 11:[{type:'exam',text:'워드프로세서 실기 응시'},{type:'todo',text:'컴활 필기 착수'}],
+ 12:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'컴활 필기 · JLPT 출발'}],
+ 13:[{type:'exam',text:'컴활 필기 응시'},{type:'todo',text:'공고 체크'}],
+ 14:[{type:'todo',text:'⚡ 하반기 공채 시즌 — 공고 몰아보기'},{type:'todo',text:'JLPT 궤도 · 컴활 실기'}],
+ 15:[{type:'todo',text:'⚡ 공채 마감 러시! 지원 몰아치기'},{type:'todo',text:'중간고사 대비 시작'}],
+ 16:[{type:'exam',text:'중간고사 집중 (자격증·공고 STOP)'}],
+ 17:[{type:'todo',text:'밀린 공고 몰아서 지원'},{type:'todo',text:'JLPT 재가속'}],
+ 18:[{type:'exam',text:'컴활 실기 응시'},{type:'todo',text:'공고 체크'}],
+ 19:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 기출 시작'}],
+ 20:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 약점 보강'}],
+ 21:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 실전 모의'}],
+ 22:[{type:'exam',text:'JLPT N2 응시! (공고 STOP)'}],
+ 23:[{type:'todo',text:'밀린 공고 지원'},{type:'todo',text:'기말 대비 시작'}],
+ 24:[{type:'exam',text:'기말고사 집중 (STOP)'}],
+ 25:[{type:'todo',text:'한 해 성과 정리'},{type:'todo',text:'상반기 공채 리서치'}],
+};
+const W1_DETAIL={
+ '2026-07-08':[{tm:'20:00–21:30',tx:'ADSP 개념 정리 — 데이터 이해·분석 기획',c:'var(--adsp)'},{tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'}],
+ '2026-07-09':[{tm:'낮 블록',tx:'ADSP 3과목 — R 기초·기술통계',c:'var(--adsp)'},{tm:'19:00–20:30',tx:'운동 · 유산소 + 하체',c:'var(--opic)'},{tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'}],
+ '2026-07-10':[{tm:'낮 블록',tx:'ADSP 3과목 — 데이터 마이닝 기초',c:'var(--adsp)'},{tm:'19:00–20:30',tx:'운동 · 유산소',c:'var(--opic)'},{tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'}],
+ '2026-07-11':[{tm:'오전',tx:'ADSP 기출 1회독 + 오답 체크',c:'var(--adsp)'},{tm:'16:00–17:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'},{tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'}],
+ '2026-07-12':[{tm:'오전',tx:'한능검 기출 1회 — 감각 되살리기',c:'var(--hanneung)'},{tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'}],
+};
+const DOW=['일','월','화','수','목','금','토'];
+
+/* ================= 유틸 ================= */
+function t0(){const t=new Date();t.setHours(0,0,0,0);return t;}
+function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function fmt(s){const p=s.split('-');return (+p[1])+'/'+(+p[2]);}
+function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function wkStart(w){return new Date(w.s+'T00:00:00');}
+function wkEnd(w){return new Date(w.e+'T23:59:59');}
+function weekOf(d){return W.find(w=>d>=wkStart(w)&&d<=wkEnd(w));}
+function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'&&!Array.isArray(v)){if(!t[k]||typeof t[k]!=='object')t[k]={};deepMerge(t[k],v);}else t[k]=v;}}
+const now=t0();
+let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
+let openWeekNum=null, EDIT_N=null;
+
+/* ================= 상태 ================= */
+let STATE={checks:{},customTasks:{},goals:{}};
+function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
+function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
+
+/* ================= buildDay ================= */
+function buildDay(w,date){
+  const ds=iso(date);
+  if(W1_DETAIL[ds]) return W1_DETAIL[ds];
+  const dow=date.getDay();
+  const ex=EXAMS.find(x=>x.d===ds);
+  if(ex) return [{tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c}];
+  if(w.warn) return [{tm:'종일',tx:'학과 시험 공부 — 자격증은 잠시 STOP',c:'var(--study)'},{tm:'자기 전',tx:'JLPT 단어 15분 (여유되면)',c:'var(--jlpt)'}];
+  const PC='var(--'+w.t[0]+')';
+  const it=[];
+  if(dow===1||dow===3) it.push({tm:'20:00–21:30',tx:w.eve,c:PC});
+  else if(dow===2) it.push({tm:'낮 블록',tx:w.day,c:PC});
+  else if(dow===4){it.push({tm:'낮 블록',tx:w.day,c:PC});it.push({tm:'19:00–20:30',tx:'운동 · 유산소 + 하체',c:'var(--opic)'});}
+  else if(dow===5){it.push({tm:'낮 블록',tx:w.day,c:PC});it.push({tm:'19:00–20:30',tx:'운동 · 유산소',c:'var(--opic)'});}
+  else if(dow===6){it.push({tm:'오전',tx:w.wk,c:PC});it.push({tm:'16:00–17:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'});}
+  else if(dow===0) it.push({tm:'오전',tx:w.wk,c:PC});
+  it.push({tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'});
+  return it;
+}
+
+/* ================= 렌더 ================= */
+function goalHTML(n,label,edit){
+  const gs=getGoals(n);
+  const eb=edit?`<button class="goal-edit" data-edit="${n}">✎ 편집</button>`:'';
+  let rows;
+  if(!gs.length) rows=`<div class="goal"><span class="gi">•</span><span class="gt" style="opacity:.55">등록된 목표 없음 — 편집으로 추가</span></div>`;
+  else rows=gs.map(g=>{
+    const ty=typeOf(g);
+    if(ty==='job') return `<div class="goal job"><span class="gi">📋</span><span class="gt">${esc(g.name||g.job)}</span><span class="imp">${IMP[g.imp]||''}</span><span class="due">${esc(g.due)}</span></div>`;
+    if(ty==='exam') return `<div class="goal exam"><span class="gi">🎯</span><span class="gt">${esc(g.text||g.exam)}</span></div>`;
+    return `<div class="goal"><span class="gi">•</span><span class="gt">${esc(g.text||g.todo)}</span></div>`;
+  }).join('');
+  return `<div class="goal-box"><div class="goal-label">${label}${eb}</div>${rows}</div>`;
+}
+
+function renderTodo(){
+  const card=document.getElementById('todayCard');
+  const wk=weekOf(now), ds=iso(now);
+  const base=wk?buildDay(wk,now):[];
+  const customs=(STATE.customTasks&&STATE.customTasks[ds])||[];
+  const items=[...base.map((it,i)=>({key:ds+'::i'+i,tm:it.tm,tx:it.tx})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id}))];
+  const doneN=items.filter(x=>STATE.checks&&STATE.checks[x.key]).length;
+  const pct=items.length?Math.round(doneN/items.length*100):0;
+  const rowsHtml=items.length?items.map(x=>{
+    const done=!!(STATE.checks&&STATE.checks[x.key]);
+    return `<div class="todo ${done?'done':''}" data-key="${x.key}">
+      <div class="box" data-act="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}</div></div>
+      ${x.cid?`<div class="del" data-act="del" data-cid="${x.cid}">✕</div>`:''}</div>`;
+  }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
+  const dstr=`${now.getMonth()+1}월 ${now.getDate()}일 (${DOW[now.getDay()]})`;
+  card.innerHTML=`<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
+    <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
+    <div class="tc-prog"><span style="width:${pct}%"></span></div>
+    <div class="tc-pct">${doneN} / ${items.length} 완료</div>
+    ${rowsHtml}
+    <div class="tc-add"><input id="newTask" placeholder="할 일 직접 추가…" maxlength="60"><button data-act="add">추가</button></div>`;
+  card.onclick=e=>{
+    const t=e.target.closest('[data-act]'); if(!t)return;
+    const a=t.dataset.act;
+    if(a==='check'){toggleCheck(t.closest('.todo').dataset.key);}
+    else if(a==='del'){delCustom(t.dataset.cid);}
+    else if(a==='add'){addCustom();}
+  };
+  const inp=card.querySelector('#newTask');
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
+}
+function toggleCheck(key){const v=!(STATE.checks&&STATE.checks[key]);save({checks:{[key]:v}});}
+function addCustom(){const inp=document.getElementById('newTask');const tx=inp.value.trim();if(!tx)return;const ds=iso(now);const arr=[...((STATE.customTasks&&STATE.customTasks[ds])||[]),{id:Date.now().toString(36),tx}];save({customTasks:{[ds]:arr}});}
+function delCustom(cid){const ds=iso(now);const arr=((STATE.customTasks&&STATE.customTasks[ds])||[]).filter(c=>c.id!==cid);save({customTasks:{[ds]:arr}});}
+
+function renderHero(){
+  const el=document.getElementById('hero');
+  const c=T[cur.t[0]][1];
+  const tags=cur.t.map(k=>`<span class="tag" style="background:${T[k][1]}">${T[k][0]}</span>`).join('');
+  const rows=[['낮',cur.day],['저녁',cur.eve],['주말',cur.wk]].filter(r=>r[1]&&r[1]!=='—').map(r=>`<div class="li"><span class="k2">${r[0]}</span><span class="v">${esc(r[1])}</span></div>`).join('');
+  el.innerHTML=`<span class="rail" style="background:${c}"></span>
+    <div class="wk">W${cur.n} · ${fmt(cur.s)} – ${fmt(cur.e)} · 이번 주</div>
+    <h1>${esc(cur.h.replace('★','').replace('⚠',''))}</h1>
+    ${goalHTML(cur.n,'이번 주 GOAL',true)}
+    <div class="list">${rows}</div>
+    <div class="tags">${tags}</div>`;
+}
+
+function renderExam(){
+  const el=document.getElementById('examCard');
+  const up=EXAMS.map(x=>({...x,diff:Math.round((new Date(x.d+'T00:00:00')-now)/86400000)})).filter(x=>x.diff>=0).sort((a,b)=>a.diff-b.diff)[0];
+  if(!up){el.innerHTML=`<div class="info"><div class="l">All done</div><div class="n">모든 시험 완주 🎉</div></div>`;return;}
+  el.innerHTML=`<div class="cd" style="color:${up.c}">${up.diff===0?'D-DAY':'D-'+up.diff}</div><div class="info"><div class="l">다음 시험</div><div class="n">${up.l}</div><div class="d">${up.d.slice(5).replace('-','.')}</div></div>`;
+}
+
+function renderGrid(){
+  const grid=document.getElementById('grid');
+  const nowWk=weekOf(now);
+  const months=[7,8,9,10,11,12];
+  const maxW=Math.max(...months.map(m=>W.filter(w=>w.m===m).length));
+  let out='';
+  months.forEach(m=>{
+    const ws=W.filter(w=>w.m===m);
+    let cells='';
+    ws.forEach(w=>{
+      const isNow=(nowWk&&nowWk.n===w.n), isSel=(openWeekNum===w.n);
+      const c=T[w.t[0]][1];
+      const dim=wkEnd(w)<now?'dim':'';
+      cells+=`<div class="cell ${isNow?'now':''} ${isSel?'sel':''} ${dim}" data-w="${w.n}" style="--c:${c}">
+        ${w.ex||w.dot?`<span class="ex"></span>`:''}${w.warn?`<span class="wn"></span>`:''}
+        <span class="tip"><b>W${w.n} · ${fmt(w.s)}–${fmt(w.e)}</b><br>${esc(w.h.replace('★','').replace('⚠',''))}</span></div>`;
+    });
+    for(let i=ws.length;i<maxW;i++) cells+=`<div class="cell" style="background:transparent"></div>`;
+    out+=`<div class="mrow"><div class="ml">${m}월</div><div class="cells">${cells}</div></div>`;
+  });
+  grid.innerHTML=out;
+}
+
+function renderDaysHTML(w){
+  let html='<div class="dp-head"><span class="dp-close" data-act="closePanel">✕ 닫기</span><b>W'+w.n+'</b> · '+esc(w.h.replace('★','').replace('⚠',''))+'</div>'+goalHTML(w.n,'W'+w.n+' GOAL',true);
+  let d=new Date(w.s+'T00:00:00');const end=new Date(w.e+'T00:00:00');
+  while(d<=end){
+    const dow=d.getDay(),wknd=(dow===0||dow===6),isT=(iso(d)===iso(now));
+    const its=buildDay(w,new Date(d)).map(it=>`<div class="it ${it.exam?'exam':''}" style="${it.exam?('background:'+it.c):('border-left-color:'+it.c)}"><span class="tm">${esc(it.tm)}</span><span class="tx">${esc(it.tx)}</span></div>`).join('');
+    html+=`<div class="day ${wknd?'wknd':''} ${isT?'today':''}"><div class="dd"><div class="dw">${DOW[dow]}</div><div class="dn">${d.getDate()}</div></div><div class="items">${its}</div></div>`;
+    d.setDate(d.getDate()+1);
+  }
+  return html;
+}
+function renderPanel(){
+  const p=document.getElementById('dayPanel');
+  if(openWeekNum==null){p.classList.remove('open');p.innerHTML='';return;}
+  const w=W.find(x=>x.n===openWeekNum);if(!w){p.classList.remove('open');return;}
+  p.innerHTML=renderDaysHTML(w);p.classList.add('open');
+}
+function renderLegend(){
+  const lg=document.getElementById('legend');let h='';
+  ['adsp','hanneung','korean','opic','office','jlpt','study'].forEach(k=>{h+=`<div class="lg"><span class="sw" style="background:${T[k][1]}"></span>${T[k][0]}</div>`;});
+  lg.innerHTML=h;
+}
+function renderAll(){renderTodo();renderHero();renderExam();renderGrid();renderLegend();renderPanel();}
+
+/* ================= 상호작용 ================= */
+function openWeek(n){openWeekNum=(openWeekNum===n?null:n);renderGrid();renderPanel();if(openWeekNum!=null){setTimeout(()=>document.getElementById('dayPanel').scrollIntoView({behavior:'smooth',block:'nearest'}),140);}}
+document.getElementById('grid').onclick=e=>{const c=e.target.closest('.cell[data-w]');if(c)openWeek(+c.dataset.w);};
+document.getElementById('hero').onclick=e=>{const ed=e.target.closest('[data-edit]');if(ed)openGoalEdit(+ed.dataset.edit);};
+document.getElementById('dayPanel').onclick=e=>{
+  if(e.target.closest('[data-act="closePanel"]')){openWeekNum=null;renderGrid();renderPanel();return;}
+  const ed=e.target.closest('[data-edit]');if(ed)openGoalEdit(+ed.dataset.edit);
+};
+
+/* ---- GOAL 편집 모달 ---- */
+function geditHTML(type,g){
+  g=g||{};
+  if(type==='job') return `<div class="gedit" data-type="job">
+    <div class="grow"><span class="badge" style="background:var(--adsp)">공고</span><span class="del-g" data-del>삭제</span></div>
+    <div class="grow"><input class="f-name" placeholder="공고명" value="${esc(g.name||g.job)}"></div>
+    <div class="grow"><select class="f-imp">${[5,4,3,2,1].map(v=>`<option value="${v}" ${(+g.imp===v)?'selected':''}>${IMP[v]}</option>`).join('')}</select><input class="f-due" placeholder="마감 (예: 수시 / 8-20)" value="${esc(g.due)}"></div></div>`;
+  if(type==='exam') return `<div class="gedit" data-type="exam">
+    <div class="grow"><span class="badge" style="background:var(--jlpt)">시험</span><span class="del-g" data-del>삭제</span></div>
+    <div class="grow"><input class="f-text" placeholder="시험 / 목표" value="${esc(g.text||g.exam)}"></div></div>`;
+  return `<div class="gedit" data-type="todo">
+    <div class="grow"><span class="badge" style="background:var(--rest)">할 일</span><span class="del-g" data-del>삭제</span></div>
+    <div class="grow"><input class="f-text" placeholder="할 일" value="${esc(g.text||g.todo)}"></div></div>`;
+}
+function openGoalEdit(n){
+  EDIT_N=n;
+  const items=getGoals(n).map(g=>geditHTML(typeOf(g),g)).join('');
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>W${n} 목표 편집</h3>
+    <div class="msub">공고·시험·할 일을 추가하거나 지울 수 있어요. 저장하면 폰·PC에 바로 반영돼요.</div>
+    <div id="modalBody">${items}</div>
+    <div class="madd"><button data-add="job">📋 공고 추가</button><button data-add="todo">• 할 일 추가</button></div>
+    <div class="msave"><button class="cancel" data-m="cancel">취소</button><button class="save" data-m="save">저장</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function readModal(){
+  const arr=[];
+  document.querySelectorAll('#modalBody .gedit').forEach(g=>{
+    const ty=g.dataset.type;
+    if(ty==='job'){const name=g.querySelector('.f-name').value.trim();if(!name)return;arr.push({type:'job',name,imp:+g.querySelector('.f-imp').value,due:g.querySelector('.f-due').value.trim()});}
+    else{const tx=g.querySelector('.f-text').value.trim();if(!tx)return;arr.push({type:ty,text:tx});}
+  });
+  return arr;
+}
+const modalEl=document.getElementById('modal');
+modalEl.onclick=e=>{
+  const add=e.target.closest('[data-add]');
+  if(add){document.getElementById('modalBody').insertAdjacentHTML('beforeend',geditHTML(add.dataset.add,{}));return;}
+  if(e.target.closest('[data-del]')){e.target.closest('.gedit').remove();return;}
+  const m=e.target.closest('[data-m]');
+  if(m){if(m.dataset.m==='save')save({goals:{[EDIT_N]:readModal()}});modalEl.classList.remove('open');return;}
+  if(e.target===modalEl)modalEl.classList.remove('open');
+};
+
+/* ================= Firebase ================= */
+let db=null,F=null,stateRef=null;
+function setSync(on){const s=document.getElementById('sync');s.className='sync '+(on?'on':'off');document.getElementById('syncTxt').textContent=on?'동기화됨':'로컬 모드';}
+async function save(patch){
+  deepMerge(STATE,patch);renderAll();
+  if(db&&F&&stateRef){try{await F.setDoc(stateRef,patch,{merge:true});}catch(e){console.warn('저장 실패',e);}}
+}
+async function initFirebase(){
+  try{
+    const appMod=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
+    const fs=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+    const app=appMod.initializeApp(firebaseConfig);
+    db=fs.getFirestore(app);F=fs;
+    stateRef=fs.doc(db,'roadmap','state');
+    fs.onSnapshot(stateRef,snap=>{
+      const d=snap.exists()?snap.data():{};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{}};
+      setSync(true);renderAll();
+    },err=>{console.warn('구독 오류',err);setSync(false);});
+  }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
+}
+
+renderAll();
+initFirebase();
+</script>
+</body>
+</html>
