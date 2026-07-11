@@ -141,6 +141,25 @@
   .kcal-badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:4px 12px;}
   .kcal-ai{margin-left:auto;font-size:11px;font-weight:600;text-decoration:none;color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap;background:#fff;}
   .kcal-ai:hover{border-color:var(--jlpt);color:var(--jlpt);}
+
+  .wt-box{background:linear-gradient(140deg,#f2f4fb,#fbf3f7);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+  .wt-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .wt-in{width:84px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
+  .wt-in:focus{border-color:var(--hanneung);}
+  .wt-unit{font-family:var(--display);font-size:12.5px;font-weight:600;color:var(--ink-faint);}
+  .wt-delta{font-family:var(--display);font-size:12px;font-weight:700;border-radius:20px;padding:3px 10px;}
+  .wt-delta.dn{background:#d8efd9;color:#3a6f42;}
+  .wt-delta.up{background:#f9dcdc;color:#a33c3c;}
+  .wt-delta.same{background:#e6e8ef;color:#5a5f70;}
+  .wt-trend{font-size:11px;font-weight:600;color:var(--ink-soft);margin-left:auto;}
+  .wt-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px;}
+  .wt-card{background:#fff;border-radius:10px;padding:8px 10px;}
+  .wt-card .l{font-size:10px;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase;font-family:var(--display);}
+  .wt-card .v{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);margin-top:2px;}
+  .wt-card .v small{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-left:2px;}
+  .wt-bar{height:5px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:5px;}
+  .wt-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--korean),var(--hanneung));border-radius:6px;transition:width .5s;}
+  .wt-empty{font-size:12px;color:var(--ink-faint);margin-top:8px;}
   .tc-prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px;}
   .tc-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--opic),var(--hanneung));transition:width .45s;}
   .tc-pct{font-size:11px;font-weight:600;color:var(--ink-faint);text-align:right;margin-bottom:10px;}
@@ -458,7 +477,7 @@ let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
 let openWeekNum=null, EDIT_N=null;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 
@@ -486,6 +505,7 @@ function buildDay(w,date){
   else if(dow===4) it.push({tm:'18:30–20:30',tx:'운동 · 유산소',c:'var(--opic)'});
   else if(dow===5) it.push({tm:'18:30–20:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'});
   it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
+  it.push({tm:'아침',tx:'몸무게 기록',c:'var(--hanneung)'});
   if(!it.some(x=>x.c==='var(--jlpt)')) it.push({tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'});
   return it;
 }
@@ -531,6 +551,7 @@ function renderTodo(){
       ${kst?`<span class="kcal-badge" style="background:${kst.bg};color:${kst.fg}">${kst.label}</span>`:''}
       <a class="kcal-ai" href="https://claude.ai/new" target="_blank" rel="noopener">🍽 AI에게 칼로리 물어보기 ↗</a>
     </div>
+    ${weightHTML()}
     <div class="tc-prog"><span style="width:${pct}%"></span></div>
     <div class="tc-pct">${doneN} / ${items.length} 완료</div>
     ${rowsHtml}
@@ -545,9 +566,78 @@ function renderTodo(){
   const ki=card.querySelector('#kcalIn');
   ki.addEventListener('change',()=>saveKcal(ki.value));
   ki.addEventListener('keydown',e=>{if(e.key==='Enter'){ki.blur();}});
+  const wi=card.querySelector('#wtIn');
+  if(wi){wi.addEventListener('change',()=>saveWeight(wi.value));wi.addEventListener('keydown',e=>{if(e.key==='Enter'){wi.blur();}});}
   const inp=card.querySelector('#newTask');
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
 }
+/* ---- 몸무게 트래커 ---- */
+const WT_START=67, WT_GOAL=59, WT_PACE=1;   // 시작 67kg → 목표 59kg (-8kg), 주 1kg 페이스
+function wLog(){return STATE.weight||{};}
+function wAt(dsx){const v=wLog()[dsx];return (v||v===0)?parseFloat(v):null;}
+function wPrev(ds){ // 가장 최근의 이전 기록
+  const keys=Object.keys(wLog()).filter(k=>k<ds&&wAt(k)!=null).sort();
+  return keys.length?{d:keys[keys.length-1],v:wAt(keys[keys.length-1])}:null;
+}
+function wAvg(endDate,days){ // 최근 n일 평균
+  let sum=0,cnt=0,d=new Date(endDate);
+  for(let i=0;i<days;i++){const v=wAt(iso(d));if(v!=null){sum+=v;cnt++;}d.setDate(d.getDate()-1);}
+  return cnt?{avg:sum/cnt,cnt}:null;
+}
+function weightHTML(){
+  const ds=iso(now);
+  const cur=wAt(ds), prev=wPrev(ds);
+  const val=(cur!=null)?cur:'';
+  // 이번 주 목표: 주 시작(월요일) 기준 -1kg
+  const mon=new Date(now); mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
+  const startKeys=Object.keys(wLog()).filter(k=>k<iso(mon)&&wAt(k)!=null).sort();
+  const weekStart=wAt(iso(mon))??(startKeys.length?wAt(startKeys[startKeys.length-1]):null);
+  let weekHTML='';
+  if(cur!=null&&weekStart!=null){
+    const lost=weekStart-cur, remain=Math.max(0,WT_PACE-lost);
+    const pct=Math.max(0,Math.min(100,(lost/WT_PACE)*100));
+    weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${WT_PACE}kg)</div>
+      <div class="v">${remain<=0?'달성! 🎉':remain.toFixed(1)+'<small>kg 남음</small>'}</div>
+      <div class="wt-bar"><span style="width:${pct}%"></span></div></div>`;
+  } else weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${WT_PACE}kg)</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
+  // 최종 목표
+  let goalHTML2;
+  if(cur!=null){
+    const done=Math.max(0,WT_START-cur), left=Math.max(0,cur-WT_GOAL);
+    const pct=Math.max(0,Math.min(100,(done/(WT_START-WT_GOAL))*100));
+    goalHTML2=`<div class="wt-card"><div class="l">최종 ${WT_GOAL}kg까지</div>
+      <div class="v">${left<=0?'달성! 🎉':left.toFixed(1)+'<small>kg 남음</small>'}</div>
+      <div class="wt-bar"><span style="width:${pct}%"></span></div></div>`;
+  } else goalHTML2=`<div class="wt-card"><div class="l">최종 ${WT_GOAL}kg까지</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
+  // 전날 대비
+  let delta='';
+  if(cur!=null&&prev){
+    const d=cur-prev.v;
+    const cls=d<-0.05?'dn':(d>0.05?'up':'same');
+    const arrow=d<-0.05?'▼':(d>0.05?'▲':'—');
+    delta=`<span class="wt-delta ${cls}">${arrow} ${Math.abs(d).toFixed(1)}kg</span>`;
+  }
+  // 주간 평균 추세 (최근 7일 vs 그 이전 7일)
+  let trend='';
+  const a=wAvg(now,7);
+  if(a&&a.cnt>=2){
+    const pd=new Date(now); pd.setDate(pd.getDate()-7);
+    const b=wAvg(pd,7);
+    let t='';
+    if(b&&b.cnt>=2){const diff=a.avg-b.avg;t=` · 지난주 대비 ${diff<0?'▼':'▲'}${Math.abs(diff).toFixed(1)}kg`;}
+    trend=`<span class="wt-trend">주간 평균 ${a.avg.toFixed(1)}kg${t}</span>`;
+  }
+  return `<div class="wt-box">
+    <div class="wt-row1">
+      <input class="wt-in" id="wtIn" type="number" step="0.1" inputmode="decimal" placeholder="0.0" value="${val}">
+      <span class="wt-unit">kg</span>${delta}${trend}
+    </div>
+    <div class="wt-stats">${weekHTML}${goalHTML2}</div>
+    ${cur==null?'<div class="wt-empty">오늘 몸무게를 입력하면 변화가 계산돼요</div>':''}
+  </div>`;
+}
+function saveWeight(v){const n=parseFloat(v);const ds=iso(now);save({weight:{[ds]:(n&&n>0)?n:''}});}
+
 function kcalState(v){
   const n=parseInt(v,10); if(!n||n<=0) return null;
   if(n<=1000) return {label:'성공적 다이어트',bg:'#d6ecfa',fg:'#2b6c93'};
@@ -710,7 +800,7 @@ async function initFirebase(){
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{}};
       setSync(true);renderAll();
     },err=>{console.warn('구독 오류',err);setSync(false);});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
