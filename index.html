@@ -133,7 +133,14 @@
   .tc-top{display:flex;align-items:baseline;justify-content:space-between;}
   .tc-top .tt{font-family:var(--display);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--opic);font-weight:700;}
   .tc-top .dd{font-family:var(--display);font-size:12px;color:var(--ink-faint);}
-  .tc-title{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:5px 0 12px;}
+  .tc-title{font-size:19px;font-weight:700;letter-spacing:-.01em;margin:5px 0 8px;}
+  .kcal-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-bottom:12px;}
+  .kcal-in{width:76px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-family:var(--display);font-size:14px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
+  .kcal-in:focus{border-color:var(--jlpt);}
+  .kcal-unit{font-family:var(--display);font-size:12.5px;font-weight:600;color:var(--ink-faint);}
+  .kcal-badge{font-size:11.5px;font-weight:700;border-radius:20px;padding:4px 12px;}
+  .kcal-ai{margin-left:auto;font-size:11px;font-weight:600;text-decoration:none;color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap;background:#fff;}
+  .kcal-ai:hover{border-color:var(--jlpt);color:var(--jlpt);}
   .tc-prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px;}
   .tc-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--opic),var(--hanneung));transition:width .45s;}
   .tc-pct{font-size:11px;font-weight:600;color:var(--ink-faint);text-align:right;margin-bottom:10px;}
@@ -451,7 +458,7 @@ let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
 let openWeekNum=null, EDIT_N=null;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 
@@ -463,9 +470,10 @@ function buildDay(w,date){
   if(ex){
     it.push({tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c});
     if(DETAIL[ds]) DETAIL[ds].forEach(x=>it.push({tm:x.tm||'저녁',tx:x.tx,c:'var(--'+x.c+')'}));
+    it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
     return it;
   }
-  if(w.warn){ it.push({tm:'종일',tx:'학과 시험 공부 — 자격증은 잠시 STOP',c:'var(--study)'}); it.push({tm:'자기 전',tx:'JLPT 단어 15분 (여유되면)',c:'var(--jlpt)'}); return it; }
+  if(w.warn){ it.push({tm:'종일',tx:'학과 시험 공부 — 자격증은 잠시 STOP',c:'var(--study)'}); it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'}); it.push({tm:'자기 전',tx:'JLPT 단어 15분 (여유되면)',c:'var(--jlpt)'}); return it; }
   const plan=DETAIL[ds];
   if(plan) plan.forEach(x=>it.push({tm:x.tm||slotOf(dow),tx:x.tx,c:'var(--'+x.c+')'}));
   else {
@@ -474,9 +482,10 @@ function buildDay(w,date){
     else if(dow===2||dow===4||dow===5) it.push({tm:slotOf(dow),tx:w.day,c:PC});
     else it.push({tm:slotOf(dow),tx:w.wk,c:PC});
   }
-  if(dow===4) it.push({tm:'19:00–20:30',tx:'운동 · 유산소 + 하체',c:'var(--opic)'});
-  else if(dow===5) it.push({tm:'19:00–20:30',tx:'운동 · 유산소',c:'var(--opic)'});
-  else if(dow===6) it.push({tm:'16:00–17:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'});
+  if(dow===2) it.push({tm:'18:30–20:30',tx:'운동 · 유산소 + 하체',c:'var(--opic)'});
+  else if(dow===4) it.push({tm:'18:30–20:30',tx:'운동 · 유산소',c:'var(--opic)'});
+  else if(dow===5) it.push({tm:'18:30–20:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'});
+  it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
   if(!it.some(x=>x.c==='var(--jlpt)')) it.push({tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'});
   return it;
 }
@@ -512,8 +521,16 @@ function renderTodo(){
       ${x.cid?`<div class="del" data-act="del" data-cid="${x.cid}">✕</div>`:''}</div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
   const dstr=`${now.getMonth()+1}월 ${now.getDate()}일 (${DOW[now.getDay()]})`;
+  const kcalV=(STATE.kcal&&STATE.kcal[ds])||'';
+  const kst=kcalState(kcalV);
   card.innerHTML=`<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
     <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
+    <div class="kcal-row">
+      <input class="kcal-in" id="kcalIn" type="number" inputmode="numeric" placeholder="0" value="${kcalV}">
+      <span class="kcal-unit">/ 1,200 kcal</span>
+      ${kst?`<span class="kcal-badge" style="background:${kst.bg};color:${kst.fg}">${kst.label}</span>`:''}
+      <a class="kcal-ai" href="https://claude.ai/new" target="_blank" rel="noopener">🍽 AI에게 칼로리 물어보기 ↗</a>
+    </div>
     <div class="tc-prog"><span style="width:${pct}%"></span></div>
     <div class="tc-pct">${doneN} / ${items.length} 완료</div>
     ${rowsHtml}
@@ -525,9 +542,21 @@ function renderTodo(){
     else if(a==='del'){delCustom(t.dataset.cid);}
     else if(a==='add'){addCustom();}
   };
+  const ki=card.querySelector('#kcalIn');
+  ki.addEventListener('change',()=>saveKcal(ki.value));
+  ki.addEventListener('keydown',e=>{if(e.key==='Enter'){ki.blur();}});
   const inp=card.querySelector('#newTask');
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
 }
+function kcalState(v){
+  const n=parseInt(v,10); if(!n||n<=0) return null;
+  if(n<=1000) return {label:'성공적 다이어트',bg:'#d6ecfa',fg:'#2b6c93'};
+  if(n<=1200) return {label:'적당한 칼로리!',bg:'#d8efd9',fg:'#3a6f42'};
+  if(n<=1350) return {label:'약간 불안해…',bg:'#faeecd',fg:'#8a6a1f'};
+  if(n<=1500) return {label:'살찜 경고!!',bg:'#f9d8d8',fg:'#a33c3c'};
+  return {label:'확신의 멧돼지 🐗',bg:'#e2e4ea',fg:'#5a5f70'};
+}
+function saveKcal(v){const n=parseInt(v,10);const ds=iso(now);save({kcal:{[ds]:(n&&n>0)?n:''}});}
 function toggleCheck(key){const v=!(STATE.checks&&STATE.checks[key]);save({checks:{[key]:v}});}
 function addCustom(){const inp=document.getElementById('newTask');const tx=inp.value.trim();if(!tx)return;const ds=iso(now);const arr=[...((STATE.customTasks&&STATE.customTasks[ds])||[]),{id:Date.now().toString(36),tx}];save({customTasks:{[ds]:arr}});}
 function delCustom(cid){const ds=iso(now);const arr=((STATE.customTasks&&STATE.customTasks[ds])||[]).filter(c=>c.id!==cid);save({customTasks:{[ds]:arr}});}
@@ -681,7 +710,7 @@ async function initFirebase(){
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{}};
       setSync(true);renderAll();
     },err=>{console.warn('구독 오류',err);setSync(false);});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
