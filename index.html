@@ -8,6 +8,7 @@
 <!-- 홈 화면 앱 설정 -->
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#f0a9c8">
+<link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
 <!-- iOS -->
@@ -153,6 +154,34 @@
   .kcal-ai{margin-left:auto;font-size:11px;font-weight:600;text-decoration:none;color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;padding:5px 11px;white-space:nowrap;background:#fff;}
   .kcal-ai:hover{border-color:var(--jlpt);color:var(--jlpt);}
 
+  .kcal-toggle{font-size:11px;font-weight:700;color:var(--ink-soft);background:#fff;border:1px solid var(--line);border-radius:20px;padding:5px 11px;cursor:pointer;font-family:var(--body);white-space:nowrap;}
+  .kcal-toggle:hover{border-color:var(--jlpt);color:var(--jlpt);}
+  .kcal-net{font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);}
+  .kcal-net small{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-left:3px;}
+  .kcal-panel{overflow:hidden;max-height:0;opacity:0;transition:max-height .4s cubic-bezier(.4,0,.2,1),opacity .3s;}
+  .kcal-panel.open{max-height:900px;opacity:1;margin-bottom:12px;}
+  .kp-sec{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px;margin-bottom:8px;}
+  .kp-sec.plus{border-left:3px solid var(--hanneung);}
+  .kp-sec.minus{border-left:3px solid var(--korean);}
+  .kp-head{display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:8px;}
+  .kp-head .sum{margin-left:auto;font-family:var(--display);font-size:12.5px;font-weight:700;}
+  .kp-sec.plus .sum{color:#a33c3c;}
+  .kp-sec.minus .sum{color:#3a6f42;}
+  .kp-item{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+  .kp-item input.n{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-family:var(--body);font-size:12.5px;color:var(--ink);outline:none;}
+  .kp-item input.c{width:64px;border:1px solid var(--line);border-radius:8px;padding:6px 7px;font-family:var(--display);font-size:12.5px;font-weight:700;color:var(--ink);outline:none;text-align:right;}
+  .kp-item input:focus{border-color:var(--jlpt);}
+  .kp-item .x{color:var(--ink-faint);font-size:14px;cursor:pointer;padding:0 3px;opacity:.5;}
+  .kp-item .x:hover{opacity:1;color:var(--hanneung);}
+  .kp-add{width:100%;border:1px dashed var(--ink-faint);background:transparent;border-radius:8px;padding:7px;font-family:var(--body);font-size:11.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;margin-top:2px;}
+  .kp-add:hover{background:#fafbfe;color:var(--jlpt);border-color:var(--jlpt);}
+
+  .lec-link{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;color:#fff;background:rgba(0,0,0,.16);border-radius:20px;padding:2px 9px;text-decoration:none;margin-left:8px;white-space:nowrap;}
+  .lec-link:hover{background:rgba(0,0,0,.28);}
+  .day .it .lec-link{color:var(--jlpt);background:#eef0f8;}
+  .day .it .lec-link:hover{background:#dfe2f5;}
+  .day .it .row-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px;}
+
   .wt-box{background:linear-gradient(140deg,#f2f4fb,#fbf3f7);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
   .wt-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .wt-in{width:84px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
@@ -267,11 +296,11 @@ const firebaseConfig = {
 /* ================= 정적 계획 데이터 ================= */
 const T={adsp:['ADSP','var(--adsp)'],hanneung:['한능검','var(--hanneung)'],sqld:['SQLD','var(--sqld)'],korean:['KBS 한국어','var(--korean)'],opic:['OPIc','var(--opic)'],office:['워드·컴활','var(--office)'],jlpt:['JLPT N2','var(--jlpt)'],study:['학과','var(--study)'],python:['파이썬','var(--python)'],rest:['회복·정리','var(--rest)']};
 const W=[
- {n:1,s:'2026-07-08',e:'2026-07-12',m:7,h:'ADSP·한능검 시동',day:'ADSP 3과목 진입',eve:'ADSP 개념정리',wk:'한능검 기출 1회',t:['adsp','hanneung']},
- {n:2,s:'2026-07-13',e:'2026-07-19',m:7,h:'ADSP 3과목에 무게',day:'R·통계·마이닝 집중',eve:'ADSP 기출 시작',wk:'한능검 취약시대+오답',t:['adsp','hanneung']},
- {n:3,s:'2026-07-20',e:'2026-07-26',m:7,h:'ADSP 기출+취약시대',day:'ADSP 기출 1회독 / 개항기·일제',eve:'번갈아 기출',wk:'한능검 기출 2회',t:['adsp','hanneung']},
- {n:4,s:'2026-07-27',e:'2026-08-02',m:7,h:'한능검 70→80',day:'취약시대 집중+ADSP 2회독',eve:'요약노트/기출',wk:'실전 모의 각 1회',t:['adsp','hanneung']},
- {n:5,s:'2026-08-03',e:'2026-08-09',m:8,h:'★시험 주간',day:'요약·오답 최종정리',eve:'가볍게, 밤샘 금지',wk:'토 ADSP → 일 한능검',t:['adsp','hanneung'],ex:1},
+ {n:1,s:'2026-07-08',e:'2026-07-12',m:7,h:'ADSP 개념 훑기 (유튜브)',day:'시험 구조 파악 + 1·2과목',eve:'용어 암기',wk:'1·2과목 요약강의',t:['adsp']},
+ {n:2,s:'2026-07-13',e:'2026-07-19',m:7,h:'ADSP 3과목 진입',day:'R 기초·기술통계·회귀',eve:'1·2과목 복습',wk:'기출 첫 도전 + 한능검 감각',t:['adsp','hanneung']},
+ {n:3,s:'2026-07-20',e:'2026-07-26',m:7,h:'ADSP 마이닝 + 기출 시작',day:'분류·군집·앙상블',eve:'기출 오답 정리',wk:'기출 2회차 + 한능검 취약시대',t:['adsp','hanneung']},
+ {n:4,s:'2026-07-27',e:'2026-08-02',m:7,h:'ADSP 기출 반복 (핵심!)',day:'기출 3~5회차 + 약점 보강',eve:'오답 노트',wk:'실전 모의 + 한능검 기출',t:['adsp','hanneung']},
+ {n:5,s:'2026-08-03',e:'2026-08-09',m:8,h:'★시험 주간',day:'오답·요약 최종 점검',eve:'가볍게, 밤샘 금지',wk:'토 ADSP → 일 한능검',t:['adsp','hanneung'],ex:1},
  {n:6,s:'2026-08-10',e:'2026-08-16',m:8,h:'SQLD + 사무자동화 시동',day:'SQLD 데이터 모델링 + SQL 기본',eve:'SQL 쿼리 / 사무자동화 프로그래밍일반 기출',wk:'SQLD 기출 1회',t:['sqld','office']},
  {n:7,s:'2026-08-17',e:'2026-08-23',m:8,h:'★SQLD (8/22)',day:'SQL 활용 집중 — 2과목',eve:'SQLD 오답 / 사무자동화 네트워크일반 기출',wk:'토 8/22 SQLD 응시',t:['sqld','office'],ex:1},
  {n:8,s:'2026-08-24',e:'2026-08-30',m:8,h:'사무자동화 집중 + OPIc 시동',day:'사무자동화 1과목(컴활 겹침)+3과목 총정리 / OPIc 스크립트',eve:'JLPT 단어 재가동',wk:'사무자동화 실전 모의 / 공고',t:['office','opic','jlpt']},
@@ -326,35 +355,35 @@ const DETAIL={
  '2026-07-08':[{tx:'ADSP 개념 — 데이터 이해·분석 기획',c:'adsp'}],
  '2026-07-09':[{tx:'ADSP 3과목 — R 기초·기술통계',c:'adsp'}],
  '2026-07-10':[{tx:'ADSP 3과목 — 데이터 마이닝 기초',c:'adsp'}],
- '2026-07-11':[{tx:'ADSP 기출 1회독 + 오답 체크',c:'adsp'}],
- '2026-07-12':[{tx:'한능검 기출 1회 — 감각 되살리기',c:'hanneung'}],
- '2026-07-13':[{tx:'ADSP 3과목 — R 데이터 핸들링(벡터·데이터프레임)',c:'adsp'}],
- '2026-07-14':[{tx:'ADSP 3과목 — 기술통계·상관분석',c:'adsp'}],
- '2026-07-15':[{tx:'ADSP 3과목 — 회귀분석 기초',c:'adsp'}],
- '2026-07-16':[{tx:'ADSP 3과목 — 분류(로지스틱·의사결정나무)',c:'adsp'}],
- '2026-07-17':[{tx:'ADSP 3과목 — 군집·연관분석',c:'adsp'}],
- '2026-07-18':[{tx:'한능검 취약시대 — 전근대 순서 정리',c:'hanneung'}],
- '2026-07-19':[{tx:'ADSP 1·2과목 암기 — 데이터 이해·기획',c:'adsp'}],
- '2026-07-20':[{tx:'ADSP 기출 1회차 풀이',c:'adsp'}],
- '2026-07-21':[{tx:'ADSP 기출 오답 + 3과목 약점 보강',c:'adsp'}],
- '2026-07-22':[{tx:'ADSP 기출 2회차',c:'adsp'}],
- '2026-07-23':[{tx:'한능검 개항기(강화도조약~독립협회)',c:'hanneung'}],
- '2026-07-24':[{tx:'한능검 일제강점기(1910~30년대 통치)',c:'hanneung'}],
- '2026-07-25':[{tx:'한능검 기출 1회 + 오답',c:'hanneung'}],
- '2026-07-26':[{tx:'ADSP 기출 3회차 + 요약노트',c:'adsp'}],
- '2026-07-27':[{tx:'한능검 취약시대 — 일제 후반·광복',c:'hanneung'}],
- '2026-07-28':[{tx:'ADSP 기출 4회차(2회독)',c:'adsp'}],
- '2026-07-29':[{tx:'한능검 근현대(정부수립~현대사)',c:'hanneung'}],
- '2026-07-30':[{tx:'ADSP 기출 5회차 + 오답',c:'adsp'}],
- '2026-07-31':[{tx:'한능검 유네스코·지역사·문화유산',c:'hanneung'}],
- '2026-08-01':[{tx:'ADSP 실전 모의 1회',c:'adsp'}],
- '2026-08-02':[{tx:'한능검 실전 모의 1회 + 최종 오답',c:'hanneung'}],
- '2026-08-03':[{tx:'ADSP 요약노트 최종 정리',c:'adsp'}],
- '2026-08-04':[{tx:'ADSP 오답 총정리(3과목)',c:'adsp'}],
- '2026-08-05':[{tx:'한능검 취약시대 요약노트',c:'hanneung'}],
- '2026-08-06':[{tx:'ADSP 최종 기출 1회',c:'adsp'}],
- '2026-08-07':[{tx:'ADSP 마무리 + 한능검 순서문제 점검',c:'adsp'}],
- '2026-08-08':[{tx:'한능검 취약시대만 가볍게 (밤샘 X)',c:'hanneung',tm:'저녁'}],
+ '2026-07-11':[{tx:'오늘은 쉬는 날 — 컨디션 관리',c:'rest'}],
+ '2026-07-12':[{tx:'ADSP 1과목 데이터 이해',c:'adsp',tm:'오전'},{tx:'이승만 정부(발췌개헌·사사오입개헌)',c:'hanneung',tm:'저녁',lec:'최태성 이승만 정부 발췌개헌 사사오입'}],
+ '2026-07-13':[{tx:'ADSP 2과목 데이터 분석 기획',c:'adsp',tm:'저녁'},{tx:'4·19혁명~장면내각, 5·16군사정변',c:'hanneung',tm:'저녁',lec:'최태성 4·19혁명 장면내각 5·16'}],
+ '2026-07-14':[{tx:'ADSP 3과목 — R 기초 문법',c:'adsp',tm:'낮 블록'},{tx:'박정희 정부① 경제(경부고속도로·포항제철·새마을운동)',c:'hanneung',tm:'저녁',lec:'최태성 박정희 정부 경제개발'}],
+ '2026-07-15':[{tx:'ADSP 1·2과목 복습',c:'adsp',tm:'저녁'},{tx:'박정희 정부② 유신헌법·3선개헌(개헌사 핵심)',c:'hanneung',tm:'저녁',lec:'최태성 유신헌법 3선개헌'}],
+ '2026-07-16':[{tx:'ADSP 3과목 — 기술통계·확률분포',c:'adsp',tm:'낮 블록'},{tx:'전두환 정부(5공·3S정책·6월항쟁 전야)',c:'hanneung',tm:'저녁',lec:'최태성 전두환 정부 5공화국'}],
+ '2026-07-17':[{tx:'ADSP 3과목 — 상관·회귀분석',c:'adsp',tm:'낮 블록'},{tx:'6월항쟁~노태우 정부(현행헌법 개헌사 마무리)',c:'hanneung',tm:'저녁',lec:'최태성 6월민주항쟁 노태우 정부'}],
+ '2026-07-18':[{tx:'ADSP 기출 1회차 (일단 풀어보기)',c:'adsp',tm:'오전'},{tx:'한능검 기출 1회 — 현대사 범위 집중 채점',c:'hanneung',tm:'오후',lec:'한국사능력검정시험 기출 78회'}],
+ '2026-07-19':[{tx:'ADSP 기출 1회차 오답 정리',c:'adsp',tm:'오전'},{tx:'노태우 정부 통일정책(북방외교·남북기본합의서)',c:'hanneung',tm:'저녁',lec:'최태성 노태우 정부 북방외교 남북기본합의서'}],
+ '2026-07-20':[{tx:'ADSP 3과목 — 분류(로지스틱·의사결정나무)',c:'adsp',tm:'저녁'},{tx:'김영삼 정부(금융실명제·지방자치제·IMF)',c:'hanneung',tm:'저녁',lec:'최태성 김영삼 정부 금융실명제'}],
+ '2026-07-21':[{tx:'ADSP 1·2과목 기출 집중',c:'adsp',tm:'낮 블록'},{tx:'김대중 정부 통일정책(6·15공동선언·햇볕정책)',c:'hanneung',tm:'저녁',lec:'최태성 김대중 정부 6·15공동선언'}],
+ '2026-07-22':[{tx:'ADSP 3과목 — 군집·연관분석',c:'adsp',tm:'낮 블록'},{tx:'노무현 정부(10·4선언), 현대 정부 통일정책 총정리',c:'hanneung',tm:'저녁',lec:'최태성 노무현 정부 10·4선언 통일정책'}],
+ '2026-07-23':[{tx:'ADSP 3과목 — 앙상블·인공신경망',c:'adsp',tm:'낮 블록'},{tx:'조선 중앙관제① 사헌부·홍문관·한성부 구분',c:'hanneung',tm:'저녁',lec:'최태성 조선 중앙관제 사헌부 홍문관'}],
+ '2026-07-24':[{tx:'ADSP 기출 2회차',c:'adsp',tm:'저녁'},{tx:'조선 중앙관제② 승정원·의금부·관상감',c:'hanneung',tm:'저녁',lec:'최태성 조선 중앙관제 승정원 의금부 관상감'}],
+ '2026-07-25':[{tx:'ADSP 기출 2회차 오답',c:'adsp',tm:'오전'},{tx:'한능검 기출 2회 — 조선 관제·현대사 재점검',c:'hanneung',tm:'오후',lec:'한국사능력검정시험 기출 77회'}],
+ '2026-07-26':[{tx:'ADSP 3과목 오답 총정리',c:'adsp',tm:'오전'},{tx:'조선전기 학자(신숙주 등) 업적 구분',c:'hanneung',tm:'저녁',lec:'최태성 신숙주 해동제국기'}],
+ '2026-07-27':[{tx:'ADSP 기출 3회차',c:'adsp',tm:'저녁'},{tx:'붕당정치(서인·남인·노론·소론) 시기 구분',c:'hanneung',tm:'저녁',lec:'최태성 붕당정치 서인 남인 노론 소론'}],
+ '2026-07-28':[{tx:'ADSP 약점 과목 집중 보강',c:'adsp',tm:'낮 블록'},{tx:'조선후기 인물사(송시열·이이·김장생) 업적',c:'hanneung',tm:'저녁',lec:'최태성 송시열 이이 김장생'}],
+ '2026-07-29':[{tx:'ADSP 기출 4회차',c:'adsp',tm:'낮 블록'},{tx:'시대통합형 키워드(고려·발해·조선 구분 훈련)',c:'hanneung',tm:'저녁',lec:'최태성 시대통합 문제 고려 발해 조선'}],
+ '2026-07-30':[{tx:'ADSP 3과목 통계 재점검',c:'adsp',tm:'낮 블록'},{tx:'근대 개항기 독립운동 순서 재점검',c:'hanneung',tm:'저녁',lec:'최태성 개항기 독립운동 순서'}],
+ '2026-07-31':[{tx:'ADSP 기출 5회차 (실전처럼 시간 재고)',c:'adsp',tm:'오전'},{tx:'일제강점기 무장투쟁 순서(연표 암기)',c:'hanneung',tm:'저녁',lec:'최태성 일제강점기 무장투쟁 연표'}],
+ '2026-08-01':[{tx:'ADSP 기출 5회차 오답',c:'adsp',tm:'오전'},{tx:'한능검 실전모의 1회 — 전 범위',c:'hanneung',tm:'오후',lec:'한국사능력검정시험 실전모의고사'}],
+ '2026-08-02':[{tx:'ADSP 오답 노트 총정리',c:'adsp',tm:'오전'},{tx:'오답노트(현대사·조선관제 재확인)',c:'hanneung',tm:'저녁',lec:'최태성 현대사 총정리'}],
+ '2026-08-03':[{tx:'ADSP 기출 6회차 (최종 점검)',c:'adsp',tm:'저녁'},{tx:'취약 시대 최종 재복습',c:'hanneung',tm:'저녁',lec:'최태성 한능검 심화 총정리'}],
+ '2026-08-04':[{tx:'ADSP 기출 6회차 오답',c:'adsp',tm:'낮 블록'},{tx:'한능검 기출 마무리 — 현대사 중심',c:'hanneung',tm:'저녁',lec:'한국사능력검정시험 현대사 기출'}],
+ '2026-08-05':[{tx:'ADSP 1·2과목 암기 최종 회독',c:'adsp',tm:'낮 블록'},{tx:'한능검 요약노트 정리',c:'hanneung',tm:'저녁',lec:'최태성 한능검 요약정리'}],
+ '2026-08-06':[{tx:'ADSP 3과목 핵심 요약 (과락 방어 체크)',c:'adsp',tm:'낮 블록'},{tx:'한능검 실전모의 2회',c:'hanneung',tm:'저녁',lec:'한국사능력검정시험 실전모의고사'}],
+ '2026-08-07':[{tx:'ADSP 최종 오답만 훑기 (D-1, 밤샘 금지)',c:'adsp',tm:'저녁'},{tx:'한능검 요약노트 가볍게',c:'hanneung',tm:'저녁'}],
+ '2026-08-08':[{tx:'한능검 취약시대 요약노트만 가볍게 (밤샘 X)',c:'hanneung',tm:'저녁'}],
  '2026-08-10':[{tx:'SQLD 1과목 — 데이터 모델링(엔터티·속성·관계)',c:'sqld'}],
  '2026-08-11':[{tx:'SQLD 2과목 — SQL 기본(SELECT·WHERE·GROUP BY)',c:'sqld'}],
  '2026-08-12':[{tx:'SQLD 정규화·식별자',c:'sqld'},{tx:'사무자동화 프로그래밍일반 기출',c:'office',tm:'병행'}],
@@ -485,10 +514,10 @@ function weekProgress(w){
 function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'&&!Array.isArray(v)){if(!t[k]||typeof t[k]!=='object')t[k]={};deepMerge(t[k],v);}else t[k]=v;}}
 const now=t0();
 let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
-let openWeekNum=null, EDIT_N=null;
+let openWeekNum=null, EDIT_N=null, KOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 
@@ -499,13 +528,13 @@ function buildDay(w,date){
   const ex=EXAMS.find(x=>x.d===ds);
   if(ex){
     it.push({tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c});
-    if(DETAIL[ds]) DETAIL[ds].forEach(x=>it.push({tm:x.tm||'저녁',tx:x.tx,c:'var(--'+x.c+')'}));
+    if(DETAIL[ds]) DETAIL[ds].forEach(x=>it.push({tm:x.tm||'저녁',tx:x.tx,c:'var(--'+x.c+')',lec:x.lec}));
     it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
     return it;
   }
   if(w.warn){ it.push({tm:'종일',tx:'학과 시험 공부 — 자격증은 잠시 STOP',c:'var(--study)'}); it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'}); it.push({tm:'자기 전',tx:'JLPT 단어 15분 (여유되면)',c:'var(--jlpt)'}); return it; }
   const plan=DETAIL[ds];
-  if(plan) plan.forEach(x=>it.push({tm:x.tm||slotOf(dow),tx:x.tx,c:'var(--'+x.c+')'}));
+  if(plan) plan.forEach(x=>it.push({tm:x.tm||slotOf(dow),tx:x.tx,c:'var(--'+x.c+')',lec:x.lec}));
   else {
     const PC='var(--'+w.t[0]+')';
     if(dow===1||dow===3) it.push({tm:slotOf(dow),tx:w.eve,c:PC});
@@ -541,26 +570,43 @@ function renderTodo(){
   const wk=weekOf(now), ds=iso(now);
   const base=wk?buildDay(wk,now):[];
   const customs=(STATE.customTasks&&STATE.customTasks[ds])||[];
-  const items=[...base.map((it,i)=>({key:ds+'::i'+i,tm:it.tm,tx:it.tx})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id}))];
+  const items=[...base.map((it,i)=>({key:ds+'::i'+i,tm:it.tm,tx:it.tx,lec:it.lec})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id}))];
   const doneN=items.filter(x=>STATE.checks&&STATE.checks[x.key]).length;
   const pct=items.length?Math.round(doneN/items.length*100):0;
   const rowsHtml=items.length?items.map(x=>{
     const done=!!(STATE.checks&&STATE.checks[x.key]);
+    const lecBtn=x.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
     return `<div class="todo ${done?'done':''}" data-key="${x.key}">
       <div class="box" data-act="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}</div></div>
+      <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}${lecBtn}</div></div>
       ${x.cid?`<div class="del" data-act="del" data-cid="${x.cid}">✕</div>`:''}</div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
   const dstr=`${now.getMonth()+1}월 ${now.getDate()}일 (${DOW[now.getDay()]})`;
-  const kcalV=(STATE.kcal&&STATE.kcal[ds])||'';
-  const kst=kcalState(kcalV);
+  const foods=(STATE.foods&&STATE.foods[ds])||[];
+  const exs=(STATE.exs&&STATE.exs[ds])||[];
+  const inSum=foods.reduce((a,b)=>a+(parseInt(b.c,10)||0),0);
+  const outSum=exs.reduce((a,b)=>a+(parseInt(b.c,10)||0),0);
+  const net=inSum-outSum;
+  const kst=kcalState(net>0?net:0);
   card.innerHTML=`<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
     <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
     <div class="kcal-row">
-      <input class="kcal-in" id="kcalIn" type="number" inputmode="numeric" placeholder="0" value="${kcalV}">
-      <span class="kcal-unit">/ 1,200 kcal</span>
+      <span class="kcal-net">${net>0?net.toLocaleString():'—'}<small>/ 1,200 kcal</small></span>
       ${kst?`<span class="kcal-badge" style="background:${kst.bg};color:${kst.fg}">${kst.label}</span>`:''}
-      <a class="kcal-ai" href="https://claude.ai/new" target="_blank" rel="noopener">🍽 AI에게 칼로리 물어보기 ↗</a>
+      <button class="kcal-toggle" data-act="kexp">${KOPEN?'▲ 접기':'▼ 식단·운동 입력'}</button>
+      <a class="kcal-ai" href="https://claude.ai/new" target="_blank" rel="noopener">🍽 AI에게 물어보기 ↗</a>
+    </div>
+    <div class="kcal-panel ${KOPEN?'open':''}">
+      <div class="kp-sec plus">
+        <div class="kp-head">＋ 오늘 먹은 것<span class="sum">+${inSum.toLocaleString()} kcal</span></div>
+        ${foods.map((f,i)=>`<div class="kp-item"><input class="n" data-k="f" data-i="${i}" data-f="n" placeholder="음식 (예: 메밀면)" value="${esc(f.n)}"><input class="c" data-k="f" data-i="${i}" data-f="c" type="number" inputmode="numeric" placeholder="kcal" value="${esc(f.c)}"><span class="x" data-act="fdel" data-i="${i}">✕</span></div>`).join('')}
+        <button class="kp-add" data-act="fadd">＋ 음식 추가</button>
+      </div>
+      <div class="kp-sec minus">
+        <div class="kp-head">－ 오늘 운동한 것<span class="sum">−${outSum.toLocaleString()} kcal</span></div>
+        ${exs.map((x,i)=>`<div class="kp-item"><input class="n" data-k="e" data-i="${i}" data-f="n" placeholder="운동 (예: 달리기)" value="${esc(x.n)}"><input class="c" data-k="e" data-i="${i}" data-f="c" type="number" inputmode="numeric" placeholder="kcal" value="${esc(x.c)}"><span class="x" data-act="edel" data-i="${i}">✕</span></div>`).join('')}
+        <button class="kp-add" data-act="eadd">＋ 운동 추가</button>
+      </div>
     </div>
     ${weightHTML()}
     <div class="tc-prog"><span style="width:${pct}%"></span></div>
@@ -573,10 +619,22 @@ function renderTodo(){
     if(a==='check'){toggleCheck(t.closest('.todo').dataset.key);}
     else if(a==='del'){delCustom(t.dataset.cid);}
     else if(a==='add'){addCustom();}
+    else if(a==='kexp'){KOPEN=!KOPEN;renderTodo();}
+    else if(a==='fadd'){KOPEN=true;const arr=[...((STATE.foods&&STATE.foods[ds])||[]),{n:'',c:''}];save({foods:{[ds]:arr}});}
+    else if(a==='eadd'){KOPEN=true;const arr=[...((STATE.exs&&STATE.exs[ds])||[]),{n:'',c:''}];save({exs:{[ds]:arr}});}
+    else if(a==='fdel'){KOPEN=true;const arr=((STATE.foods&&STATE.foods[ds])||[]).filter((_,i)=>i!=t.dataset.i);save({foods:{[ds]:arr}});}
+    else if(a==='edel'){KOPEN=true;const arr=((STATE.exs&&STATE.exs[ds])||[]).filter((_,i)=>i!=t.dataset.i);save({exs:{[ds]:arr}});}
   };
-  const ki=card.querySelector('#kcalIn');
-  ki.addEventListener('change',()=>saveKcal(ki.value));
-  ki.addEventListener('keydown',e=>{if(e.key==='Enter'){ki.blur();}});
+  card.querySelectorAll('.kp-item input').forEach(el=>{
+    el.addEventListener('change',()=>{
+      const kind=el.dataset.k==='f'?'foods':'exs';
+      const arr=[...((STATE[kind]&&STATE[kind][ds])||[])];
+      if(!arr[el.dataset.i])return;
+      arr[el.dataset.i]={...arr[el.dataset.i],[el.dataset.f]:el.value};
+      KOPEN=true; save({[kind]:{[ds]:arr}});
+    });
+    el.addEventListener('keydown',e=>{if(e.key==='Enter')el.blur();});
+  });
   const wi=card.querySelector('#wtIn');
   if(wi){wi.addEventListener('change',()=>saveWeight(wi.value));wi.addEventListener('keydown',e=>{if(e.key==='Enter'){wi.blur();}});}
   const inp=card.querySelector('#newTask');
@@ -720,7 +778,8 @@ function renderDaysHTML(w){
     const its=items.map((it,i)=>{
       const key=ds+'::i'+i, chk=!!(STATE.checks&&STATE.checks[key]);
       if(chk)done++;
-      return `<div class="it ${it.exam?'exam':''} ${chk?'done':''}" data-daykey="${key}" style="${it.exam?('background:'+it.c):('border-left-color:'+it.c)}"><span class="ibox"></span><span class="tm">${esc(it.tm)}</span><span class="tx">${esc(it.tx)}</span></div>`;
+      const lecBtn=it.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(it.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
+      return `<div class="it ${it.exam?'exam':''} ${chk?'done':''}" data-daykey="${key}" style="${it.exam?('background:'+it.c):('border-left-color:'+it.c)}"><span class="ibox"></span><span class="tm">${esc(it.tm)}</span><span class="tx">${esc(it.tx)}${lecBtn}</span></div>`;
     }).join('');
     const prog=items.length?`<div class="dprog ${done===items.length?'full':''}">${done}/${items.length}</div>`:'';
     html+=`<div class="day ${wknd?'wknd':''} ${isT?'today':''} ${past?'past':''}"><div class="dd"><div class="dw">${DOW[dow]}</div><div class="dn">${d.getDate()}</div>${prog}</div><div class="items">${its}</div></div>`;
@@ -811,7 +870,7 @@ async function initFirebase(){
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{}};
       setSync(true);renderAll();
     },err=>{console.warn('구독 오류',err);setSync(false);});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
