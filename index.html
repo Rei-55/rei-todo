@@ -1286,23 +1286,33 @@ function saveHanMock(){
 function delHanMock(dt){save({hanneungMock:{[dt]:''}});openHanneungModal('mock');}
 
 /* ================= Firebase ================= */
-let db=null,F=null,stateRef=null;
+let db=null,F=null,stateRef=null,pendingWrites=0;
 function setSync(on){const s=document.getElementById('sync');s.className='sync '+(on?'on':'off');document.getElementById('syncTxt').textContent=on?'동기화됨':'로컬 모드';}
 async function save(patch){
   deepMerge(STATE,patch);renderAll();
-  if(db&&F&&stateRef){try{await F.setDoc(stateRef,patch,{merge:true});}catch(e){console.warn('저장 실패',e);}}
+  if(db&&F&&stateRef){
+    pendingWrites++;
+    try{await F.setDoc(stateRef,patch,{merge:true});}
+    catch(e){console.warn('저장 실패',e);}
+    finally{pendingWrites--;}
+  }
 }
+window.addEventListener('beforeunload',e=>{
+  if(pendingWrites>0){e.preventDefault();e.returnValue='';}
+});
 async function initFirebase(){
   try{
     const appMod=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
     const fs=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
     const app=appMod.initializeApp(firebaseConfig);
     db=fs.getFirestore(app);F=fs;
+    // 저장 직후 새로고침해도 데이터가 유실되지 않도록, 기기에 오프라인 캐시를 켜둠
+    try{await fs.enableIndexedDbPersistence(db);}catch(e){console.warn('오프라인 캐시 비활성화(다른 탭이 열려있거나 미지원 브라우저):',e);}
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
       STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{}};
-      setSync(true);renderAll();
+      setSync(!snap.metadata.fromCache);renderAll();
     },err=>{console.warn('구독 오류',err);setSync(false);});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
 }
