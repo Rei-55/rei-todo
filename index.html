@@ -182,7 +182,65 @@
   .day .it .lec-link:hover{background:#dfe2f5;}
   .day .it .row-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px;}
 
+  .pp-btn{flex-shrink:0;font-size:10.5px;font-weight:600;color:var(--ink-faint);background:#f4f5fa;border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:var(--body);}
+  .pp-btn:hover{color:var(--jlpt);border-color:var(--jlpt);background:#eef0fb;}
+  .yest-box{background:linear-gradient(140deg,#fdf3ee,#fdf0f4);border:1px solid #f3d9cf;border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+  .yest-label{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#b06a4a;margin-bottom:8px;}
+  .yest-row{display:flex;align-items:center;gap:9px;padding:5px 0;font-size:12.5px;}
+  .yest-row .yt{flex:1;color:var(--ink);font-weight:500;}
+  .yest-row .pull{flex-shrink:0;font-size:10.5px;font-weight:700;color:#fff;background:var(--hanneung);border:none;border-radius:20px;padding:5px 11px;cursor:pointer;font-family:var(--body);}
+  .yest-row .pull:hover{filter:brightness(1.08);}
+
+  .habit{cursor:pointer;transition:transform .14s,box-shadow .14s;}
+  .habit:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(150,162,210,.18);}
+
+  .cert-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+  .cert-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:11px 12px;cursor:pointer;transition:transform .14s,box-shadow .14s;}
+  .cert-card:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(150,162,210,.18);}
+  .cert-card .cn{font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:6px;}
+  .cc-top{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .cc-top .cn{margin-bottom:0;}
+  .cc-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .cc-kana{font-family:var(--display);font-size:15px;font-weight:700;line-height:1;}
+  .cert-card .cp{font-family:var(--display);font-size:17px;font-weight:700;color:var(--ink);}
+  .cert-card .cp small{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-left:2px;}
+  .cert-card .cbar{height:5px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:6px;}
+  .cert-card .cbar span{display:block;height:100%;border-radius:6px;transition:width .4s;}
+
+  .stat-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
+  .stat-card{background:#f5f6fb;border-radius:12px;padding:12px 13px;}
+  .stat-card .sl{font-size:10.5px;font-weight:700;color:var(--ink-faint);letter-spacing:.03em;}
+  .stat-card .sv{font-family:var(--display);font-size:21px;font-weight:700;color:var(--ink);margin-top:3px;}
+  .stat-card .sv small{font-size:11px;font-weight:600;color:var(--ink-faint);margin-left:2px;}
+
+  .mlist{max-height:340px;overflow-y:auto;border-top:1px solid var(--line);margin-top:4px;}
+  .mrow2{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid #eef0f6;font-size:12.5px;}
+  .mrow2 .mbox{width:19px;height:19px;border-radius:6px;border:2px solid var(--line);flex-shrink:0;cursor:pointer;position:relative;background:#fff;}
+  .mrow2 .mbox.on{background:var(--jlpt);border-color:var(--jlpt);}
+  .mrow2 .mbox.on::after{content:'✓';position:absolute;top:-3px;left:1px;font-size:11px;color:#fff;font-weight:700;}
+  .mrow2 .mtx{flex:1;color:var(--ink);cursor:pointer;}
+  .mrow2.done .mtx{color:var(--ink-faint);text-decoration:line-through;}
+  .mrow2 .mmeta{font-size:10.5px;color:var(--ink-faint);white-space:nowrap;font-family:var(--display);}
+  .mrow2 .mimp{font-size:10px;color:var(--opic);white-space:nowrap;}
+
+  .word-in-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;background:#f5f6fb;border-radius:12px;padding:11px 13px;}
+  .word-in-row input{width:70px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;font-family:var(--display);font-size:14px;font-weight:700;text-align:right;outline:none;}
+  .word-in-row input:focus{border-color:var(--jlpt);}
+  .word-in-row .wlabel{font-size:12.5px;color:var(--ink-soft);font-weight:600;}
+  .word-in-row button{margin-left:auto;background:var(--jlpt);color:#fff;border:none;border-radius:9px;padding:8px 14px;font-family:var(--body);font-size:12.5px;font-weight:700;cursor:pointer;}
+  .word-in-row input[type="date"]{width:132px;text-align:left;font-size:12.5px;font-weight:600;}
+
+  .han-tabs{display:flex;gap:6px;margin-bottom:14px;}
+  .han-tab{flex:1;background:#f5f6fb;border:1px solid var(--line);border-radius:10px;padding:8px 0;font-family:var(--body);font-size:12.5px;font-weight:700;color:var(--ink-soft);cursor:pointer;}
+  .han-tab.on{background:var(--hanneung);border-color:var(--hanneung);color:#fff;}
+  .mrow2 .x{color:var(--ink-faint);font-size:14px;cursor:pointer;padding:0 3px;opacity:.5;flex-shrink:0;}
+  .mrow2 .x:hover{opacity:1;color:var(--hanneung);}
+
   .wt-box{background:linear-gradient(140deg,#f2f4fb,#fbf3f7);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:12px;}
+  .wt-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+  .wt-label{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;}
+  .wt-edit{font-size:10.5px;font-weight:600;color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;padding:3px 10px;cursor:pointer;}
+  .wt-edit:hover{color:var(--hanneung);border-color:var(--hanneung);}
   .wt-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .wt-in{width:84px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
   .wt-in:focus{border-color:var(--hanneung);}
@@ -215,6 +273,19 @@
   .todo.done .ttx{color:var(--ink-faint);text-decoration:line-through;}
   .todo .del{color:var(--ink-faint);font-size:16px;padding:0 2px;opacity:.45;cursor:pointer;align-self:center;}
   .todo .del:hover{opacity:1;color:var(--hanneung);}
+  .todo .del.restore:hover{color:var(--opic);}
+  .memo-badge{position:relative;display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#fff;background:#c98a3e;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
+  .memo-badge:hover{background:#b3762d;}
+  .memo-badge .tip{display:none;position:absolute;bottom:calc(100% + 8px);right:0;background:var(--ink);color:#fff;font-size:11.5px;line-height:1.45;font-weight:500;padding:9px 11px;border-radius:10px;width:190px;white-space:normal;z-index:6;box-shadow:0 6px 20px rgba(0,0,0,.2);text-align:left;}
+  .memo-badge:hover .tip{display:block;}
+  .pp-btn.memo-add{flex-shrink:0;}
+  .memo-textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-family:var(--body);font-size:13.5px;color:var(--ink);outline:none;resize:vertical;margin-bottom:4px;background:#fff;}
+  .memo-textarea:focus{border-color:var(--hanneung);}
+  .msave .danger{background:transparent;color:#a33c3c;border:1px solid #f0c9c9!important;}
+  .jlpt-inline{flex-shrink:0;display:flex;align-items:center;gap:4px;align-self:center;}
+  .jlpt-inline input{width:40px;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-family:var(--display);font-size:12.5px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
+  .jlpt-inline input:focus{border-color:var(--jlpt);}
+  .jlpt-inline .ju{font-size:11px;font-weight:600;color:var(--ink-faint);}
   .tc-empty{font-size:13.5px;color:var(--ink-faint);padding:10px 2px;line-height:1.5;}
   .tc-add{display:flex;gap:8px;margin-top:13px;}
   .tc-add input{flex:1;border:1px solid var(--line);border-radius:11px;padding:10px 13px;font-family:var(--body);font-size:13px;color:var(--ink);outline:none;min-width:0;}
@@ -260,12 +331,7 @@
   <div class="hero" id="hero"></div>
   <div class="exam-card" id="examCard"></div>
 
-  <div class="habits">
-    <div class="habit"><span class="d" style="background:var(--rest)"></span><span><b>공고</b> 일 밤 1건</span></div>
-    <div class="habit"><span class="d" style="background:var(--jlpt)"></span><span><b>JLPT 단어</b> 매일 15분</span></div>
-    <div class="habit"><span class="d" style="background:var(--opic)"></span><span><b>운동</b> 주 3~4회</span></div>
-    <div class="habit"><span class="d" style="background:var(--korean)"></span><span><b>강점</b> 지원할 때</span></div>
-  </div>
+  <div class="cert-row" id="cardsGrid"></div>
 
   <div class="mini">
     <div class="h">6개월 한눈에 · 주를 누르면 일별로 펼쳐져요</div>
@@ -517,7 +583,7 @@ let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
 let openWeekNum=null, EDIT_N=null, KOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 
@@ -565,22 +631,50 @@ function goalHTML(n,label,edit){
   return `<div class="goal-box"><div class="goal-label">${label}${eb}</div>${rows}</div>`;
 }
 
+function tomorrowDs(){const d=new Date(now);d.setDate(d.getDate()+1);return iso(d);}
+function yesterdayDs(){const d=new Date(now);d.setDate(d.getDate()-1);return iso(d);}
+let TODAY_ITEMS=[], YEST_ITEMS=[];
+
 function renderTodo(){
   const card=document.getElementById('todayCard');
   const wk=weekOf(now), ds=iso(now);
-  const base=wk?buildDay(wk,now):[];
+  const baseAll=wk?buildDay(wk,now):[];
+  const base=baseAll.map((it,i)=>({...it,_key:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
   const customs=(STATE.customTasks&&STATE.customTasks[ds])||[];
-  const items=[...base.map((it,i)=>({key:ds+'::i'+i,tm:it.tm,tx:it.tx,lec:it.lec})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id}))];
+  const items=[...base.map(it=>({key:it._key,tm:it.tm,tx:it.tx,lec:it.lec,c:it.c})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id,origKey:c.origKey}))];
+  TODAY_ITEMS=items;
   const doneN=items.filter(x=>STATE.checks&&STATE.checks[x.key]).length;
   const pct=items.length?Math.round(doneN/items.length*100):0;
-  const rowsHtml=items.length?items.map(x=>{
+  const jlptWordVal=(STATE.jlptWords&&STATE.jlptWords[ds])||'';
+  const rowsHtml=items.length?items.map((x,idx)=>{
     const done=!!(STATE.checks&&STATE.checks[x.key]);
     const lecBtn=x.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
+    const jlptBox=x.c==='var(--jlpt)'?`<div class="jlpt-inline"><input id="jlptCntIn" type="number" inputmode="numeric" placeholder="0" value="${esc(jlptWordVal)}"><span class="ju">개</span></div>`:'';
+    const memoText=(STATE.memos&&STATE.memos[x.key])||'';
+    const memoHtml=memoText
+      ? `<span class="memo-badge" data-act="memoOpen" data-key="${x.key}">📝 메모<span class="tip">${esc(memoText)}</span></span>`
+      : `<button class="pp-btn memo-add" data-act="memoOpen" data-key="${x.key}">📝 메모</button>`;
     return `<div class="todo ${done?'done':''}" data-key="${x.key}">
       <div class="box" data-act="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
       <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}${lecBtn}</div></div>
-      ${x.cid?`<div class="del" data-act="del" data-cid="${x.cid}">✕</div>`:''}</div>`;
+      ${jlptBox}
+      ${memoHtml}
+      ${done?'':`<button class="pp-btn" data-act="postpone" data-idx="${idx}">↷ 내일로</button>`}
+      ${x.cid?(x.origKey?`<div class="del restore" data-act="del" data-cid="${x.cid}" title="원래 자리로 되돌리기">↺</div>`:`<div class="del" data-act="del" data-cid="${x.cid}" title="삭제">✕</div>`):''}</div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
+
+  // 어제 놓친 일
+  const yd=yesterdayDs();
+  const ywk=weekOf(new Date(yd+'T00:00:00'));
+  const yBaseAll=ywk?buildDay(ywk,new Date(yd+'T00:00:00')):[];
+  const yBase=yBaseAll.map((it,i)=>({key:yd+'::i'+i,tx:it.tx})).filter(it=>!(STATE.checks&&STATE.checks[it.key])&&!(STATE.postponed&&STATE.postponed[it.key]));
+  const yCustoms=((STATE.customTasks&&STATE.customTasks[yd])||[]).filter(c=>!(STATE.checks&&STATE.checks[yd+'::c'+c.id])).map(c=>({key:yd+'::c'+c.id,tx:c.tx,cid:c.id,origKey:c.origKey}));
+  const yItems=[...yBase,...yCustoms];
+  YEST_ITEMS=yItems;
+  const yestHTML=yItems.length?`<div class="yest-box"><div class="yest-label">어제 놓친 일 (${yItems.length})</div>
+    ${yItems.map((y,idx)=>`<div class="yest-row"><span class="yt">${esc(y.tx)}</span><button class="pull" data-act="pull" data-idx="${idx}">↩ 오늘로</button></div>`).join('')}
+    </div>`:'';
+
   const dstr=`${now.getMonth()+1}월 ${now.getDate()}일 (${DOW[now.getDay()]})`;
   const foods=(STATE.foods&&STATE.foods[ds])||[];
   const exs=(STATE.exs&&STATE.exs[ds])||[];
@@ -588,7 +682,7 @@ function renderTodo(){
   const outSum=exs.reduce((a,b)=>a+(parseInt(b.c,10)||0),0);
   const net=inSum-outSum;
   const kst=kcalState(net>0?net:0);
-  card.innerHTML=`<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
+  card.innerHTML=`${yestHTML}<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
     <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
     <div class="kcal-row">
       <span class="kcal-net">${net>0?net.toLocaleString():'—'}<small>/ 1,200 kcal</small></span>
@@ -624,6 +718,10 @@ function renderTodo(){
     else if(a==='eadd'){KOPEN=true;const arr=[...((STATE.exs&&STATE.exs[ds])||[]),{n:'',c:''}];save({exs:{[ds]:arr}});}
     else if(a==='fdel'){KOPEN=true;const arr=((STATE.foods&&STATE.foods[ds])||[]).filter((_,i)=>i!=t.dataset.i);save({foods:{[ds]:arr}});}
     else if(a==='edel'){KOPEN=true;const arr=((STATE.exs&&STATE.exs[ds])||[]).filter((_,i)=>i!=t.dataset.i);save({exs:{[ds]:arr}});}
+    else if(a==='postpone'){const item=TODAY_ITEMS[t.dataset.idx];if(item)postponeToTomorrow(item,ds);}
+    else if(a==='pull'){const item=YEST_ITEMS[t.dataset.idx];if(item)pullFromYesterday(item,ds);}
+    else if(a==='wgedit'){openWeightGoalModal();}
+    else if(a==='memoOpen'){openMemoModal(t.dataset.key);}
   };
   card.querySelectorAll('.kp-item input').forEach(el=>{
     el.addEventListener('change',()=>{
@@ -637,11 +735,19 @@ function renderTodo(){
   });
   const wi=card.querySelector('#wtIn');
   if(wi){wi.addEventListener('change',()=>saveWeight(wi.value));wi.addEventListener('keydown',e=>{if(e.key==='Enter'){wi.blur();}});}
+  const ji=card.querySelector('#jlptCntIn');
+  if(ji){
+    ji.addEventListener('click',e=>e.stopPropagation());
+    ji.addEventListener('change',()=>{const v=parseInt(ji.value,10);save({jlptWords:{[ds]:(v&&v>0)?v:''}});});
+    ji.addEventListener('keydown',e=>{if(e.key==='Enter')ji.blur();});
+  }
   const inp=card.querySelector('#newTask');
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')addCustom();});
 }
 /* ---- 몸무게 트래커 ---- */
-const WT_START=67, WT_GOAL=59, WT_PACE=1;   // 시작 67kg → 목표 59kg (-8kg), 주 1kg 페이스
+const WT_START=67, WT_GOAL=59, WT_PACE=1;   // 시작 67kg → 목표 59kg (-8kg), 주 1kg 페이스 (기본값, 아래 함수로 오버라이드 가능)
+function wtGoal(){const v=STATE.weightGoal&&STATE.weightGoal.goal;return (v!=null&&v!=='')?+v:WT_GOAL;}
+function wtPace(){const v=STATE.weightGoal&&STATE.weightGoal.pace;return (v!=null&&v!=='')?+v:WT_PACE;}
 function wLog(){return STATE.weight||{};}
 function wAt(dsx){const v=wLog()[dsx];return (v||v===0)?parseFloat(v):null;}
 function wPrev(ds){ // 가장 최근의 이전 기록
@@ -657,27 +763,28 @@ function weightHTML(){
   const ds=iso(now);
   const cur=wAt(ds), prev=wPrev(ds);
   const val=(cur!=null)?cur:'';
-  // 이번 주 목표: 주 시작(월요일) 기준 -1kg
+  const GOAL=wtGoal(), PACE=wtPace();
+  // 이번 주 목표: 주 시작(월요일) 기준 -PACE kg
   const mon=new Date(now); mon.setDate(mon.getDate()-((mon.getDay()+6)%7));
   const startKeys=Object.keys(wLog()).filter(k=>k<iso(mon)&&wAt(k)!=null).sort();
   const weekStart=wAt(iso(mon))??(startKeys.length?wAt(startKeys[startKeys.length-1]):null);
   let weekHTML='';
   if(cur!=null&&weekStart!=null){
-    const lost=weekStart-cur, remain=Math.max(0,WT_PACE-lost);
-    const pct=Math.max(0,Math.min(100,(lost/WT_PACE)*100));
-    weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${WT_PACE}kg)</div>
+    const lost=weekStart-cur, remain=Math.max(0,PACE-lost);
+    const pct=Math.max(0,Math.min(100,(lost/PACE)*100));
+    weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${PACE}kg)</div>
       <div class="v">${remain<=0?'달성! 🎉':remain.toFixed(1)+'<small>kg 남음</small>'}</div>
       <div class="wt-bar"><span style="width:${pct}%"></span></div></div>`;
-  } else weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${WT_PACE}kg)</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
+  } else weekHTML=`<div class="wt-card"><div class="l">이번 주 목표 (-${PACE}kg)</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
   // 최종 목표
   let goalHTML2;
   if(cur!=null){
-    const done=Math.max(0,WT_START-cur), left=Math.max(0,cur-WT_GOAL);
-    const pct=Math.max(0,Math.min(100,(done/(WT_START-WT_GOAL))*100));
-    goalHTML2=`<div class="wt-card"><div class="l">최종 ${WT_GOAL}kg까지</div>
+    const done=Math.max(0,WT_START-cur), left=Math.max(0,cur-GOAL);
+    const pct=Math.max(0,Math.min(100,(done/(WT_START-GOAL))*100));
+    goalHTML2=`<div class="wt-card"><div class="l">최종 ${GOAL}kg까지</div>
       <div class="v">${left<=0?'달성! 🎉':left.toFixed(1)+'<small>kg 남음</small>'}</div>
       <div class="wt-bar"><span style="width:${pct}%"></span></div></div>`;
-  } else goalHTML2=`<div class="wt-card"><div class="l">최종 ${WT_GOAL}kg까지</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
+  } else goalHTML2=`<div class="wt-card"><div class="l">최종 ${GOAL}kg까지</div><div class="v">—</div><div class="wt-bar"><span style="width:0%"></span></div></div>`;
   // 전날 대비
   let delta='';
   if(cur!=null&&prev){
@@ -697,6 +804,7 @@ function weightHTML(){
     trend=`<span class="wt-trend">주간 평균 ${a.avg.toFixed(1)}kg${t}</span>`;
   }
   return `<div class="wt-box">
+    <div class="wt-topline"><span class="wt-label">몸무게</span><span class="wt-edit" data-act="wgedit">✎ 목표 수정</span></div>
     <div class="wt-row1">
       <input class="wt-in" id="wtIn" type="number" step="0.1" inputmode="decimal" placeholder="0.0" value="${val}">
       <span class="wt-unit">kg</span>${delta}${trend}
@@ -706,6 +814,46 @@ function weightHTML(){
   </div>`;
 }
 function saveWeight(v){const n=parseFloat(v);const ds=iso(now);save({weight:{[ds]:(n&&n>0)?n:''}});}
+function openWeightGoalModal(){
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>🎯 몸무게 목표 수정</h3>
+    <div class="msub">최종 목표 몸무게와 주간 감량 페이스를 바꿀 수 있어요.</div>
+    <div class="word-in-row"><span class="wlabel">최종 목표</span><input id="wgGoal" type="number" step="0.1" inputmode="decimal" value="${wtGoal()}"><span class="wlabel">kg</span></div>
+    <div class="word-in-row"><span class="wlabel">주간 페이스</span><input id="wgPace" type="number" step="0.1" inputmode="decimal" value="${wtPace()}"><span class="wlabel">kg/주</span></div>
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">취소</button><button class="save" data-act="wgsave" style="flex:1">저장</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function saveWeightGoal(){
+  const g=document.getElementById('wgGoal'),p=document.getElementById('wgPace');
+  if(!g||!p)return;
+  const gv=parseFloat(g.value),pv=parseFloat(p.value);
+  save({weightGoal:{goal:(gv&&gv>0)?gv:'',pace:(pv&&pv>0)?pv:''}});
+  document.getElementById('modal').classList.remove('open');
+}
+/* ---- TO-DO 메모 ---- */
+function openMemoModal(key){
+  const text=(STATE.memos&&STATE.memos[key])||'';
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>📝 메모</h3>
+    <div class="msub">이 할 일에 대한 메모를 남겨보세요.</div>
+    <textarea id="memoText" class="memo-textarea" placeholder="메모를 입력하세요…" maxlength="500">${esc(text)}</textarea>
+    <div class="msave" style="margin-top:14px">
+      ${text?`<button class="danger" data-act="memodel" data-key="${key}" style="flex:1">삭제</button>`:''}
+      <button class="cancel" data-m="cancel" style="flex:1">취소</button>
+      <button class="save" data-act="memosave" data-key="${key}" style="flex:1">저장</button>
+    </div></div>`;
+  document.getElementById('modal').classList.add('open');
+  const ta=document.getElementById('memoText'); if(ta)ta.focus();
+}
+function saveMemo(key){
+  const t=document.getElementById('memoText'); if(!t)return;
+  save({memos:{[key]:t.value.trim()}});
+  document.getElementById('modal').classList.remove('open');
+}
+function deleteMemo(key){
+  save({memos:{[key]:''}});
+  document.getElementById('modal').classList.remove('open');
+}
 
 function kcalState(v){
   const n=parseInt(v,10); if(!n||n<=0) return null;
@@ -717,8 +865,46 @@ function kcalState(v){
 }
 function saveKcal(v){const n=parseInt(v,10);const ds=iso(now);save({kcal:{[ds]:(n&&n>0)?n:''}});}
 function toggleCheck(key){const v=!(STATE.checks&&STATE.checks[key]);save({checks:{[key]:v}});}
+
+function newId(){return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
+
+// item: {key, tx, cid?}  today(ds)의 항목을 내일로 미루기
+function postponeToTomorrow(item,ds){
+  const td=tomorrowDs();
+  const origKey=item.cid?item.origKey:item.key;
+  const tArr=[...((STATE.customTasks&&STATE.customTasks[td])||[]),{id:newId(),tx:item.tx,origKey}];
+  if(item.cid){ // 사용자 추가/이동된 항목 — 오늘에서 빼고 내일로 이동
+    const arr=((STATE.customTasks&&STATE.customTasks[ds])||[]).filter(c=>c.id!==item.cid);
+    save({customTasks:{[ds]:arr,[td]:tArr}});
+  } else { // 기본 계획 항목 — 오늘엔 숨기고 내일 커스텀으로 추가
+    save({postponed:{[item.key]:true},customTasks:{[td]:tArr}});
+  }
+}
+
+// item: {key, tx, cid?}  어제(yd)의 항목을 오늘로 가져오기
+function pullFromYesterday(item,ds){
+  const yd=yesterdayDs();
+  const origKey=item.cid?item.origKey:item.key;
+  const tArr=[...((STATE.customTasks&&STATE.customTasks[ds])||[]),{id:newId(),tx:item.tx,origKey}];
+  if(item.cid){
+    const arr=((STATE.customTasks&&STATE.customTasks[yd])||[]).filter(c=>c.id!==item.cid);
+    save({customTasks:{[yd]:arr,[ds]:tArr}});
+  } else {
+    save({postponed:{[item.key]:true},customTasks:{[ds]:tArr}});
+  }
+}
 function addCustom(){const inp=document.getElementById('newTask');const tx=inp.value.trim();if(!tx)return;const ds=iso(now);const arr=[...((STATE.customTasks&&STATE.customTasks[ds])||[]),{id:Date.now().toString(36),tx}];save({customTasks:{[ds]:arr}});}
-function delCustom(cid){const ds=iso(now);const arr=((STATE.customTasks&&STATE.customTasks[ds])||[]).filter(c=>c.id!==cid);save({customTasks:{[ds]:arr}});}
+function delCustom(cid){
+  const ds=iso(now);
+  const arr0=(STATE.customTasks&&STATE.customTasks[ds])||[];
+  const item=arr0.find(c=>c.id===cid);
+  const arr=arr0.filter(c=>c.id!==cid);
+  if(item&&item.origKey){ // 원래 다른 날짜의 항목이었다면 — 그 자리로 되돌리기
+    save({customTasks:{[ds]:arr},postponed:{[item.origKey]:false}});
+  } else { // 직접 추가한 할 일 — 그냥 삭제
+    save({customTasks:{[ds]:arr}});
+  }
+}
 
 function renderHero(){
   const el=document.getElementById('hero');
@@ -773,10 +959,10 @@ function renderDaysHTML(w){
   while(d<=end){
     const dow=d.getDay(),wknd=(dow===0||dow===6),ds=iso(d);
     const isT=(ds===iso(now)),past=(d<now&&!isT);
-    const items=buildDay(w,new Date(d));
+    const items=buildDay(w,new Date(d)).map((it,i)=>({...it,_key:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
     let done=0;
-    const its=items.map((it,i)=>{
-      const key=ds+'::i'+i, chk=!!(STATE.checks&&STATE.checks[key]);
+    const its=items.map((it)=>{
+      const key=it._key, chk=!!(STATE.checks&&STATE.checks[key]);
       if(chk)done++;
       const lecBtn=it.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(it.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
       return `<div class="it ${it.exam?'exam':''} ${chk?'done':''}" data-daykey="${key}" style="${it.exam?('background:'+it.c):('border-left-color:'+it.c)}"><span class="ibox"></span><span class="tm">${esc(it.tm)}</span><span class="tx">${esc(it.tx)}${lecBtn}</span></div>`;
@@ -798,7 +984,7 @@ function renderLegend(){
   ['adsp','hanneung','sqld','opic','office','jlpt','study'].forEach(k=>{h+=`<div class="lg"><span class="sw" style="background:${T[k][1]}"></span>${T[k][0]}</div>`;});
   lg.innerHTML=h;
 }
-function renderAll(){renderTodo();renderHero();renderExam();renderGrid();renderLegend();renderPanel();}
+function renderAll(){renderTodo();renderHero();renderExam();renderGrid();renderLegend();renderPanel();renderCardsGrid();}
 
 /* ================= 상호작용 ================= */
 function openWeek(n){openWeekNum=(openWeekNum===n?null:n);renderGrid();renderPanel();if(openWeekNum!=null){setTimeout(()=>document.getElementById('dayPanel').scrollIntoView({behavior:'smooth',block:'nearest'}),140);}}
@@ -849,10 +1035,255 @@ modalEl.onclick=e=>{
   const add=e.target.closest('[data-add]');
   if(add){document.getElementById('modalBody').insertAdjacentHTML('beforeend',geditHTML(add.dataset.add,{}));return;}
   if(e.target.closest('[data-del]')){e.target.closest('.gedit').remove();return;}
+  const jt=e.target.closest('[data-act="jtoggle"]');
+  if(jt){toggleApplied(jt.dataset.name);return;}
+  const tt=e.target.closest('[data-act="ttoggle"]');
+  if(tt){toggleTrackCheck(tt.dataset.key);return;}
+  const ws=e.target.closest('[data-act="wsave"]');
+  if(ws){saveWordAndRefresh();return;}
+  const ht=e.target.closest('[data-act="hantab"]');
+  if(ht){openHanneungModal(ht.dataset.tab);return;}
+  const hs=e.target.closest('[data-act="hansave"]');
+  if(hs){saveHanMock();return;}
+  const hd=e.target.closest('[data-act="handel"]');
+  if(hd){delHanMock(hd.dataset.date);return;}
+  const wg=e.target.closest('[data-act="wgsave"]');
+  if(wg){saveWeightGoal();return;}
+  const ms2=e.target.closest('[data-act="memosave"]');
+  if(ms2){saveMemo(ms2.dataset.key);return;}
+  const md2=e.target.closest('[data-act="memodel"]');
+  if(md2){deleteMemo(md2.dataset.key);return;}
   const m=e.target.closest('[data-m]');
   if(m){if(m.dataset.m==='save')save({goals:{[EDIT_N]:readModal()}});modalEl.classList.remove('open');return;}
   if(e.target===modalEl)modalEl.classList.remove('open');
 };
+
+/* ---- 공고 체크리스트 모달 ---- */
+function jobList(){
+  const seen={},out=[];
+  for(let n=1;n<=25;n++){
+    getGoals(n).forEach(g=>{
+      if(typeOf(g)!=='job')return;
+      const name=g.name||g.job; if(!name||seen[name])return;
+      seen[name]=true; out.push({name,imp:g.imp||3,due:g.due||'',week:n});
+    });
+  }
+  return out.sort((a,b)=>(b.imp||0)-(a.imp||0));
+}
+function openJobModal(){
+  const jobs=jobList();
+  const done=jobs.filter(j=>STATE.applied&&STATE.applied[j.name]).length;
+  const pct=jobs.length?Math.round(done/jobs.length*100):0;
+  const rows=jobs.map(j=>{
+    const on=!!(STATE.applied&&STATE.applied[j.name]);
+    return `<div class="mrow2 ${on?'done':''}"><div class="mbox ${on?'on':''}" data-act="jtoggle" data-name="${esc(j.name)}"></div><div class="mtx" data-act="jtoggle" data-name="${esc(j.name)}">${esc(j.name)}</div><span class="mimp">${IMP[j.imp]||''}</span><span class="mmeta">${esc(j.due)}</span></div>`;
+  }).join('')||'<div class="tc-empty">등록된 공고가 없어요. 각 주 GOAL 편집(✎)에서 공고를 추가해보세요.</div>';
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>📋 공고 지원 체크리스트</h3>
+    <div class="msub">주간 GOAL에 등록한 공고를 한곳에 모았어요. 지원 완료하면 체크!</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">지원 완료</div><div class="sv">${done}<small>/ ${jobs.length}</small></div></div><div class="stat-card"><div class="sl">진행률</div><div class="sv">${pct}<small>%</small></div></div></div>
+    <div class="mlist">${rows}</div>
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">닫기</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function toggleApplied(name){const v=!(STATE.applied&&STATE.applied[name]);save({applied:{[name]:v}});openJobModal();}
+
+/* ---- JLPT 단어 모달 ---- */
+function wordStats(){
+  const entries=Object.entries(STATE.jlptWords||{}).filter(([,v])=>v&&+v>0);
+  const total=entries.reduce((a,[,v])=>a+(+v||0),0);
+  const recent=[...entries].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10);
+  return {total,days:entries.length,recent};
+}
+function openWordModal(){
+  const ds=iso(now);
+  const todayVal=(STATE.jlptWords&&STATE.jlptWords[ds])||'';
+  const s=wordStats();
+  const rows=s.recent.map(([d,v])=>`<div class="mrow2"><div class="mtx" style="cursor:default">${fmt(d)}</div><span class="mmeta">${v}개</span></div>`).join('')||'<div class="tc-empty">아직 기록이 없어요. 오늘부터 시작해봐요!</div>';
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>📖 JLPT 단어 기록</h3>
+    <div class="msub">오늘 외운 단어 개수만 편하게 적어요. 목표 개수는 없어요 — 그날 컨디션대로!</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">누적 단어</div><div class="sv">${s.total.toLocaleString()}<small>개</small></div></div><div class="stat-card"><div class="sl">기록한 날</div><div class="sv">${s.days}<small>일</small></div></div></div>
+    <div class="word-in-row"><span class="wlabel">오늘</span><input id="wordIn" type="number" inputmode="numeric" placeholder="0" value="${todayVal}"><button data-act="wsave">저장</button></div>
+    <div class="mlist">${rows}</div>
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">닫기</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+  const inp=document.getElementById('wordIn');
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')saveWordAndRefresh();});
+}
+function saveWordAndRefresh(){
+  const inp=document.getElementById('wordIn'); if(!inp)return;
+  const v=parseInt(inp.value,10); const ds=iso(now);
+  save({jlptWords:{[ds]:(v&&v>0)?v:''}});
+  openWordModal();
+}
+
+/* ---- 운동 기록 모달 ---- */
+function exerciseStats(){
+  const all=STATE.exs||{};
+  const wS=iso(wkStart(cur)),wE=iso(wkEnd(cur));
+  let weekDays=0,weekCal=0,allDays=0,allCal=0;
+  const entries=Object.entries(all).filter(([,arr])=>arr&&arr.length&&arr.some(x=>x.n||x.c));
+  entries.forEach(([d,arr])=>{
+    const cal=arr.reduce((a,b)=>a+(parseInt(b.c,10)||0),0);
+    allDays++; allCal+=cal;
+    if(d>=wS&&d<=wE){weekDays++; weekCal+=cal;}
+  });
+  const recent=[...entries].sort((a,b)=>b[0].localeCompare(a[0])).slice(0,10).map(([d,arr])=>({d,cal:arr.reduce((a,b)=>a+(parseInt(b.c,10)||0),0),names:arr.map(x=>x.n).filter(Boolean).join(', ')}));
+  return {weekDays,weekCal,allDays,allCal,recent};
+}
+function openExerciseModal(){
+  const s=exerciseStats();
+  const rows=s.recent.map(r=>`<div class="mrow2"><div class="mtx" style="cursor:default">${fmt(r.d)}${r.names?(' · '+esc(r.names)):''}</div><span class="mmeta">${r.cal.toLocaleString()}kcal</span></div>`).join('')||'<div class="tc-empty">아직 기록이 없어요. 오늘 할 일 카드의 \'오늘 운동한 것\'에서 추가해보세요.</div>';
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>🏃 운동 기록</h3>
+    <div class="msub">오늘 할 일 카드의 '오늘 운동한 것'에 입력한 기록이 여기 모여요.</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">이번 주 운동</div><div class="sv">${s.weekDays}<small>회</small></div></div><div class="stat-card"><div class="sl">이번 주 소모</div><div class="sv">${s.weekCal.toLocaleString()}<small>kcal</small></div></div></div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">전체 운동일</div><div class="sv">${s.allDays}<small>일</small></div></div><div class="stat-card"><div class="sl">전체 소모</div><div class="sv">${s.allCal.toLocaleString()}<small>kcal</small></div></div></div>
+    <div class="mlist">${rows}</div>
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">닫기</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+/* ---- 자격증 진행도 (ADSP·SQLD·사무자동화) ---- */
+function collectTrackItems(matchFn){
+  const out=[];
+  W.forEach(w=>{
+    let d=new Date(w.s+'T00:00:00');const end=new Date(w.e+'T00:00:00');
+    while(d<=end){
+      const ds=iso(d);
+      const items=buildDay(w,new Date(d));
+      items.forEach((it,i)=>{
+        if(it.exam)return;
+        if(!matchFn(it))return;
+        const key=ds+'::i'+i;
+        if(STATE.postponed&&STATE.postponed[key])return;
+        out.push({key,ds,tx:it.tx,done:!!(STATE.checks&&STATE.checks[key])});
+      });
+      d.setDate(d.getDate()+1);
+    }
+  });
+  return out;
+}
+function trackStats(matchFn){
+  const items=collectTrackItems(matchFn);
+  return {done:items.filter(x=>x.done).length,total:items.length,items};
+}
+const CERT_DEFS=[
+  {label:'ADSP',color:'var(--adsp)',heart:'#7ec8ef',bg:'#e3f4fc',match:it=>it.c==='var(--adsp)'},
+  {label:'한능검',color:'var(--hanneung)',heart:'#e58bb5',bg:'#fdeaf3',match:it=>it.c==='var(--hanneung)'&&it.tx!=='몸무게 기록'},
+  {label:'SQLD',color:'var(--sqld)',heart:'#b6a3e6',bg:'#efeafb',match:it=>it.c==='var(--sqld)'},
+  {label:'사무자동화',color:'var(--office)',heart:'#f3a8c8',bg:'#fdeaf3',match:it=>it.c==='var(--office)'&&/사무자동화/.test(it.tx)},
+];
+
+/* ---- 아이콘 SVG ---- */
+function iconBoard(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M9 3v4M15 3v4M8 11h8M8 15h5"/></svg>`;}
+function iconDumbbell(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${c}" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9v6M2.5 8v8M19.5 9v6M21.5 8v8M8 12h8"/></svg>`;}
+function iconHeart(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill="${c}"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;}
+function iconKana(c){return `<span class="cc-kana" style="color:${c}">あ</span>`;}
+
+function renderCardsGrid(){
+  const el=document.getElementById('cardsGrid'); if(!el)return;
+  const jobs=jobList();
+  const jDone=jobs.filter(j=>STATE.applied&&STATE.applied[j.name]).length;
+  const jPct=jobs.length?Math.round(jDone/jobs.length*100):0;
+  const ws=wordStats();
+  const wPct=Math.min(100,ws.total);
+  const es=exerciseStats();
+  const ePct=Math.min(100,Math.round(es.weekDays/4*100));
+
+  const cards=[
+    {k:'job',label:'공고',icon:iconBoard('#c26a8c'),bg:'#fdeaf3',stat:`${jDone}<small>/${jobs.length}</small>`,pct:jPct,bar:'var(--hanneung)'},
+    {k:'word',label:'JLPT',icon:iconKana('#8a6fc9'),bg:'#efeafb',stat:`${ws.total}<small>개</small>`,pct:wPct,bar:'var(--jlpt)'},
+    {k:'exercise',label:'운동',icon:iconDumbbell('#4a8fc0'),bg:'#e3f1fb',stat:`${es.weekDays}<small>회</small>`,pct:ePct,bar:'var(--opic)'},
+    ...CERT_DEFS.map((d,idx)=>{
+      const s=trackStats(d.match);
+      const pct=s.total?Math.round(s.done/s.total*100):0;
+      return {k:'cert'+idx,label:d.label,icon:iconHeart(d.heart),bg:d.bg,stat:`${s.done}<small>/${s.total}</small>`,pct,bar:d.color};
+    }),
+  ];
+  el.innerHTML=cards.map(c=>`<div class="cert-card" data-card="${c.k}">
+    <div class="cc-top"><span class="cc-icon" style="background:${c.bg}">${c.icon}</span><span class="cn">${c.label}</span></div>
+    <div class="cp">${c.stat}</div>
+    <div class="cbar"><span style="width:${c.pct}%;background:${c.bar}"></span></div></div>`).join('');
+  el.onclick=e=>{
+    const c=e.target.closest('[data-card]'); if(!c)return;
+    const k=c.dataset.card;
+    if(k==='job')openJobModal();
+    else if(k==='word')openWordModal();
+    else if(k==='exercise')openExerciseModal();
+    else if(k.startsWith('cert')){const d=CERT_DEFS[+k.slice(4)];if(d.label==='한능검')openHanneungModal('progress');else openTrackModal(d.label,d.match,d.color);}
+  };
+}
+let CUR_TRACK=null;
+function openTrackModal(label,matchFn,color){
+  CUR_TRACK={label,matchFn,color};
+  const s=trackStats(matchFn);
+  const pct=s.total?Math.round(s.done/s.total*100):0;
+  const rows=s.items.map(it=>`<div class="mrow2 ${it.done?'done':''}"><div class="mbox ${it.done?'on':''}" data-act="ttoggle" data-key="${it.key}"></div><div class="mtx" data-act="ttoggle" data-key="${it.key}">${esc(it.tx)}</div><span class="mmeta">${fmt(it.ds)}</span></div>`).join('')||'<div class="tc-empty">등록된 학습 항목이 아직 없어요.</div>';
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3 style="color:${color}">${label} 진행도</h3>
+    <div class="msub">체크박스를 누르면 전체 계획표에도 바로 반영돼요.</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">완료</div><div class="sv">${s.done}<small>/ ${s.total}</small></div></div><div class="stat-card"><div class="sl">달성률</div><div class="sv">${pct}<small>%</small></div></div></div>
+    <div class="mlist">${rows}</div>
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">닫기</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+}
+function toggleTrackCheck(key){toggleCheck(key);if(CUR_TRACK)openTrackModal(CUR_TRACK.label,CUR_TRACK.matchFn,CUR_TRACK.color);}
+
+/* ---- 한능검 (진행도 + 모의고사 점수) ---- */
+let HAN_TAB='progress';
+function hanneungMockStats(){
+  const entries=Object.entries(STATE.hanneungMock||{}).filter(([,v])=>v&&+v>0);
+  const avg=entries.length?Math.round(entries.reduce((a,[,v])=>a+(+v),0)/entries.length):0;
+  const recent=[...entries].sort((a,b)=>b[0].localeCompare(a[0]));
+  return {avg,count:entries.length,recent};
+}
+function openHanneungModal(tab){
+  const d=CERT_DEFS.find(x=>x.label==='한능검');
+  HAN_TAB=tab||HAN_TAB||'progress';
+  const tabsHTML=`<div class="han-tabs">
+    <button class="han-tab ${HAN_TAB==='progress'?'on':''}" data-act="hantab" data-tab="progress">진행도</button>
+    <button class="han-tab ${HAN_TAB==='mock'?'on':''}" data-act="hantab" data-tab="mock">모의고사 점수</button>
+  </div>`;
+  let body;
+  if(HAN_TAB==='mock'){
+    const ms=hanneungMockStats();
+    const today=iso(now);
+    const todayVal=(STATE.hanneungMock&&STATE.hanneungMock[today])||'';
+    const rows=ms.recent.map(([dt,v])=>`<div class="mrow2"><div class="mtx" style="cursor:default">${fmt(dt)}</div><span class="mmeta">${v}점</span><span class="x" data-act="handel" data-date="${dt}">✕</span></div>`).join('')||'<div class="tc-empty">아직 기록한 모의고사 점수가 없어요.</div>';
+    body=`<div class="msub">매주 치는 한능검 모의고사 점수를 기록해봐요.</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">평균 점수</div><div class="sv">${ms.avg}<small>점</small></div></div><div class="stat-card"><div class="sl">응시 횟수</div><div class="sv">${ms.count}<small>회</small></div></div></div>
+    <div class="word-in-row"><input id="hanDate" type="date" value="${today}"><input id="hanScore" type="number" inputmode="numeric" placeholder="점수" value="${esc(todayVal)}"><button data-act="hansave">저장</button></div>
+    <div class="mlist">${rows}</div>`;
+  }else{
+    const s=trackStats(d.match);
+    const pct=s.total?Math.round(s.done/s.total*100):0;
+    const rows=s.items.map(it=>`<div class="mrow2 ${it.done?'done':''}"><div class="mbox ${it.done?'on':''}" data-act="ttoggle" data-key="${it.key}"></div><div class="mtx" data-act="ttoggle" data-key="${it.key}">${esc(it.tx)}</div><span class="mmeta">${fmt(it.ds)}</span></div>`).join('')||'<div class="tc-empty">등록된 학습 항목이 아직 없어요.</div>';
+    body=`<div class="msub">체크박스를 누르면 전체 계획표에도 바로 반영돼요.</div>
+    <div class="stat-row"><div class="stat-card"><div class="sl">완료</div><div class="sv">${s.done}<small>/ ${s.total}</small></div></div><div class="stat-card"><div class="sl">달성률</div><div class="sv">${pct}<small>%</small></div></div></div>
+    <div class="mlist">${rows}</div>`;
+  }
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3 style="color:${d.color}">${d.label}</h3>
+    ${tabsHTML}
+    ${body}
+    <div class="msave" style="margin-top:14px"><button class="cancel" data-m="cancel" style="flex:1">닫기</button></div></div>`;
+  document.getElementById('modal').classList.add('open');
+  if(HAN_TAB==='mock'){
+    const sc=document.getElementById('hanScore');
+    if(sc)sc.addEventListener('keydown',e=>{if(e.key==='Enter')saveHanMock();});
+  }
+}
+function saveHanMock(){
+  const dInp=document.getElementById('hanDate'),sInp=document.getElementById('hanScore');
+  if(!dInp||!sInp)return;
+  const dt=dInp.value||iso(now);
+  const v=parseInt(sInp.value,10);
+  save({hanneungMock:{[dt]:(v&&v>0)?v:''}});
+  openHanneungModal('mock');
+}
+function delHanMock(dt){save({hanneungMock:{[dt]:''}});openHanneungModal('mock');}
 
 /* ================= Firebase ================= */
 let db=null,F=null,stateRef=null;
@@ -870,7 +1301,7 @@ async function initFirebase(){
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{}};
       setSync(true);renderAll();
     },err=>{console.warn('구독 오류',err);setSync(false);});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
