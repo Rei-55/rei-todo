@@ -186,6 +186,20 @@
 
   .pp-btn{flex-shrink:0;font-size:10.5px;font-weight:600;color:var(--ink-faint);background:#f4f5fa;border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:var(--body);}
   .pp-btn.pp-hide{visibility:hidden;pointer-events:none;}
+  .pp-btn.giveup{color:#a86b6b;border-color:#e8cccc;background:#fbf3f3;}
+  .pp-btn.giveup:hover{background:#f3dede;color:#8a4a4a;}
+  .skip-box{margin:10px 0 4px;border:1px dashed var(--line);border-radius:12px;background:#faf9f7;overflow:hidden;}
+  .skip-head{padding:9px 13px;font-size:12px;font-weight:700;color:var(--ink-faint);cursor:pointer;user-select:none;}
+  .skip-head:hover{color:var(--ink-soft);}
+  .skip-list{display:none;padding:0 11px 9px;}
+  .skip-box.open .skip-list{display:block;}
+  .skip-row{display:flex;align-items:center;gap:8px;padding:7px 4px;border-top:1px solid var(--line);}
+  .skip-row .skt{flex:1;font-size:13px;color:var(--ink-faint);text-decoration:line-through;}
+  .skip-restore,.skip-del{flex-shrink:0;font-size:10.5px;font-weight:600;border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;background:#fff;font-family:var(--body);white-space:nowrap;}
+  .skip-restore{color:var(--opic);border-color:#bfe3d5;}
+  .skip-restore:hover{background:#e6f5ee;}
+  .skip-del{color:#a33c3c;border-color:#f0c9c9;}
+  .skip-del:hover{background:#fbeaea;}
   .pp-btn:hover{color:var(--jlpt);border-color:var(--jlpt);background:#eef0fb;}
   .yest-box{background:linear-gradient(140deg,#fdf3ee,#fdf0f4);border:1px solid #f3d9cf;border-radius:14px;padding:12px 14px;margin-bottom:12px;}
   .yest-label{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#b06a4a;margin-bottom:8px;}
@@ -583,10 +597,10 @@ function weekProgress(w){
 function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'&&!Array.isArray(v)){if(!t[k]||typeof t[k]!=='object')t[k]={};deepMerge(t[k],v);}else t[k]=v;}}
 const now=t0();
 let cur=weekOf(now)||(now<wkStart(W[0])?W[0]:W[W.length-1]);
-let openWeekNum=null, EDIT_N=null, KOPEN=false;
+let openWeekNum=null, EDIT_N=null, KOPEN=false, SKOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 
@@ -636,7 +650,7 @@ function goalHTML(n,label,edit){
 
 function tomorrowDs(){const d=new Date(now);d.setDate(d.getDate()+1);return iso(d);}
 function yesterdayDs(){const d=new Date(now);d.setDate(d.getDate()-1);return iso(d);}
-let TODAY_ITEMS=[], YEST_ITEMS=[];
+let TODAY_ITEMS=[], YEST_ITEMS=[], SKIPPED_ITEMS=[];
 
 function renderTodo(){
   const card=document.getElementById('todayCard');
@@ -644,15 +658,21 @@ function renderTodo(){
   const baseAll=wk?buildDay(wk,now):[];
   const base=baseAll.map((it,i)=>({...it,_key:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
   const customs=(STATE.customTasks&&STATE.customTasks[ds])||[];
-  const items=[...base.map(it=>({key:it._key,tm:it.tm,tx:it.tx,lec:it.lec,c:it.c})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id,origKey:c.origKey}))];
+  const allItems=[...base.map(it=>({key:it._key,tm:it.tm,tx:it.tx,lec:it.lec,c:it.c})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id,origKey:c.origKey}))];
+  const items=allItems.filter(x=>!(STATE.skipped&&STATE.skipped[x.key]));
+  const skippedItems=allItems.filter(x=>STATE.skipped&&STATE.skipped[x.key]);
   TODAY_ITEMS=items;
+  SKIPPED_ITEMS=skippedItems;
   const doneN=items.filter(x=>STATE.checks&&STATE.checks[x.key]).length;
   const pct=items.length?Math.round(doneN/items.length*100):0;
   const jlptWordVal=(STATE.jlptWords&&STATE.jlptWords[ds])||'';
+  let jlptShown=false;
   const rowsHtml=items.length?items.map((x,idx)=>{
     const done=!!(STATE.checks&&STATE.checks[x.key]);
     const lecBtn=x.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(x.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
-    const jlptBox=x.c==='var(--jlpt)'?`<div class="jlpt-inline"><input id="jlptCntIn" type="number" inputmode="numeric" placeholder="0" value="${esc(jlptWordVal)}"><span class="ju">개</span></div>`:'';
+    const isJlpt=(x.c==='var(--jlpt)')||/JLPT/i.test(x.tx);
+    let jlptBox='';
+    if(isJlpt&&!jlptShown){jlptShown=true;jlptBox=`<div class="jlpt-inline"><input id="jlptCntIn" type="number" inputmode="numeric" placeholder="0" value="${esc(jlptWordVal)}"><span class="ju">개</span></div>`;}
     const memoText=(STATE.memos&&STATE.memos[x.key])||'';
     const memoHtml=memoText
       ? `<span class="memo-badge" data-act="memoOpen" data-key="${x.key}">📝 메모<span class="tip">${esc(memoText)}</span></span>`
@@ -663,6 +683,7 @@ function renderTodo(){
       ${jlptBox}
       ${memoHtml}
       <button class="pp-btn ${done?'pp-hide':''}" data-act="postpone" data-idx="${idx}">↷ 내일로</button>
+      ${done?'':`<button class="pp-btn giveup" data-act="skip" data-key="${x.key}" title="이 할 일을 포기함으로 표시">✕ 포기</button>`}
       ${x.cid?(x.origKey?`<div class="del restore" data-act="del" data-cid="${x.cid}" title="원래 자리로 되돌리기">↺</div>`:`<div class="del" data-act="del" data-cid="${x.cid}" title="삭제">✕</div>`):''}</div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
 
@@ -670,8 +691,8 @@ function renderTodo(){
   const yd=yesterdayDs();
   const ywk=weekOf(new Date(yd+'T00:00:00'));
   const yBaseAll=ywk?buildDay(ywk,new Date(yd+'T00:00:00')):[];
-  const yBase=yBaseAll.map((it,i)=>({key:yd+'::i'+i,tx:it.tx})).filter(it=>!(STATE.checks&&STATE.checks[it.key])&&!(STATE.postponed&&STATE.postponed[it.key]));
-  const yCustoms=((STATE.customTasks&&STATE.customTasks[yd])||[]).filter(c=>!(STATE.checks&&STATE.checks[yd+'::c'+c.id])).map(c=>({key:yd+'::c'+c.id,tx:c.tx,cid:c.id,origKey:c.origKey}));
+  const yBase=yBaseAll.map((it,i)=>({key:yd+'::i'+i,tx:it.tx})).filter(it=>!(STATE.checks&&STATE.checks[it.key])&&!(STATE.postponed&&STATE.postponed[it.key])&&!(STATE.skipped&&STATE.skipped[it.key]));
+  const yCustoms=((STATE.customTasks&&STATE.customTasks[yd])||[]).filter(c=>!(STATE.checks&&STATE.checks[yd+'::c'+c.id])&&!(STATE.skipped&&STATE.skipped[yd+'::c'+c.id])).map(c=>({key:yd+'::c'+c.id,tx:c.tx,cid:c.id,origKey:c.origKey}));
   const yItems=[...yBase,...yCustoms];
   YEST_ITEMS=yItems;
   const yestHTML=yItems.length?`<div class="yest-box"><div class="yest-label">어제 놓친 일 (${yItems.length})</div>
@@ -685,6 +706,10 @@ function renderTodo(){
   const outSum=exs.reduce((a,b)=>a+(parseInt(b.c,10)||0),0);
   const net=inSum-outSum;
   const kst=kcalState(net>0?net:0);
+  const skipHTML=skippedItems.length?`<div class="skip-box ${SKOPEN?'open':''}">
+    <div class="skip-head" data-act="skexp"><span>${SKOPEN?'▾':'▸'} 포기한 일 (${skippedItems.length})</span></div>
+    <div class="skip-list">${skippedItems.map(s=>`<div class="skip-row"><span class="skt">${esc(s.tx)}</span><button class="skip-restore" data-act="unskip" data-key="${esc(s.key)}">↺ 되살리기</button><button class="skip-del" data-act="skdel" data-key="${esc(s.key)}" data-cid="${s.cid||''}" data-origkey="${s.origKey||''}">🗑 삭제</button></div>`).join('')}</div>
+  </div>`:'';
   card.innerHTML=`${yestHTML}<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
     <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
     <div class="kcal-row">
@@ -709,6 +734,7 @@ function renderTodo(){
     <div class="tc-prog"><span style="width:${pct}%"></span></div>
     <div class="tc-pct">${doneN} / ${items.length} 완료</div>
     ${rowsHtml}
+    ${skipHTML}
     <div class="tc-add"><input id="newTask" placeholder="할 일 직접 추가…" maxlength="60"><button data-act="add">추가</button></div>`;
   card.onclick=e=>{
     const t=e.target.closest('[data-act]'); if(!t)return;
@@ -725,6 +751,10 @@ function renderTodo(){
     else if(a==='pull'){const item=YEST_ITEMS[t.dataset.idx];if(item)pullFromYesterday(item,ds);}
     else if(a==='wgedit'){openWeightGoalModal();}
     else if(a==='memoOpen'){openMemoModal(t.dataset.key);}
+    else if(a==='skip'){SKOPEN=true;save({skipped:{[t.dataset.key]:true}});}
+    else if(a==='unskip'){save({skipped:{[t.dataset.key]:false}});}
+    else if(a==='skexp'){SKOPEN=!SKOPEN;renderTodo();}
+    else if(a==='skdel'){skipDelete(t.dataset.key,t.dataset.cid,t.dataset.origkey);}
   };
   card.querySelectorAll('.kp-item input').forEach(el=>{
     el.addEventListener('change',()=>{
@@ -856,6 +886,20 @@ function saveMemo(key){
 function deleteMemo(key){
   save({memos:{[key]:''}});
   document.getElementById('modal').classList.remove('open');
+}
+/* ---- 포기한 일 완전 삭제 ---- */
+function skipDelete(key,cid,origKey){
+  if(!confirm('이 할 일을 완전히 삭제할까요?\n(되살릴 수 없어요)'))return;
+  const ds=iso(now);
+  const patch={skipped:{[key]:false}};
+  if(cid){ // 커스텀(직접 추가/이동된) 항목 — 배열에서 제거
+    const arr=((STATE.customTasks&&STATE.customTasks[ds])||[]).filter(c=>c.id!==cid);
+    patch.customTasks={[ds]:arr};
+    if(origKey)patch.postponed={[origKey]:true}; // 이동돼 온 항목이면 원래 자리에서도 숨김 유지
+  } else { // 기본 계획 항목 — postponed로 오늘에서 숨김
+    patch.postponed={[key]:true};
+  }
+  save(patch);
 }
 
 function kcalState(v){
@@ -1331,7 +1375,7 @@ async function initFirebase(){
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{}};
       // 캐시에서 먼저 온 데이터도 화면엔 즉시 반영 — 서버 응답이 오면 '동기화됨'으로 승격
       setSync(snap.metadata.fromCache?'wait':'on');
       renderAll();
