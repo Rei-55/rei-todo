@@ -278,28 +278,32 @@
   .tc-prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px;}
   .tc-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--opic),var(--hanneung));transition:width .45s;}
   .tc-pct{font-size:11px;font-weight:600;color:var(--ink-faint);text-align:right;margin-bottom:10px;}
-  .todo{display:flex;align-items:flex-start;gap:11px;padding:9px 2px;border-bottom:1px solid #eef0f6;}
+  .todo{display:flex;align-items:flex-start;gap:11px;padding:11px 2px;border-bottom:1px solid #eef0f6;}
   .todo:last-of-type{border-bottom:none;}
   .todo .box{width:21px;height:21px;border-radius:7px;border:2px solid var(--line);flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s;}
   .todo.done .box{background:var(--jlpt);border-color:var(--jlpt);}
   .todo .box svg{width:12px;height:12px;opacity:0;transition:.15s;}
   .todo.done .box svg{opacity:1;}
-  .todo .tcont{flex:1;cursor:pointer;min-width:0;}
+  .tmain{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px;}
+  .todo .tcont{cursor:pointer;min-width:0;}
   .todo .ttm{font-family:var(--display);font-size:10.5px;font-weight:600;color:var(--ink-faint);}
-  .todo .ttx{font-size:14px;font-weight:500;color:var(--ink);line-height:1.4;}
+  .todo .ttx{font-size:14px;font-weight:500;color:var(--ink);line-height:1.45;word-break:keep-all;overflow-wrap:break-word;}
   .todo.done .ttx{color:var(--ink-faint);text-decoration:line-through;}
-  .todo .del{color:var(--ink-faint);font-size:16px;padding:0 2px;opacity:.45;cursor:pointer;align-self:center;}
-  .todo .del:hover{opacity:1;color:var(--hanneung);}
+  .tactions{display:flex;flex-wrap:wrap;align-items:center;gap:6px;}
   .todo .del.restore:hover{color:var(--opic);}
+  .pp-btn.del-btn{color:var(--ink-faint);border-color:var(--line);}
+  .pp-btn.del-btn:hover{background:#f3dede;color:var(--hanneung);}
+  .pp-btn.restore{color:var(--opic);border-color:#bfe3d5;}
+  .pp-btn.restore:hover{background:#e6f5ee;}
   .memo-badge{position:relative;display:inline-flex;align-items:center;gap:3px;font-size:10.5px;font-weight:700;color:#fff;background:#c98a3e;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
   .memo-badge:hover{background:#b3762d;}
-  .memo-badge .tip{display:none;position:absolute;bottom:calc(100% + 8px);right:0;background:var(--ink);color:#fff;font-size:11.5px;line-height:1.45;font-weight:500;padding:9px 11px;border-radius:10px;width:190px;white-space:normal;z-index:6;box-shadow:0 6px 20px rgba(0,0,0,.2);text-align:left;}
+  .memo-badge .tip{display:none;position:absolute;bottom:calc(100% + 8px);left:0;background:var(--ink);color:#fff;font-size:11.5px;line-height:1.45;font-weight:500;padding:9px 11px;border-radius:10px;width:190px;white-space:normal;z-index:6;box-shadow:0 6px 20px rgba(0,0,0,.2);text-align:left;}
   .memo-badge:hover .tip{display:block;}
   .pp-btn.memo-add{flex-shrink:0;}
   .memo-textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-family:var(--body);font-size:13.5px;color:var(--ink);outline:none;resize:vertical;margin-bottom:4px;background:#fff;}
   .memo-textarea:focus{border-color:var(--hanneung);}
   .msave .danger{background:transparent;color:#a33c3c;border:1px solid #f0c9c9!important;}
-  .jlpt-inline{flex-shrink:0;display:flex;align-items:center;gap:4px;align-self:center;}
+  .jlpt-inline{flex-shrink:0;display:flex;align-items:center;gap:4px;}
   .jlpt-inline input{width:40px;border:1px solid var(--line);border-radius:8px;padding:4px 6px;font-family:var(--display);font-size:12.5px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
   .jlpt-inline input:focus{border-color:var(--jlpt);}
   .jlpt-inline .ju{font-size:11px;font-weight:600;color:var(--ink-faint);}
@@ -679,12 +683,16 @@ function renderTodo(){
       : `<button class="pp-btn memo-add" data-act="memoOpen" data-key="${x.key}">📝 메모</button>`;
     return `<div class="todo ${done?'done':''}" data-key="${x.key}">
       <div class="box" data-act="check"><svg viewBox="0 0 24 24"><polyline points="4 12 10 18 20 6" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-      <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}${lecBtn}</div></div>
-      ${jlptBox}
-      ${memoHtml}
-      <button class="pp-btn ${done?'pp-hide':''}" data-act="postpone" data-idx="${idx}">↷ 내일로</button>
-      ${done?'':`<button class="pp-btn giveup" data-act="skip" data-key="${x.key}" title="이 할 일을 포기함으로 표시">✕ 포기</button>`}
-      ${x.cid?(x.origKey?`<div class="del restore" data-act="del" data-cid="${x.cid}" title="원래 자리로 되돌리기">↺</div>`:`<div class="del" data-act="del" data-cid="${x.cid}" title="삭제">✕</div>`):''}</div>`;
+      <div class="tmain">
+        <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}${lecBtn}</div></div>
+        <div class="tactions">
+          ${jlptBox}
+          ${memoHtml}
+          <button class="pp-btn ${done?'pp-hide':''}" data-act="postpone" data-idx="${idx}">↷ 내일로</button>
+          ${done?'':`<button class="pp-btn giveup" data-act="skip" data-key="${x.key}" title="이 할 일을 포기함으로 표시">✕ 포기</button>`}
+          ${x.cid?(x.origKey?`<button class="pp-btn restore" data-act="del" data-cid="${x.cid}" title="원래 자리로 되돌리기">↺ 되돌리기</button>`:`<button class="pp-btn del-btn" data-act="del" data-cid="${x.cid}" title="삭제">✕ 삭제</button>`):''}
+        </div>
+      </div></div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
 
   // 어제 놓친 일
@@ -1343,8 +1351,13 @@ function setSync(st){
   s.className='sync '+st;
   document.getElementById('syncTxt').textContent=txt;
 }
+let renderTimer=null;
+function scheduleRender(){
+  if(renderTimer)return;
+  renderTimer=requestAnimationFrame(()=>{renderTimer=null;renderAll();});
+}
 async function save(patch){
-  deepMerge(STATE,patch);renderAll();
+  deepMerge(STATE,patch);scheduleRender();
   if(db&&F&&stateRef){
     pendingWrites++;
     try{await F.setDoc(stateRef,patch,{merge:true});}
@@ -1374,11 +1387,12 @@ async function initFirebase(){
     F=fs;
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
+      // 내가 방금 저장해서 되돌아온 스냅샷(에코)이면 화면은 이미 최신이라 다시 안 그림
+      const isLocalEcho=snap.metadata.hasPendingWrites;
       const d=snap.exists()?snap.data():{};
       STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{}};
-      // 캐시에서 먼저 온 데이터도 화면엔 즉시 반영 — 서버 응답이 오면 '동기화됨'으로 승격
       setSync(snap.metadata.fromCache?'wait':'on');
-      renderAll();
+      if(!isLocalEcho)scheduleRender();  // 외부(다른 기기)에서 온 변경일 때만 렌더
     },err=>{console.warn('구독 오류',err);setSync('off');});
   }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync('off');}
 }
