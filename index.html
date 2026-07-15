@@ -138,6 +138,8 @@
   .sync{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--ink-faint);}
   .sync .dot{width:7px;height:7px;border-radius:50%;background:#c3c8d6;transition:.3s;}
   .sync.on .dot{background:#2e8b6b;}
+  .sync.wait .dot{background:#c8a83e;animation:syncPulse 1s ease-in-out infinite;}
+  @keyframes syncPulse{0%,100%{opacity:1}50%{opacity:.3}}
   .sync.off .dot{background:#d98a52;}
 
   /* today todo card */
@@ -183,6 +185,7 @@
   .day .it .row-top{display:flex;align-items:center;flex-wrap:wrap;gap:2px;}
 
   .pp-btn{flex-shrink:0;font-size:10.5px;font-weight:600;color:var(--ink-faint);background:#f4f5fa;border:1px solid var(--line);border-radius:20px;padding:4px 9px;cursor:pointer;white-space:nowrap;font-family:var(--body);}
+  .pp-btn.pp-hide{visibility:hidden;pointer-events:none;}
   .pp-btn:hover{color:var(--jlpt);border-color:var(--jlpt);background:#eef0fb;}
   .yest-box{background:linear-gradient(140deg,#fdf3ee,#fdf0f4);border:1px solid #f3d9cf;border-radius:14px;padding:12px 14px;margin-bottom:12px;}
   .yest-label{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:#b06a4a;margin-bottom:8px;}
@@ -659,7 +662,7 @@ function renderTodo(){
       <div class="tcont" data-act="check"><div class="ttm">${esc(x.tm)}</div><div class="ttx">${esc(x.tx)}${lecBtn}</div></div>
       ${jlptBox}
       ${memoHtml}
-      ${done?'':`<button class="pp-btn" data-act="postpone" data-idx="${idx}">↷ 내일로</button>`}
+      <button class="pp-btn ${done?'pp-hide':''}" data-act="postpone" data-idx="${idx}">↷ 내일로</button>
       ${x.cid?(x.origKey?`<div class="del restore" data-act="del" data-cid="${x.cid}" title="원래 자리로 되돌리기">↺</div>`:`<div class="del" data-act="del" data-cid="${x.cid}" title="삭제">✕</div>`):''}</div>`;
   }).join(''):`<div class="tc-empty">오늘은 등록된 일정이 없어요.<br>아래에서 직접 추가해봐요!</div>`;
 
@@ -898,10 +901,12 @@ function delCustom(cid){
   const ds=iso(now);
   const arr0=(STATE.customTasks&&STATE.customTasks[ds])||[];
   const item=arr0.find(c=>c.id===cid);
-  const arr=arr0.filter(c=>c.id!==cid);
-  if(item&&item.origKey){ // 원래 다른 날짜의 항목이었다면 — 그 자리로 되돌리기
+  if(item&&item.origKey){ // 원래 다른 날짜의 항목이었다면 — 확인 후 그 자리로 되돌리기
+    if(!confirm('이 항목을 원래 있던 날짜로 되돌릴까요?\n(오늘 목록에서는 사라져요)'))return;
+    const arr=arr0.filter(c=>c.id!==cid);
     save({customTasks:{[ds]:arr},postponed:{[item.origKey]:false}});
   } else { // 직접 추가한 할 일 — 그냥 삭제
+    const arr=arr0.filter(c=>c.id!==cid);
     save({customTasks:{[ds]:arr}});
   }
 }
@@ -1287,7 +1292,13 @@ function delHanMock(dt){save({hanneungMock:{[dt]:''}});openHanneungModal('mock')
 
 /* ================= Firebase ================= */
 let db=null,F=null,stateRef=null,pendingWrites=0;
-function setSync(on){const s=document.getElementById('sync');s.className='sync '+(on?'on':'off');document.getElementById('syncTxt').textContent=on?'동기화됨':'로컬 모드';}
+function setSync(st){
+  if(st===true)st='on'; if(st===false)st='off';
+  const s=document.getElementById('sync');
+  const txt={on:'동기화됨',wait:'연결 중…',off:'로컬 모드'}[st]||'로컬 모드';
+  s.className='sync '+st;
+  document.getElementById('syncTxt').textContent=txt;
+}
 async function save(patch){
   deepMerge(STATE,patch);renderAll();
   if(db&&F&&stateRef){
@@ -1302,19 +1313,30 @@ window.addEventListener('beforeunload',e=>{
 });
 async function initFirebase(){
   try{
-    const appMod=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js");
-    const fs=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js");
+    setSync('wait');
+    // 두 모듈을 동시에 받아옴 (순서대로 기다리지 않음)
+    const [appMod,fs]=await Promise.all([
+      import("https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js"),
+      import("https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js")
+    ]);
     const app=appMod.initializeApp(firebaseConfig);
-    db=fs.getFirestore(app);F=fs;
-    // 저장 직후 새로고침해도 데이터가 유실되지 않도록, 기기에 오프라인 캐시를 켜둠
-    try{await fs.enableIndexedDbPersistence(db);}catch(e){console.warn('오프라인 캐시 비활성화(다른 탭이 열려있거나 미지원 브라우저):',e);}
+    // 오프라인 캐시를 '초기화 옵션'으로 켬 — 기다리지 않으므로 구독이 즉시 시작됨
+    try{
+      db=fs.initializeFirestore(app,{localCache:fs.persistentLocalCache({tabManager:fs.persistentMultipleTabManager()})});
+    }catch(e){
+      console.warn('영속 캐시 사용 불가, 기본 모드로 진행:',e);
+      db=fs.getFirestore(app);
+    }
+    F=fs;
     stateRef=fs.doc(db,'roadmap','state');
     fs.onSnapshot(stateRef,snap=>{
       const d=snap.exists()?snap.data():{};
       STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{}};
-      setSync(!snap.metadata.fromCache);renderAll();
-    },err=>{console.warn('구독 오류',err);setSync(false);});
-  }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync(false);}
+      // 캐시에서 먼저 온 데이터도 화면엔 즉시 반영 — 서버 응답이 오면 '동기화됨'으로 승격
+      setSync(snap.metadata.fromCache?'wait':'on');
+      renderAll();
+    },err=>{console.warn('구독 오류',err);setSync('off');});
+  }catch(e){console.warn('Firebase 미연결(로컬 모드):',e);setSync('off');}
 }
 
 renderAll();
