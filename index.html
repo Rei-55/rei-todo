@@ -577,7 +577,7 @@ const DETAIL={
 const DOW=['일','월','화','수','목','금','토'];
 
 /* ================= 유틸 ================= */
-function t0(){const t=new Date();t.setHours(0,0,0,0);return t;}
+function t0(){const t=new Date();if(t.getHours()<5){t.setDate(t.getDate()-1);}t.setHours(0,0,0,0);return t;}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function fmt(s){const p=s.split('-');return (+p[1])+'/'+(+p[2]);}
 function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
