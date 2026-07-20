@@ -494,6 +494,16 @@
   .wedit label{display:block;font-size:11px;color:var(--ink-soft);margin-bottom:4px;}
   .wedit input{width:100%;border:1px solid var(--line);border-radius:8px;padding:9px 10px;font-family:var(--body);font-size:13px;color:var(--ink);outline:none;background:#fff;box-sizing:border-box;}
   .wedit input:focus{border-color:var(--jlpt);}
+  .d-import{width:100%;box-sizing:border-box;min-height:88px;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:8px;}
+  .d-import:focus{border-color:var(--jlpt);}
+  .d-fmtmsg{font-size:11.5px;color:var(--jlpt);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;}
+  .kp-sec.paste{border-top:1px dashed var(--line);margin-top:4px;padding-top:10px;}
+  .kp-copy{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;font-family:var(--body);font-size:10.5px;color:var(--ink-soft);cursor:pointer;}
+  .kp-copy:hover{border-color:var(--jlpt);color:var(--jlpt);}
+  .kp-msg{font-size:11px;color:var(--jlpt);min-height:14px;margin:2px 0 5px;}
+  .kp-paste{width:100%;box-sizing:border-box;min-height:70px;border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:6px;}
+  .kp-paste:focus{border-color:var(--jlpt);}
+  .kp-add.apply{background:var(--jlpt);color:#fff;border-color:var(--jlpt);font-weight:600;}
   .todo.hot .ttx{color:#e11d48;font-weight:800;}
   .todo.hot.done .ttx{color:#f0a0b0;}
   .it.hot .tx{color:#e11d48;font-weight:800;}
@@ -929,6 +939,12 @@ function renderTodo(){
         ${exs.map((x,i)=>`<div class="kp-item"><input class="n" data-k="e" data-i="${i}" data-f="n" placeholder="운동 (예: 달리기)" value="${esc(x.n)}"><input class="c" data-k="e" data-i="${i}" data-f="c" type="number" inputmode="numeric" placeholder="kcal" value="${esc(x.c)}"><span class="x" data-act="edel" data-i="${i}">✕</span></div>`).join('')}
         <button class="kp-add" data-act="eadd">＋ 운동 추가</button>
       </div>
+      <div class="kp-sec paste">
+        <div class="kp-head">📋 AI 답변 붙여넣기<button class="kp-copy" data-act="fprompt">프롬프트 복사</button></div>
+        <div class="kp-msg"></div>
+        <textarea class="kp-paste" placeholder='AI가 준 JSON을 붙여넣으세요&#10;{"foods":[{"n":"김치찌개","c":450}],"exs":[{"n":"걷기 30분","c":150}]}'></textarea>
+        <button class="kp-add apply" data-act="fpaste">✅ 오늘 기록에 추가</button>
+      </div>
     </div>
     ${weightHTML()}
     <div class="tc-prog"><span style="width:${pct}%"></span></div>
@@ -943,6 +959,60 @@ function renderTodo(){
     else if(a==='del'){delCustom(t.dataset.cid);}
     else if(a==='add'){addCustom();}
     else if(a==='kexp'){KOPEN=!KOPEN;renderTodo();}
+    else if(a==='fprompt'){
+      KOPEN=true;
+      const tpl='내가 먹은 음식과 운동의 칼로리를 알려줘.\n'
+        +'설명은 짧게만 하고, 마지막에 아래 형식의 JSON을 코드블록으로 꼭 붙여줘.\n'
+        +'{"foods":[{"n":"음식명","c":칼로리숫자}],"exs":[{"n":"운동명","c":소모칼로리숫자}]}\n'
+        +'운동이 없으면 exs는 빈 배열로 둬.\n\n오늘 먹은 것: ';
+      const msg=document.querySelector('.kp-msg');
+      const ok=()=>{if(msg)msg.textContent='복사됐어요! AI 대화창에 붙여넣고 먹은 걸 이어서 쓰세요';};
+      const no=()=>{if(msg)msg.textContent='복사 실패 — 아래 칸에 직접 형식을 적어주세요';};
+      try{
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tpl).then(ok,no);
+        else no();
+      }catch(err){no();}
+      return;
+    }
+    else if(a==='fpaste'){
+      KOPEN=true;
+      const ta=document.querySelector('.kp-paste');
+      const msg=document.querySelector('.kp-msg');
+      const say=(m)=>{if(msg)msg.textContent=m;};
+      let raw=(ta&&ta.value||'').trim();
+      if(!raw){say('붙여넣은 내용이 없어요.');return;}
+      raw=raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+      const b1=raw.indexOf('{'),b2=raw.lastIndexOf('}');
+      const a1=raw.indexOf('['),a2=raw.lastIndexOf(']');
+      const useArr=(a1>=0&&a2>a1)&&(b1<0||a1<b1);
+      if(useArr)raw=raw.slice(a1,a2+1);
+      else if(b1>=0&&b2>b1)raw=raw.slice(b1,b2+1);
+      let o;
+      try{o=JSON.parse(raw);}catch(err){say('JSON을 읽지 못했어요. { } 부분만 붙여넣어 주세요.');return;}
+      const norm=(arr)=>(Array.isArray(arr)?arr:[]).map(x=>({
+        n:String(x.n||x.name||x.음식||x.운동||'').slice(0,40),
+        c:String(parseInt(x.c!=null?x.c:(x.kcal!=null?x.kcal:x.칼로리),10)||'')
+      })).filter(x=>x.n);
+      let addF=[],addE=[];
+      if(Array.isArray(o))addF=norm(o);
+      else{
+        if(Array.isArray(o.foods))addF=norm(o.foods);
+        else if(o.foods&&typeof o.foods==='object'&&Array.isArray(o.foods[ds]))addF=norm(o.foods[ds]);
+        if(Array.isArray(o.exs))addE=norm(o.exs);
+        else if(o.exs&&typeof o.exs==='object'&&Array.isArray(o.exs[ds]))addE=norm(o.exs[ds]);
+      }
+      if(!addF.length&&!addE.length){say('추가할 음식·운동을 찾지 못했어요.');return;}
+      const curF=((STATE.foods&&STATE.foods[ds])||[]).filter(x=>x.n||x.c);
+      const curE=((STATE.exs&&STATE.exs[ds])||[]).filter(x=>x.n||x.c);
+      const patch={};
+      if(addF.length)patch.foods={[ds]:[...curF,...addF]};
+      if(addE.length)patch.exs={[ds]:[...curE,...addE]};
+      if(ta)ta.value='';
+      const sumF=addF.reduce((t,x)=>t+(parseInt(x.c,10)||0),0);
+      save(patch);
+      say('음식 '+addF.length+'개(+'+sumF+'kcal), 운동 '+addE.length+'개 추가했어요!');
+      return;
+    }
     else if(a==='fadd'){KOPEN=true;const arr=[...((STATE.foods&&STATE.foods[ds])||[]),{n:'',c:''}];save({foods:{[ds]:arr}});}
     else if(a==='eadd'){KOPEN=true;const arr=[...((STATE.exs&&STATE.exs[ds])||[]),{n:'',c:''}];save({exs:{[ds]:arr}});}
     else if(a==='fdel'){KOPEN=true;const arr=((STATE.foods&&STATE.foods[ds])||[]).filter((_,i)=>i!=t.dataset.i);save({foods:{[ds]:arr}});}
@@ -1323,8 +1393,8 @@ function makeReport(){
   }catch(e){setRepMsg('아래 내용을 Ctrl+C 로 복사하세요');}
 }
 function setRepMsg(t){const m=document.querySelector('.w-repmsg');if(m)m.textContent=t;}
-function applyPlanJSON(){
-  const ta=document.querySelector('.w-import');
+function applyPlanJSON(sel){
+  const ta=document.querySelector(sel||'.w-import');
   if(!ta)return;
   let raw=(ta.value||'').trim();
   if(!raw){alert('붙여넣은 내용이 없어요.');return;}
@@ -1379,9 +1449,26 @@ function applyPlanJSON(){
     });
     if(Object.keys(dp).length){patch.dayPlans=dp; done.push('일자별 일정 '+Object.keys(dp).length+'일');}
   }
+  ['foods','exs'].forEach(k=>{
+    if(o[k]&&typeof o[k]==='object'&&!Array.isArray(o[k])){
+      const m={};
+      Object.keys(o[k]).forEach(ds=>{
+        const arr=o[k][ds];
+        if(Array.isArray(arr))m[ds]=arr.map(x=>({n:String(x.n||x.name||''),c:String(x.c==null?(x.kcal==null?'':x.kcal):x.c)}));
+      });
+      if(Object.keys(m).length){patch[k]=m; done.push((k==='foods'?'식단':'운동')+' '+Object.keys(m).length+'일');}
+    }
+  });
+  if(o.weight&&typeof o.weight==='object'){
+    const m={};
+    Object.keys(o.weight).forEach(ds=>{const v=parseFloat(o.weight[ds]); if(v>0)m[ds]=v;});
+    if(Object.keys(m).length){patch.weight=m; done.push('몸무게 '+Object.keys(m).length+'일');}
+  }
   if(!done.length){alert('적용할 내용을 찾지 못했어요.');return;}
   save(patch);
-  modalEl.classList.remove('open');
+  const ta2=document.querySelector(sel||'.w-import'); if(ta2)ta2.value='';
+  if(typeof DT_OPEN!=='undefined'&&DT_OPEN)renderDietView();
+  else modalEl.classList.remove('open');
   alert('반영했어요! (' + done.join(' / ') + ')');
 }
 function openWeekReview(n){
@@ -1814,12 +1901,42 @@ function renderDietView(){
         <div class="b"><div class="n">${within}<span style="font-size:11px">일</span></div><div class="l">목표 이내</div></div>
       </div>
     </div>
+    <div class="fsv-sec">
+      <h4>AI로 한 번에 입력</h4>
+      <div class="wk-help">AI에게 먹은 음식을 말하고 칼로리를 계산시킨 뒤, 받은 JSON을 여기에 붙여넣으세요. 같은 날짜에 기존 기록이 있으면 덮어써요.</div>
+      <button class="wk-btn" data-dt="fmt">📋 AI에게 보낼 형식 보기</button>
+      <div class="d-fmtmsg"></div>
+      <textarea class="d-import" placeholder='{"foods":{"2026-07-20":[{"n":"김치찌개","c":450}]}}'></textarea>
+      <button class="wk-btn apply" data-dt="dimport">✅ 붙여넣은 식단 적용</button>
+    </div>
     <div class="fsv-foot">숫자에 너무 매이지 말고, 꾸준히 기록하는 것만으로 충분해요 · 식단 입력은 오늘 카드에서</div>
   </div>`;
 }
+function dietFormatText(){
+  const ds=iso(now);
+  return '내가 먹은 음식의 칼로리를 계산해서, 다른 설명 없이 아래 JSON 형식으로만 답해줘.\n'
+    + '날짜는 ' + ds + ' 이고, c는 칼로리 숫자야. 운동을 했으면 exs에, 몸무게를 재면 weight에 넣어줘.\n\n'
+    + '{"foods":{"' + ds + '":[{"n":"음식이름","c":000}]},'
+    + '"exs":{"' + ds + '":[{"n":"운동이름","c":000}]},'
+    + '"weight":{"' + ds + '":00.0}}';
+}
 (function bindDiet(){
   const el=document.getElementById('dietView'); if(!el)return;
-  el.onclick=e=>{ if(e.target.closest('[data-dt="back"]'))closeDietView(); };
+  el.onclick=e=>{
+    if(e.target.closest('[data-dt="back"]')){closeDietView();return;}
+    if(e.target.closest('[data-dt="dimport"]')){applyPlanJSON('.d-import');return;}
+    if(e.target.closest('[data-dt="fmt"]')){
+      const t=dietFormatText();
+      const m=document.querySelector('.d-fmtmsg');
+      try{
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(t).then(()=>{if(m)m.textContent='복사됐어요! AI에게 붙여넣고 먹은 음식을 알려주세요';},
+            ()=>{if(m)m.textContent=t;});
+        }else if(m)m.textContent=t;
+      }catch(err){ if(m)m.textContent=t; }
+      return;
+    }
+  };
   el.onchange=e=>{ const gi=e.target.closest('#dtGoal'); if(gi){setCalGoal(parseInt(gi.value,10));renderDietView();} };
 })();
 
