@@ -497,6 +497,14 @@
   .d-import{width:100%;box-sizing:border-box;min-height:88px;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:8px;}
   .d-import:focus{border-color:var(--jlpt);}
   .d-fmtmsg{font-size:11.5px;color:var(--jlpt);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;}
+  .lg-iedit{border:none;background:none;color:var(--ink-soft);font-size:13px;cursor:pointer;padding:0 3px;opacity:.55;}
+  .lg-iedit:hover{opacity:1;color:var(--hanneung);}
+  .lg-editbox{border:1.5px solid var(--hanneung);border-radius:11px;padding:11px;margin:7px 0;background:#fbfcfe;}
+  .lg-ehead{font-size:11.5px;font-weight:700;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+  .lg-etype{font-size:10.5px;font-weight:600;color:var(--ink-soft);border:1px solid var(--line);border-radius:5px;padding:1px 6px;}
+  .lg-erow{display:flex;gap:7px;margin-top:9px;}
+  .lg-erow button{flex:1;border-radius:8px;padding:8px;font-family:var(--body);font-size:12.5px;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink-soft);}
+  .lg-esave{background:var(--hanneung)!important;color:#fff!important;border-color:var(--hanneung)!important;font-weight:600;}
   .kp-sec.paste{border-top:1px dashed var(--line);margin-top:4px;padding-top:10px;}
   .kp-copy{margin-left:auto;border:1px solid var(--line);background:#fff;border-radius:6px;padding:3px 8px;font-family:var(--body);font-size:10.5px;color:var(--ink-soft);cursor:pointer;}
   .kp-copy:hover{border-color:var(--jlpt);color:var(--jlpt);}
@@ -1729,13 +1737,25 @@ function iconWon(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill
 function iconApple(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8c-1.2-2-3.4-3-5.2-1.8C4.8 7.4 4.6 10.5 6 13.2c1 2 2.6 4.3 4.8 4.6M12 8c1.2-2 3.4-3 5.2-1.8C19.2 7.4 19.4 10.5 18 13.2c-1 2-2.6 4.3-4.8 4.6"/><path d="M12 8V5"/></svg>`;}
 
 /* ===== 가계부 (수입·지출) ===== */
-const LG_CATS_OUT=['식비','교통','생활','문화','쇼핑','저축','기타'];
+const LG_CATS_OUT=['식비','커피/간식','자격증','교통','생활','문화','쇼핑','저축','기타'];
 const LG_CATS_IN=['급여','용돈','환급','기타'];
 let LG_OPEN=false,LG_YM=null,LG_TYPE='out',LG_CAT='식비',LG_DRAFT={amt:'',memo:'',date:''};
+let LG_EDIT=null,LG_ECAT=null,LG_EDRAFT={amt:'',memo:'',date:''};
 function ymNow(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function ledgerArr(ym){return (STATE.ledger&&STATE.ledger[ym])||[];}
 function ledgerAdd(entry){const ym=entry.day.slice(0,7);save({ledger:{[ym]:[...ledgerArr(ym),entry]}});}
 function ledgerDel(ym,id){save({ledger:{[ym]:ledgerArr(ym).filter(e=>e.id!==id)}});}
+function ledgerUpdate(ym,id,patch){
+  const cur=ledgerArr(ym).find(e=>e.id===id); if(!cur)return;
+  const next=Object.assign({},cur,patch);
+  const nym=(next.day||'').slice(0,7)||ym;
+  if(nym===ym){save({ledger:{[ym]:ledgerArr(ym).map(e=>e.id===id?next:e)}});}
+  else{save({ledger:{[ym]:ledgerArr(ym).filter(e=>e.id!==id),[nym]:[...ledgerArr(nym),next]}});}
+}
+function lgCaptureEdit(el){
+  const a=el.querySelector('.le-amt'),m=el.querySelector('.le-memo'),d=el.querySelector('.le-date');
+  if(a)LG_EDRAFT.amt=a.value; if(m)LG_EDRAFT.memo=m.value; if(d)LG_EDRAFT.date=d.value;
+}
 function lgNewId(){return 'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function won(n){return (n<0?'-':'')+'₩'+Math.abs(Math.round(n)).toLocaleString();}
 function monthBudget(ym){const v=STATE.budget&&STATE.budget[ym];return (v!=null&&v!=='')?+v:null;}
@@ -1796,7 +1816,19 @@ function renderLedgerView(){
     const isIn=e.type==='in';
     const tagStyle=isIn?'background:#e7f5ee;color:#2e8f60':'background:#fdeaf3;color:#c25b8a';
     const dd=e.day.slice(5).replace('-','/');
-    return `<div class="lg-item"><span class="lg-idate">${dd}</span><span class="lg-itag" style="${tagStyle}">${esc(e.cat)}</span><span class="lg-imemo">${esc(e.memo||(isIn?'수입':'지출'))}</span><span class="lg-iamt" style="color:${isIn?'#2e8f60':'var(--ink)'}">${isIn?'+':'-'}${(+e.amt||0).toLocaleString()}</span><button class="lg-idel" data-lg="del" data-id="${e.id}">✕</button></div>`;
+    if(LG_EDIT===e.id){
+      const ecats=(isIn?LG_CATS_IN:LG_CATS_OUT);
+      const ecur=LG_ECAT||e.cat;
+      const echips=ecats.map(c=>`<span class="lg-cat ${c===ecur?'on':''}" data-lg="ecat" data-c="${esc(c)}">${esc(c)}</span>`).join('');
+      return `<div class="lg-editbox">
+        <div class="lg-ehead">내역 수정 <span class="lg-etype">${isIn?'수입':'지출'}</span></div>
+        <div class="lg-frow"><input class="le-amt" type="number" inputmode="numeric" placeholder="금액" value="${esc(LG_EDRAFT.amt)}"><input class="le-date" type="date" value="${esc(LG_EDRAFT.date||e.day)}" style="flex:.9"></div>
+        <div class="lg-cats">${echips}</div>
+        <div class="lg-frow"><input class="le-memo" type="text" maxlength="40" placeholder="메모 (선택)" value="${esc(LG_EDRAFT.memo)}"></div>
+        <div class="lg-erow"><button class="lg-ecancel" data-lg="ecancel">취소</button><button class="lg-esave" data-lg="esave" data-id="${e.id}">저장</button></div>
+      </div>`;
+    }
+    return `<div class="lg-item"><span class="lg-idate">${dd}</span><span class="lg-itag" style="${tagStyle}">${esc(e.cat)}</span><span class="lg-imemo">${esc(e.memo||(isIn?'수입':'지출'))}</span><span class="lg-iamt" style="color:${isIn?'#2e8f60':'var(--ink)'}">${isIn?'+':'-'}${(+e.amt||0).toLocaleString()}</span><button class="lg-iedit" data-lg="edit" data-id="${e.id}">✎</button><button class="lg-idel" data-lg="del" data-id="${e.id}">✕</button></div>`;
   }).join('')||'<div class="lg-empty">이번 달 내역이 아직 없어요.</div>';
   const cats=(LG_TYPE==='in'?LG_CATS_IN:LG_CATS_OUT);
   if(!cats.includes(LG_CAT))LG_CAT=cats[0];
@@ -1833,7 +1865,23 @@ function renderLedgerView(){
     if(e.target.closest('[data-lg="next"]')){shiftMonth(1);return;}
     const ty=e.target.closest('[data-lg="type"]'); if(ty){lgCaptureDraft(el);LG_TYPE=ty.dataset.t;renderLedgerView();return;}
     const ct=e.target.closest('[data-lg="cat"]'); if(ct){lgCaptureDraft(el);LG_CAT=ct.dataset.c;renderLedgerView();return;}
-    const dl=e.target.closest('[data-lg="del"]'); if(dl){ledgerDel(LG_YM,dl.dataset.id);renderLedgerView();return;}
+    const dl=e.target.closest('[data-lg="del"]'); if(dl){if(LG_EDIT===dl.dataset.id)LG_EDIT=null;ledgerDel(LG_YM,dl.dataset.id);renderLedgerView();return;}
+    const ed=e.target.closest('[data-lg="edit"]');
+    if(ed){
+      const it=ledgerArr(LG_YM).find(x=>x.id===ed.dataset.id);
+      if(it){LG_EDIT=it.id;LG_ECAT=it.cat;LG_EDRAFT={amt:String(it.amt||''),memo:it.memo||'',date:it.day};}
+      renderLedgerView();return;
+    }
+    const ec=e.target.closest('[data-lg="ecat"]'); if(ec){lgCaptureEdit(el);LG_ECAT=ec.dataset.c;renderLedgerView();return;}
+    if(e.target.closest('[data-lg="ecancel"]')){LG_EDIT=null;LG_ECAT=null;renderLedgerView();return;}
+    const es=e.target.closest('[data-lg="esave"]');
+    if(es){
+      lgCaptureEdit(el);
+      const amt=parseInt(LG_EDRAFT.amt,10);
+      if(!amt||amt<=0){alert('금액을 확인해 주세요.');return;}
+      ledgerUpdate(LG_YM,es.dataset.id,{amt,day:LG_EDRAFT.date||iso(now),cat:LG_ECAT,memo:(LG_EDRAFT.memo||'').trim()});
+      LG_EDIT=null;LG_ECAT=null;renderLedgerView();return;
+    }
     if(e.target.closest('[data-lg="add"]')){
       const amtEl=el.querySelector('#lgAmt'),dtEl=el.querySelector('#lgDate'),moEl=el.querySelector('#lgMemo');
       const amt=parseInt(amtEl.value,10);
