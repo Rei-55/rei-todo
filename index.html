@@ -497,6 +497,15 @@
   .d-import{width:100%;box-sizing:border-box;min-height:88px;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:8px;}
   .d-import:focus{border-color:var(--jlpt);}
   .d-fmtmsg{font-size:11.5px;color:var(--jlpt);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;}
+  .lg-subs{display:flex;flex-direction:column;gap:6px;margin-bottom:9px;}
+  .lg-sub{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;}
+  .lg-sub.off{opacity:.45;}
+  .lg-sub .ss-n{font-weight:600;color:var(--ink);flex:1;}
+  .lg-sub .ss-d{color:var(--ink-soft);font-size:11px;}
+  .lg-sub .ss-a{color:var(--ink);font-weight:600;}
+  .lg-sub .ss-t{border:1px solid var(--line);background:#fff;border-radius:6px;padding:2px 7px;font-size:10px;cursor:pointer;color:var(--ink-soft);}
+  .lg-sub .ss-x{border:none;background:none;color:var(--ink-soft);cursor:pointer;font-size:12px;opacity:.6;}
+  .lg-subnote{font-size:10.5px;color:var(--ink-soft);margin-top:6px;line-height:1.5;}
   .lg-iedit{border:none;background:none;color:var(--ink-soft);font-size:13px;cursor:pointer;padding:0 3px;opacity:.55;}
   .lg-iedit:hover{opacity:1;color:var(--hanneung);}
   .lg-editbox{border:1.5px solid var(--hanneung);border-radius:11px;padding:11px;margin:7px 0;background:#fbfcfe;}
@@ -800,7 +809,7 @@ function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'
 let openWeekNum=null, EDIT_N=null, KOPEN=false, SKOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{},subs:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 /* 주간 계획: 코드의 W + 앱에서 수정한 STATE.weekOverrides 를 합쳐서 반환 */
 function getWeek(n){
@@ -1737,10 +1746,36 @@ function iconWon(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill
 function iconApple(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${c}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8c-1.2-2-3.4-3-5.2-1.8C4.8 7.4 4.6 10.5 6 13.2c1 2 2.6 4.3 4.8 4.6M12 8c1.2-2 3.4-3 5.2-1.8C19.2 7.4 19.4 10.5 18 13.2c-1 2-2.6 4.3-4.8 4.6"/><path d="M12 8V5"/></svg>`;}
 
 /* ===== 가계부 (수입·지출) ===== */
-const LG_CATS_OUT=['식비','커피/간식','자격증','교통','생활','문화','쇼핑','저축','기타'];
+const LG_CATS_OUT=['식비','커피/간식','자격증','구독','교통','생활','문화','쇼핑','저축','기타'];
 const LG_CATS_IN=['급여','용돈','환급','기타'];
 let LG_OPEN=false,LG_YM=null,LG_TYPE='out',LG_CAT='식비',LG_DRAFT={amt:'',memo:'',date:''};
 let LG_EDIT=null,LG_ECAT=null,LG_EDRAFT={amt:'',memo:'',date:''};
+function subsArr(){return Object.values(STATE.subs||{});}
+function subAdd(name,amt,day){
+  const id='s'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  save({subs:{[id]:{id,name,amt:+amt,day:+day||1,active:1}}});
+  return id;
+}
+function subToggle(id){const s=(STATE.subs||{})[id];if(!s)return;save({subs:{[id]:Object.assign({},s,{active:s.active?0:1})}});}
+function subDel(id){const cp=Object.assign({},STATE.subs);delete cp[id];save({subs:cp});STATE.subs=cp;}
+/* 이번 달에 구독이 이미 가계부에 찍혔는지 보고, 없으면 자동으로 추가 */
+function ensureSubsForMonth(ym){
+  const arr=ledgerArr(ym);
+  let changed=false; const patch={};
+  subsArr().filter(s=>s.active).forEach(s=>{
+    const already=arr.some(e=>e.subId===s.id);
+    if(already)return;
+    const p=ym.split('-').map(Number);
+    const lastDay=new Date(p[0],p[1],0).getDate();
+    const day=Math.min(s.day||1,lastDay);
+    const ds=ym+'-'+String(day).padStart(2,'0');
+    const id='l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5)+arr.length;
+    (patch[ym]=patch[ym]||[...arr]).push({id,day:ds,type:'out',amt:s.amt,cat:'구독',memo:s.name,subId:s.id});
+    changed=true;
+  });
+  if(changed)save({ledger:patch});
+  return changed;
+}
 function ymNow(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
 function ledgerArr(ym){return (STATE.ledger&&STATE.ledger[ym])||[];}
 function ledgerAdd(entry){const ym=entry.day.slice(0,7);save({ledger:{[ym]:[...ledgerArr(ym),entry]}});}
@@ -1795,7 +1830,11 @@ function livingHTML(ym,income,expense){
     <div class="pmeta"><span>쓴 돈 ${won(expense)}</span><span>${usingBudget?'예산':'수입'} ${won(base)}</span></div>
   </div>`;
 }
-function openLedgerView(){LG_OPEN=true;LG_YM=LG_YM||ymNow();document.getElementById('ledgerView').classList.add('open');document.body.style.overflow='hidden';renderLedgerView();}
+function openLedgerView(){
+  LG_OPEN=true;LG_YM=LG_YM||ymNow();
+  if(ensureSubsForMonth(LG_YM))setTimeout(renderLedgerView,0);
+  document.getElementById('ledgerView').classList.add('open');document.body.style.overflow='hidden';renderLedgerView();
+}
 function closeLedgerView(){LG_OPEN=false;document.getElementById('ledgerView').classList.remove('open');document.body.style.overflow='';}
 function shiftMonth(delta){const p=LG_YM.split('-').map(Number);const d=new Date(p[0],p[1]-1+delta,1);LG_YM=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');renderLedgerView();}
 function lgCaptureDraft(el){const a=el.querySelector('#lgAmt'),m=el.querySelector('#lgMemo'),d=el.querySelector('#lgDate');if(a)LG_DRAFT.amt=a.value;if(m)LG_DRAFT.memo=m.value;if(d)LG_DRAFT.date=d.value;}
@@ -1803,6 +1842,7 @@ function renderLedgerView(){
   if(!LG_OPEN)return;
   const el=document.getElementById('ledgerView'); if(!el)return;
   const arr=ledgerArr(LG_YM);
+  const subs=subsArr().sort((a,b)=>(a.day||1)-(b.day||1));
   const income=arr.filter(e=>e.type==='in').reduce((a,b)=>a+(+b.amt||0),0);
   const expense=arr.filter(e=>e.type==='out').reduce((a,b)=>a+(+b.amt||0),0);
   const bal=income-expense;
@@ -1845,6 +1885,13 @@ function renderLedgerView(){
     </div>
     ${livingHTML(LG_YM,income,expense)}
     <div class="fsv-sec">
+      <h4>🔁 구독(정기지출) 관리</h4>
+      <div class="lg-subs">${subs.length?subs.map(s=>`<div class="lg-sub ${s.active?'':'off'}"><span class="ss-n">${esc(s.name)}</span><span class="ss-d">매월 ${s.day}일</span><span class="ss-a">${won(s.amt)}</span><button class="ss-t" data-lg="subtoggle" data-id="${s.id}">${s.active?'ON':'OFF'}</button><button class="ss-x" data-lg="subdel" data-id="${s.id}">✕</button></div>`).join(''):'<div class="lg-empty">등록된 구독이 없어요.</div>'}</div>
+      <div class="lg-frow"><input id="subName" type="text" maxlength="20" placeholder="예: 넷플릭스"><input id="subAmt" type="number" inputmode="numeric" placeholder="금액" style="flex:.7"><input id="subDay" type="number" inputmode="numeric" min="1" max="28" placeholder="결제일" style="flex:.5"></div>
+      <button class="lg-add" data-lg="subadd">구독 등록</button>
+      <div class="lg-subnote">등록하면 매달 이 화면을 열 때 자동으로 지출에 찍혀요. 결제일이 지난 달은 소급 반영 안 돼요.</div>
+    </div>
+    <div class="fsv-sec">
       <h4>＋ 내역 추가</h4>
       <div class="lg-type"><button class="${LG_TYPE==='in'?'on-in':''}" data-lg="type" data-t="in">수입</button><button class="${LG_TYPE==='out'?'on-out':''}" data-lg="type" data-t="out">지출</button></div>
       <div class="lg-frow"><input class="lg-amt" id="lgAmt" type="number" inputmode="numeric" placeholder="금액" value="${esc(LG_DRAFT.amt)}"><input id="lgDate" type="date" value="${dval}" style="flex:.9"></div>
@@ -1866,6 +1913,18 @@ function renderLedgerView(){
     const ty=e.target.closest('[data-lg="type"]'); if(ty){lgCaptureDraft(el);LG_TYPE=ty.dataset.t;renderLedgerView();return;}
     const ct=e.target.closest('[data-lg="cat"]'); if(ct){lgCaptureDraft(el);LG_CAT=ct.dataset.c;renderLedgerView();return;}
     const dl=e.target.closest('[data-lg="del"]'); if(dl){if(LG_EDIT===dl.dataset.id)LG_EDIT=null;ledgerDel(LG_YM,dl.dataset.id);renderLedgerView();return;}
+    const sa=e.target.closest('[data-lg="subadd"]');
+    if(sa){
+      const nm=(document.getElementById('subName').value||'').trim();
+      const amt=parseInt(document.getElementById('subAmt').value,10);
+      const day=parseInt(document.getElementById('subDay').value,10)||1;
+      if(!nm||!amt||amt<=0){alert('구독 이름과 금액을 확인해 주세요.');return;}
+      subAdd(nm,amt,day);
+      ensureSubsForMonth(LG_YM);
+      renderLedgerView();return;
+    }
+    const st=e.target.closest('[data-lg="subtoggle"]'); if(st){subToggle(st.dataset.id);renderLedgerView();return;}
+    const sd=e.target.closest('[data-lg="subdel"]'); if(sd){if(confirm('이 구독을 삭제할까요? (이미 찍힌 내역은 남아요)'))subDel(sd.dataset.id);renderLedgerView();return;}
     const ed=e.target.closest('[data-lg="edit"]');
     if(ed){
       const it=ledgerArr(LG_YM).find(x=>x.id===ed.dataset.id);
@@ -2243,7 +2302,7 @@ async function initFirebase(){
       // 내가 방금 저장해서 되돌아온 스냅샷(에코)이면 화면은 이미 최신이라 다시 안 그림
       const isLocalEcho=snap.metadata.hasPendingWrites;
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{},subs:d.subs||{}};
       setSync(snap.metadata.fromCache?'wait':'on');
       if(!isLocalEcho)scheduleRender();  // 외부(다른 기기)에서 온 변경일 때만 렌더
     },err=>{console.warn('구독 오류',err);setSync('off');});
