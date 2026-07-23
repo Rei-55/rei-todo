@@ -1749,12 +1749,12 @@ let JV_OPEN=false,JV_SORT='deadline',JV_CORE=false,JV_EDIT=null;
 function jvDaysLeft(ds){const p=ds.split('-').map(Number);const t=new Date(p[0],p[1]-1,p[2]);const n=new Date();const today=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((t-today)/86400000);}
 function jvBadge(dl){
   const k=dl.kind;
-  if(k==='rolling')return{text:'상시',color:'#a8adbe',tone:'flat'};
-  if(k==='flexible')return{text:'수시',color:'#a8adbe',tone:'flat'};
+  if(k==='rolling')return{text:'상시',color:'#4a90d9',tone:'flat'};
+  if(k==='flexible')return{text:'수시',color:'#8b6fd6',tone:'flat'};
   if(k==='unknown')return{text:'미정',color:'#b9bdca',tone:'flat'};
   if(k==='done')return{text:'완료',color:'#5bb08a',tone:'flat'};
   const n=jvDaysLeft(dl.date);
-  if(n<0)return{text:'마감',color:'#b9bdca',tone:'flat'};
+  if(n<0)return{text:'마감',color:'#c7ab8f',tone:'flat'};
   if(n===0)return{text:'오늘 마감',color:'#e0637a',tone:'solid',pulse:true};
   if(n===1)return{text:'내일 마감',color:'#e0637a',tone:'solid',pulse:true};
   if(n<=3)return{text:'D-'+n,color:'#e0637a',tone:'solid',pulse:true};
@@ -1763,10 +1763,14 @@ function jvBadge(dl){
 }
 function jvSortKey(j){
   const k=j.deadline.kind;
-  if(k==='rolling')return -2;
-  if(k==='flexible')return -1;
-  if(k==='date'){const n=jvDaysLeft(j.deadline.date);return n<0?9000+Math.abs(n):n;}
-  if(k==='unknown')return 8000;
+  if(k==='date'){
+    const n=jvDaysLeft(j.deadline.date);
+    if(n>=0)return n;              /* 아직 안 지남: 급한 것부터 (0,1,2...) */
+    return 6000+Math.abs(n);       /* 이미 지남: 맨 뒤로, 지난 지 오래일수록 더 뒤 */
+  }
+  if(k==='rolling')return 5000;
+  if(k==='flexible')return 5001;
+  if(k==='unknown')return 5002;
   return 20000; /* done */
 }
 /* 카드에 보여줄 마감 날짜·시간 전체 텍스트 */
