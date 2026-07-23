@@ -497,6 +497,39 @@
   .d-import{width:100%;box-sizing:border-box;min-height:88px;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:8px;}
   .d-import:focus{border-color:var(--jlpt);}
   .d-fmtmsg{font-size:11.5px;color:var(--jlpt);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;}
+  /* --- 그리드 셀 미니 공고 배지 --- */
+  .cell .jb{position:absolute;top:3px;left:3px;background:#e0637a;color:#fff;font-size:8.5px;font-weight:800;border-radius:50%;width:13px;height:13px;display:flex;align-items:center;justify-content:center;line-height:1;z-index:2;}
+  .tip-jobs{margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.25);}
+  .tip-job{font-size:10.5px;opacity:.92;white-space:nowrap;}
+  /* --- 패널 상단 미니 리스트 --- */
+  .jbmini{border:1px solid var(--line);background:#fbfcfe;border-radius:10px;padding:9px 11px;margin:8px 0 10px;}
+  .jbmini-h{font-size:11px;font-weight:700;color:var(--ink);margin-bottom:6px;}
+  .jbrow{display:flex;align-items:center;gap:6px;font-size:11px;padding:4px 0;border-top:1px dashed var(--line);flex-wrap:wrap;}
+  .jbrow:first-of-type{border-top:none;}
+  .jbrow.urgent .jbr-day{color:#e0637a;font-weight:800;}
+  .jbr-co{font-weight:700;color:var(--ink);}
+  .jbr-role{color:var(--ink-soft);flex:1;min-width:60px;}
+  .jbr-dd{color:var(--ink-soft);font-size:10px;}
+  .jbr-st{border:1px solid var(--line);border-radius:5px;padding:0 5px;font-size:9.5px;color:var(--ink-soft);}
+  .jbr-day{font-weight:700;color:var(--jlpt);font-size:10.5px;}
+  /* --- 지원현황 카드: 마감일시 라인 --- */
+  .jv-ddtext{font-size:10.5px;color:var(--ink-soft);margin-top:3px;}
+  .jv-delbtn{border:1px solid #e0637a;background:#fff;color:#e0637a;border-radius:7px;padding:4px 9px;font-size:10.5px;cursor:pointer;margin-top:5px;}
+  /* --- 지원현황: AI JSON 추가 --- */
+  .jv-json{margin:10px 0 6px;}
+  .jv-json summary{font-size:11px;color:var(--ink-soft);cursor:pointer;list-style:none;opacity:.65;padding:4px 0;}
+  .jv-json summary:hover{opacity:1;color:var(--jlpt);}
+  .jv-json summary::-webkit-details-marker{display:none;}
+  .jv-json summary::before{content:'▸ ';}
+  .jv-json[open] summary::before{content:'▾ ';}
+  .jv-json-body{border:1px dashed var(--line);border-radius:9px;padding:10px;margin-top:6px;background:#fbfcfe;}
+  .jv-json-help{font-size:10.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:7px;}
+  .jv-json-in{width:100%;box-sizing:border-box;min-height:64px;border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:7px;}
+  .jv-json-in:focus{border-color:var(--jlpt);}
+  .jv-json-row{display:flex;align-items:center;gap:9px;}
+  .jv-json-apply{border:1px solid var(--jlpt);background:#fff;color:var(--jlpt);border-radius:8px;padding:7px 12px;font-size:12px;cursor:pointer;font-weight:600;}
+  .jv-json-apply:hover{background:var(--jlpt);color:#fff;}
+  .jv-json-msg{font-size:11px;color:var(--jlpt);}
   .gjson{margin:10px 0 4px;}
   .gjson summary{font-size:11px;color:var(--ink-soft);cursor:pointer;list-style:none;padding:4px 0;opacity:.6;}
   .gjson summary:hover{opacity:1;color:var(--jlpt);}
@@ -824,7 +857,7 @@ function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'
 let openWeekNum=null, EDIT_N=null, KOPEN=false, SKOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{},subs:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{},subs:{},jobsExtra:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 /* 주간 계획: 코드의 W + 앱에서 수정한 STATE.weekOverrides 를 합쳐서 반환 */
 function getWeek(n){
@@ -1294,9 +1327,15 @@ function renderGrid(){
       const started=wkStart(w)<=now;
       const prog=weekProgress(w);
       const pctHTML=started?`<span class="pct ${prog.pct<40?'low':''}">${prog.pct}%</span>`:'';
+      const wjobs=jobsInWeek(w);
+      const jobLines=wjobs.map(j=>{
+        const n2=jvDaysLeft(j.deadline.date);
+        const dtxt=n2<0?'마감':(n2===0?'오늘마감':'D-'+n2);
+        return '<div class="tip-job">📋 '+esc(j.company)+' · '+dtxt+' · '+esc(j.status)+'</div>';
+      }).join('');
       cells+=`<div class="cell ${isNow?'now':''} ${isSel?'sel':''} ${dim}" data-w="${w.n}" style="--c:${c}">
-        ${w.ex||w.dot?`<span class="ex"></span>`:''}${w.warn?`<span class="wn"></span>`:''}${pctHTML}
-        <span class="tip"><b>W${w.n} · ${fmt(w.s)}–${fmt(w.e)}</b><br>${esc(w.h.replace('★','').replace('⚠',''))}</span></div>`;
+        ${w.ex||w.dot?`<span class="ex"></span>`:''}${w.warn?`<span class="wn"></span>`:''}${wjobs.length?`<span class="jb">${wjobs.length}</span>`:''}${pctHTML}
+        <span class="tip"><b>W${w.n} · ${fmt(w.s)}–${fmt(w.e)}</b><br>${esc(w.h.replace('★','').replace('⚠',''))}${jobLines?'<div class="tip-jobs">'+jobLines+'</div>':''}</span></div>`;
     });
     for(let i=ws.length;i<maxW;i++) cells+=`<div class="cell" style="background:transparent"></div>`;
     out+=`<div class="mrow"><div class="ml">${m}월</div><div class="cells">${cells}</div></div>`;
@@ -1304,8 +1343,25 @@ function renderGrid(){
   grid.innerHTML=out;
 }
 
+function jobsInWeekMiniHTML(w){
+  const list=jobsInWeek(w);
+  if(!list.length)return '';
+  const rows=list.map(j=>{
+    const n2=jvDaysLeft(j.deadline.date);
+    const dtxt=n2<0?'마감됨':(n2===0?'오늘 마감':(n2===1?'내일 마감':'D-'+n2));
+    const urgent=n2>=0&&n2<=3;
+    return `<div class="jbrow${urgent?' urgent':''}">
+      <span class="jbr-co">${esc(j.company)}</span>
+      <span class="jbr-role">${esc(j.role)}</span>
+      <span class="jbr-dd">${jvDeadlineText(j.deadline)}</span>
+      <span class="jbr-st">${esc(j.status)}</span>
+      <span class="jbr-day">${dtxt}</span>
+    </div>`;
+  }).join('');
+  return `<div class="jbmini"><div class="jbmini-h">📋 이번 주 마감 예정 공고 (${list.length})</div>${rows}</div>`;
+}
 function renderDaysHTML(w){
-  let html='<div class="dp-head"><span class="dp-close" data-act="closePanel">✕ 닫기</span><b>W'+w.n+'</b> · '+esc(w.h.replace('★','').replace('⚠',''))+'<button class="wk-edit" data-wkedit="'+w.n+'">\ud83d\udcdd 계획 수정</button></div>'+goalHTML(w.n,'W'+w.n+' GOAL',true);
+  let html='<div class="dp-head"><span class="dp-close" data-act="closePanel">✕ 닫기</span><b>W'+w.n+'</b> · '+esc(w.h.replace('★','').replace('⚠',''))+'<button class="wk-edit" data-wkedit="'+w.n+'">\ud83d\udcdd 계획 수정</button></div>'+jobsInWeekMiniHTML(w)+goalHTML(w.n,'W'+w.n+' GOAL',true);
   let d=new Date(w.s+'T00:00:00');const end=new Date(w.e+'T00:00:00');
   while(d<=end){
     const dow=d.getDay(),wknd=(dow===0||dow===6),ds=iso(d);
@@ -1705,8 +1761,62 @@ function jvBadge(dl){
   if(n<=7)return{text:'D-'+n,color:'#d59a3e',tone:'solid'};
   return{text:'D-'+n,color:'#8a95d6',tone:'flat'};
 }
-function jvSortKey(j){const k=j.deadline.kind;if(k==='date'){const n=jvDaysLeft(j.deadline.date);return n<0?9000+Math.abs(n):n;}if(k==='rolling')return 10001;if(k==='flexible')return 10002;if(k==='unknown')return 10003;return 20000;}
+function jvSortKey(j){
+  const k=j.deadline.kind;
+  if(k==='rolling')return -2;
+  if(k==='flexible')return -1;
+  if(k==='date'){const n=jvDaysLeft(j.deadline.date);return n<0?9000+Math.abs(n):n;}
+  if(k==='unknown')return 8000;
+  return 20000; /* done */
+}
+/* 카드에 보여줄 마감 날짜·시간 전체 텍스트 */
+function jvDeadlineText(dl){
+  if(dl.kind==='rolling')return '상시 접수 · 조기마감 가능';
+  if(dl.kind==='flexible')return '수시 채용';
+  if(dl.kind==='unknown')return '마감일 미정';
+  if(dl.kind==='done')return '';
+  if(dl.kind!=='date')return '';
+  const p=dl.date.split('-').map(Number);
+  const dt=new Date(p[0],p[1]-1,p[2]);
+  return p[1]+'/'+p[2]+'('+DOW[dt.getDay()]+')'+(dl.time?' '+dl.time:'')+' 마감';
+}
+/* 이 주(w.s~w.e) 안에 마감이 걸린 공고만 추려서, 마감 임박 순으로 */
+function jobsInWeek(w){
+  return jobsAll().map(j=>({...j,status:jobStatus(j)}))
+    .filter(j=>j.deadline.kind==='date'&&j.deadline.date>=w.s&&j.deadline.date<=w.e&&j.status!=='제외')
+    .sort((a,b)=>a.deadline.date.localeCompare(b.deadline.date));
+}
 function jvStars(v){if(!v)return '<span style="color:var(--ink-faint)">—</span>';const f=Math.floor(v),h=v%1>=0.5;let s='';for(let i=0;i<f;i++)s+='★';if(h)s+='<span style="opacity:.45">★</span>';s+='<span style="color:#e3e5ee">'+'☆'.repeat(5-f-(h?1:0))+'</span>';return s;}
+function jobsAll(){return JOBS.concat(Object.values(STATE.jobsExtra||{}));}
+function jobDelExtra(id){const cp=Object.assign({},STATE.jobsExtra);delete cp[id];save({jobsExtra:cp});STATE.jobsExtra=cp;}
+/* "2026-08-02 18:00" / "2026-08-02" / "상시" / "수시" / "미정" 같은 자유 텍스트를 deadline 객체로 변환 */
+function parseDue(due){
+  if(due&&typeof due==='object'&&due.kind)return due;
+  const t=String(due||'').trim();
+  if(!t)return {kind:'unknown'};
+  if(/^(상시|rolling)/i.test(t))return {kind:'rolling'};
+  if(/^(수시|flexible)/i.test(t))return {kind:'flexible'};
+  if(/^(미정|unknown)/i.test(t))return {kind:'unknown'};
+  const m=t.match(/(\d{4})-(\d{2})-(\d{2})(?:[ T](\d{2}):(\d{2}))?/);
+  if(m)return {kind:'date',date:m[1]+'-'+m[2]+'-'+m[3],time:m[4]?(m[4]+':'+m[5]):undefined};
+  return {kind:'unknown'};
+}
+function normJob(x){
+  const id='ex'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  return {
+    id, rank:0, custom:true,
+    company:String(x.company||x.co||'').slice(0,30)||'미입력',
+    role:String(x.role||x.title||'').slice(0,40),
+    type:String(x.type||'인턴'),
+    stars:+x.stars||3,
+    deadline:x.deadline?x.deadline:parseDue(x.due||x.deadline_text),
+    loc:String(x.loc||x.location||''),
+    pay:String(x.pay||''),
+    track:String(x.track||'기타'),
+    status:JV_STATUSES.includes(x.status)?x.status:'예정',
+    note:String(x.note||'')
+  };
+}
 function jobStatus(j){const o=STATE.jobOverrides&&STATE.jobOverrides[j.id];return (o&&o.status)||j.status;}
 function jobNote(j){const o=STATE.jobOverrides&&STATE.jobOverrides[j.id];return (o&&typeof o.note==='string')?o.note:j.note;}
 function setJobOverride(id,patch){const cur=(STATE.jobOverrides&&STATE.jobOverrides[id])||{};save({jobOverrides:{[id]:Object.assign({},cur,patch)}});}
@@ -1724,7 +1834,7 @@ function closeJobsView(){JV_OPEN=false;JV_EDIT=null;document.getElementById('job
 function renderJobsView(){
   if(!JV_OPEN)return;
   const el=document.getElementById('jobsView'); if(!el)return;
-  let list=JOBS.map(j=>({...j,status:jobStatus(j),note:jobNote(j)}));
+  let list=jobsAll().map(j=>({...j,status:jobStatus(j),note:jobNote(j)}));
   if(JV_CORE)list=list.filter(j=>j.stars>=4&&j.status!=='제외');
   list.sort((a,b)=>{
     if(JV_SORT==='stars')return (b.stars-a.stars)||(jvSortKey(a)-jvSortKey(b));
@@ -1744,6 +1854,7 @@ function renderJobsView(){
       j.loc?`<span class="jv-chip">${esc(j.loc)}</span>`:'',
       j.pay?`<span class="jv-chip pay">${esc(j.pay)}</span>`:''
     ].join('');
+    const ddText=jvDeadlineText(j.deadline);
     const noteBlock=editing
       ? `<textarea id="jvNoteEd" class="jv-note-ed">${esc(j.note||'')}</textarea><div class="jv-note-btns"><button class="jv-nsave" data-jv="noteSave" data-id="${j.id}">저장</button><button class="jv-ncancel" data-jv="noteCancel">취소</button></div>`
       : (j.note?`<div class="jv-note">${esc(j.note)}</div>`:'');
@@ -1755,12 +1866,14 @@ function renderJobsView(){
         <div class="jv-r1"><span class="jv-rank">${j.rank?('#'+j.rank):'·'}</span><span class="jv-co">${esc(j.company)}</span><span class="jv-stars">${jvStars(j.stars)}</span></div>
         <div class="jv-role${j.status==='제외'?' ex':''}">${esc(j.role)}</div>
         <div class="jv-chips">${chips}</div>
+        ${ddText?`<div class="jv-ddtext">${esc(ddText)}</div>`:''}
         ${noteBlock}
       </div>
       <div class="jv-right">
         <span class="jv-dday ${b.tone}${b.pulse?' jv-pulse':''}" style="${ddayStyle}">${b.text}</span>
         <span class="jv-selwrap" style="background:${st.bg}"><select data-jv="status" data-id="${j.id}" style="color:${st.fg}">${opts}</select><span class="cr" style="color:${st.fg}">▼</span></span>
         ${editing?'':`<button class="jv-notebtn" data-jv="noteEdit" data-id="${j.id}">메모 ✎</button>`}
+        ${j.custom?`<button class="jv-delbtn" data-jv="del" data-id="${j.id}">삭제</button>`:''}
       </div>
     </div>`;
   }).join('');
@@ -1781,6 +1894,14 @@ function renderJobsView(){
       </div>
       <div class="jv-core ${JV_CORE?'on':''}" data-jv="core">핵심만<span class="box"></span></div>
     </div>
+    <details class="jv-json">
+      <summary>🤖 AI가 준 JSON으로 공고 추가</summary>
+      <div class="jv-json-body">
+        <div class="jv-json-help">채용공고 내용을 AI에게 주고 아래 형식으로 요청한 뒤, 답을 그대로 붙여넣으세요.<br>due는 "2026-08-02 18:00" · "상시" · "수시" · "미정" 중 하나로 받아주세요.</div>
+        <textarea class="jv-json-in" placeholder='{"jobs":[{"company":"UNHCR","role":"HR Intern","due":"2026-08-02 18:00","stars":3,"loc":"서울","note":"PSP팀 OPS Support"}]}'></textarea>
+        <div class="jv-json-row"><button class="jv-json-apply" data-jv="jsonApply">추가하기</button><span class="jv-json-msg"></span></div>
+      </div>
+    </details>
     ${cards}
     <div class="jv-foot">상태·메모는 자동 저장 · 기기 간 동기화돼요</div>
   </div>`;
@@ -1794,6 +1915,29 @@ function renderJobsView(){
     const ne=e.target.closest('[data-jv="noteEdit"]'); if(ne){JV_EDIT=ne.dataset.id;renderJobsView();return;}
     const nc=e.target.closest('[data-jv="noteCancel"]'); if(nc){JV_EDIT=null;renderJobsView();return;}
     const ns=e.target.closest('[data-jv="noteSave"]'); if(ns){const ta=el.querySelector('#jvNoteEd');if(ta)setJobOverride(ns.dataset.id,{note:ta.value});JV_EDIT=null;renderJobsView();return;}
+    const dl2=e.target.closest('[data-jv="del"]'); if(dl2){if(confirm('이 공고를 목록에서 삭제할까요?'))jobDelExtra(dl2.dataset.id);renderJobsView();return;}
+    if(e.target.closest('[data-jv="jsonApply"]')){
+      const ta=el.querySelector('.jv-json-in'); const msg=el.querySelector('.jv-json-msg');
+      const say=(m)=>{if(msg)msg.textContent=m;};
+      let raw=(ta&&ta.value||'').trim();
+      if(!raw){say('붙여넣은 내용이 없어요.');return;}
+      raw=raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+      const b1=raw.indexOf('{'),b2=raw.lastIndexOf('}');
+      const a1=raw.indexOf('['),a2=raw.lastIndexOf(']');
+      const useArr=(a1>=0&&a2>a1)&&(b1<0||a1<b1);
+      if(useArr)raw=raw.slice(a1,a2+1); else if(b1>=0&&b2>b1)raw=raw.slice(b1,b2+1);
+      let o; try{o=JSON.parse(raw);}catch(err){say('JSON을 읽지 못했어요. { } 부분만 붙여넣어 주세요.');return;}
+      const list=Array.isArray(o)?o:(Array.isArray(o.jobs)?o.jobs:[]);
+      if(!list.length){say('추가할 공고를 찾지 못했어요.');return;}
+      const patch={};
+      list.forEach(x=>{if(x&&(x.company||x.co)){const j=normJob(x);patch[j.id]=j;}});
+      if(!Object.keys(patch).length){say('공고에 회사명이 있어야 추가돼요.');return;}
+      save({jobsExtra:patch});
+      if(ta)ta.value='';
+      say(Object.keys(patch).length+'개 공고를 추가했어요!');
+      renderJobsView();
+      return;
+    }
   };
   el.onchange=e=>{
     const sel=e.target.closest('select[data-jv="status"]');
@@ -2364,7 +2508,7 @@ async function initFirebase(){
       // 내가 방금 저장해서 되돌아온 스냅샷(에코)이면 화면은 이미 최신이라 다시 안 그림
       const isLocalEcho=snap.metadata.hasPendingWrites;
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{},subs:d.subs||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{},subs:d.subs||{},jobsExtra:d.jobsExtra||{}};
       setSync(snap.metadata.fromCache?'wait':'on');
       if(!isLocalEcho)scheduleRender();  // 외부(다른 기기)에서 온 변경일 때만 렌더
     },err=>{console.warn('구독 오류',err);setSync('off');});
