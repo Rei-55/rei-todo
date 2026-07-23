@@ -497,6 +497,20 @@
   .d-import{width:100%;box-sizing:border-box;min-height:88px;border:1px solid var(--line);border-radius:9px;padding:9px 10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:8px;}
   .d-import:focus{border-color:var(--jlpt);}
   .d-fmtmsg{font-size:11.5px;color:var(--jlpt);line-height:1.6;white-space:pre-wrap;margin-bottom:6px;}
+  .gjson{margin:10px 0 4px;}
+  .gjson summary{font-size:11px;color:var(--ink-soft);cursor:pointer;list-style:none;padding:4px 0;opacity:.6;}
+  .gjson summary:hover{opacity:1;color:var(--jlpt);}
+  .gjson summary::-webkit-details-marker{display:none;}
+  .gjson summary::before{content:'▸ ';}
+  .gjson[open] summary::before{content:'▾ ';}
+  .gjson-body{border:1px dashed var(--line);border-radius:9px;padding:10px;margin-top:6px;background:#fbfcfe;}
+  .gjson-help{font-size:11px;color:var(--ink-soft);line-height:1.5;margin-bottom:7px;}
+  .gjson-in{width:100%;box-sizing:border-box;min-height:64px;border:1px solid var(--line);border-radius:8px;padding:8px 9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11px;line-height:1.5;color:var(--ink);outline:none;background:#fff;resize:vertical;margin-bottom:7px;}
+  .gjson-in:focus{border-color:var(--jlpt);}
+  .gjson-row{display:flex;align-items:center;gap:9px;}
+  .gjson-apply{border:1px solid var(--jlpt);background:#fff;color:var(--jlpt);border-radius:8px;padding:7px 12px;font-family:var(--body);font-size:12px;cursor:pointer;font-weight:600;}
+  .gjson-apply:hover{background:var(--jlpt);color:#fff;}
+  .gjson-msg{font-size:11px;color:var(--jlpt);}
   .lg-slabel{flex:0 0 auto;font-size:12px;color:var(--ink-soft);white-space:nowrap;align-self:center;}
   .lg-subs{display:flex;flex-direction:column;gap:6px;margin-bottom:9px;}
   .lg-sub{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:9px;padding:8px 10px;font-size:12px;}
@@ -1537,6 +1551,14 @@ function openGoalEdit(n){
     <div class="msub">공고·시험·할 일을 추가하거나 지울 수 있어요. 저장하면 폰·PC에 바로 반영돼요.</div>
     <div id="modalBody">${items}</div>
     <div class="madd"><button data-add="job">📋 공고 추가</button><button data-add="todo">• 할 일 추가</button></div>
+    <details class="gjson">
+      <summary>🤖 AI가 준 JSON으로 한번에 넣기</summary>
+      <div class="gjson-body">
+        <div class="gjson-help">챗봇에 공고 정보를 알려주고 아래 형식으로 요청하면, 그 답을 그대로 붙여넣어 여러 개를 한 번에 추가할 수 있어요.</div>
+        <textarea class="gjson-in" placeholder='{"jobs":[{"name":"회사명 - 직무","imp":5,"due":"7/30 마감"}]}'></textarea>
+        <div class="gjson-row"><button class="gjson-apply" data-act="gjsonapply">이 목록에 추가</button><span class="gjson-msg"></span></div>
+      </div>
+    </details>
     <div class="msave"><button class="cancel" data-m="cancel">취소</button><button class="save" data-m="save">저장</button></div></div>`;
   document.getElementById('modal').classList.add('open');
 }
@@ -1553,6 +1575,43 @@ const modalEl=document.getElementById('modal');
 modalEl.onclick=e=>{
   const add=e.target.closest('[data-add]');
   if(add){document.getElementById('modalBody').insertAdjacentHTML('beforeend',geditHTML(add.dataset.add,{}));return;}
+  if(e.target.closest('[data-act="gjsonapply"]')){
+    const ta=modalEl.querySelector('.gjson-in');
+    const msg=modalEl.querySelector('.gjson-msg');
+    const say=(m)=>{if(msg)msg.textContent=m;};
+    let raw=(ta&&ta.value||'').trim();
+    if(!raw){say('붙여넣은 내용이 없어요.');return;}
+    raw=raw.replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+    const b1=raw.indexOf('{'),b2=raw.lastIndexOf('}');
+    const a1=raw.indexOf('['),a2=raw.lastIndexOf(']');
+    const useArr=(a1>=0&&a2>a1)&&(b1<0||a1<b1);
+    if(useArr)raw=raw.slice(a1,a2+1); else if(b1>=0&&b2>b1)raw=raw.slice(b1,b2+1);
+    let o;
+    try{o=JSON.parse(raw);}catch(err){say('JSON을 읽지 못했어요. { } 부분만 붙여넣어 주세요.');return;}
+    let list=[];
+    if(Array.isArray(o))list=o;
+    else if(Array.isArray(o.jobs))list=o.jobs.map(x=>Object.assign({type:'job'},x));
+    else if(Array.isArray(o.todos))list=o.todos.map(x=>({type:'todo',text:x.text||x.tx||String(x)}));
+    else if(Array.isArray(o.items))list=o.items;
+    if(!list.length){say('추가할 항목을 찾지 못했어요.');return;}
+    let added=0;
+    list.forEach(it=>{
+      const ty=it.type||'job';
+      if(ty==='job'){
+        const nm=(it.name||it.n||'').trim(); if(!nm)return;
+        document.getElementById('modalBody').insertAdjacentHTML('beforeend',
+          geditHTML('job',{name:nm,imp:it.imp||3,due:it.due||''}));
+      }else{
+        const tx=(it.text||it.tx||'').trim(); if(!tx)return;
+        document.getElementById('modalBody').insertAdjacentHTML('beforeend',geditHTML('todo',{text:tx}));
+      }
+      added++;
+    });
+    if(!added){say('추가할 항목을 찾지 못했어요.');return;}
+    if(ta)ta.value='';
+    say(added+'개 추가했어요! 아래 저장을 눌러야 최종 반영돼요.');
+    return;
+  }
   if(e.target.closest('[data-del]')){e.target.closest('.gedit').remove();return;}
   const tt=e.target.closest('[data-act="ttoggle"]');
   if(tt){toggleTrackCheck(tt.dataset.key);return;}
