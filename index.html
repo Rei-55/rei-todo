@@ -1968,7 +1968,7 @@ function subToggle(id){const s=(STATE.subs||{})[id];if(!s)return;save({subs:{[id
 function subDel(id){const cp=Object.assign({},STATE.subs);delete cp[id];save({subs:cp});STATE.subs=cp;}
 /* 이번 달에 구독이 이미 가계부에 찍혔는지 보고, 없으면 자동으로 추가 */
 function ensureSubsForMonth(ym){
-  const arr=ledgerArr(ym);
+  const arr=ledgerPeriodArr(ym);  // 기간 전체에서 중복 체크
   let changed=false; const patch={};
   subsArr().filter(s=>s.active).forEach(s=>{
     const already=arr.some(e=>e.subId===s.id);
@@ -1984,8 +1984,41 @@ function ensureSubsForMonth(ym){
   if(changed)save({ledger:patch});
   return changed;
 }
-function ymNow(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');}
+/* 월급 기준 기간: 매월 25일~익월 24일. 25일 이후면 "다음 달" 키로 귀속 */
+function ymNow(){
+  const d=new Date();
+  let y=d.getFullYear(),m=d.getMonth()+1;
+  if(d.getDate()>=25){m++;if(m>12){m=1;y++;}}
+  return y+'-'+String(m).padStart(2,'0');
+}
+/* 현재 월급기간의 시작일·종료일을 반환 (ym 기준) */
+function payPeriod(ym){
+  const p=ym.split('-').map(Number);
+  // 시작: 전달 25일
+  let sy=p[0],sm=p[1]-1;
+  if(sm<1){sm=12;sy--;}
+  const start=new Date(sy,sm-1,25);
+  // 종료: 해당 달 24일
+  const end=new Date(p[0],p[1]-1,24);
+  return {start,end};
+}
+/* 원시 저장 데이터: YYYY-MM 키 그대로 */
 function ledgerArr(ym){return (STATE.ledger&&STATE.ledger[ym])||[];}
+/* 월급 기준(25일~익월24일) 해당 항목만 필터링해 반환 */
+function ledgerPeriodArr(ym){
+  const {start,end}=payPeriod(ym);
+  // 필요한 두 달 키: 전달(시작이 있는 달) + 당월
+  const p=ym.split('-').map(Number);
+  let py=p[0],pm=p[1]-1; if(pm<1){pm=12;py--;}
+  const prevYm=py+'-'+String(pm).padStart(2,'0');
+  const all=[...(ledgerArr(prevYm)||[]),...(ledgerArr(ym)||[])];
+  return all.filter(e=>{
+    if(!e.day)return false;
+    const dp=e.day.split('-').map(Number);
+    const d=new Date(dp[0],dp[1]-1,dp[2]);
+    return d>=start&&d<=end;
+  });
+}
 function ledgerAdd(entry){const ym=entry.day.slice(0,7);save({ledger:{[ym]:[...ledgerArr(ym),entry]}});}
 function ledgerDel(ym,id){save({ledger:{[ym]:ledgerArr(ym).filter(e=>e.id!==id)}});}
 function ledgerUpdate(ym,id,patch){
@@ -2002,13 +2035,16 @@ function lgCaptureEdit(el){
 function lgNewId(){return 'l'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 function won(n){return (n<0?'-':'')+'₩'+Math.abs(Math.round(n)).toLocaleString();}
 function monthBudget(ym){const v=STATE.budget&&STATE.budget[ym];return (v!=null&&v!=='')?+v:null;}
+/* 25일~익월24일 기간에서 오늘 기준 남은 일수 */
 function daysLeftInMonth(ym){
-  const p=ym.split('-').map(Number);const t=new Date();
-  const isCur=(t.getFullYear()===p[0]&&(t.getMonth()+1)===p[1]);
-  const lastDay=new Date(p[0],p[1],0).getDate();
-  if(isCur)return lastDay-t.getDate()+1;
-  const firstYm=new Date(p[0],p[1]-1,1),firstCur=new Date(t.getFullYear(),t.getMonth(),1);
-  return firstYm>firstCur?lastDay:0;
+  const {start,end}=payPeriod(ym);
+  const t=new Date();
+  const today=new Date(t.getFullYear(),t.getMonth(),t.getDate());
+  // 현재 기간인지 확인
+  const isCur=(today>=start&&today<=end);
+  if(isCur)return Math.round((end-today)/86400000)+1;
+  // 미래 기간이면 전체 일수(31일), 과거면 0
+  return start>today?Math.round((end-start)/86400000)+1:0;
 }
 function manwon(n){/* 만원 단위 읽기 좋게 */const v=Math.round(n/10000);return v.toLocaleString()+'만원';}
 function livingHTML(ym,income,expense){
@@ -2017,7 +2053,7 @@ function livingHTML(ym,income,expense){
   const usingBudget=(bud!=null);
   // 수입도 예산도 없으면 안내
   if(base<=0){
-    return `<div class="lg-live empty"><div class="lab">이번 달 생활비</div><div class="big">아직 계산 전</div><div class="sub">월급(수입)을 등록하면 남은 생활비가 계산돼요.</div></div>`;
+    return `<div class="lg-live empty"><div class="lab">이번 월급기간 생활비</div><div class="big">아직 계산 전</div><div class="sub">월급(수입)을 등록하면 남은 생활비가 계산돼요. (25일~익월 24일 기준)</div></div>`;
   }
   const left=base-expense;
   const dleft=daysLeftInMonth(ym);
@@ -2028,10 +2064,10 @@ function livingHTML(ym,income,expense){
   else if(spentPct>=85)cls='warn';
   if(dleft>0&&left>0)daily=`· 하루 약 ${won(perDay)} 쓸 수 있어요`;
   const headline=left>=0
-    ? `이번 달 생활비 <b>${manwon(left)}</b> 남았어요`
-    : `이번 달 예산보다 <b>${manwon(-left)}</b> 더 썼어요`;
+    ? `이번 월급기간 생활비 <b>${manwon(left)}</b> 남았어요`
+    : `이번 월급기간 예산보다 <b>${manwon(-left)}</b> 더 썼어요`;
   return `<div class="lg-live ${cls}">
-    <div class="lab">${usingBudget?'이번 달 생활비 (예산 기준)':'이번 달 생활비 (수입 기준)'}</div>
+    <div class="lab">${usingBudget?'이번 월급기간 생활비 (예산 기준)':'이번 월급기간 생활비 (수입 기준)'}</div>
     <div class="big">${won(left)}</div>
     <div class="sub">${headline} ${daily}</div>
     <div class="pbar"><span style="width:${spentPct}%"></span></div>
@@ -2049,7 +2085,7 @@ function lgCaptureDraft(el){const a=el.querySelector('#lgAmt'),m=el.querySelecto
 function renderLedgerView(){
   if(!LG_OPEN)return;
   const el=document.getElementById('ledgerView'); if(!el)return;
-  const arr=ledgerArr(LG_YM);
+  const arr=ledgerPeriodArr(LG_YM);  // 25일~익월24일 기간 항목만
   const subs=subsArr().sort((a,b)=>(a.day||1)-(b.day||1));
   const income=arr.filter(e=>e.type==='in').reduce((a,b)=>a+(+b.amt||0),0);
   const expense=arr.filter(e=>e.type==='out').reduce((a,b)=>a+(+b.amt||0),0);
@@ -2077,11 +2113,14 @@ function renderLedgerView(){
       </div>`;
     }
     return `<div class="lg-item"><span class="lg-idate">${dd}</span><span class="lg-itag" style="${tagStyle}">${esc(e.cat)}</span><span class="lg-imemo">${esc(e.memo||(isIn?'수입':'지출'))}</span><span class="lg-iamt" style="color:${isIn?'#2e8f60':'var(--ink)'}">${isIn?'+':'-'}${(+e.amt||0).toLocaleString()}</span><button class="lg-iedit" data-lg="edit" data-id="${e.id}">✎</button><button class="lg-idel" data-lg="del" data-id="${e.id}">✕</button></div>`;
-  }).join('')||'<div class="lg-empty">이번 달 내역이 아직 없어요.</div>';
+  }).join('')||'<div class="lg-empty">이번 월급기간 내역이 아직 없어요.</div>';
   const cats=(LG_TYPE==='in'?LG_CATS_IN:LG_CATS_OUT);
   if(!cats.includes(LG_CAT))LG_CAT=cats[0];
   const catChips=cats.map(c=>`<span class="lg-cat ${c===LG_CAT?'on':''}" data-lg="cat" data-c="${esc(c)}">${esc(c)}</span>`).join('');
-  const ymLabel=LG_YM.replace('-','.');
+  /* 예: "2026-08" → "26.07.25~08.24" */
+  const _lgP=payPeriod(LG_YM);
+  function _lgFmt(d){return String(d.getFullYear()).slice(2)+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');}
+  const ymLabel=`${_lgFmt(_lgP.start)} ~ ${_lgFmt(_lgP.end)}`;
   const dval=LG_DRAFT.date||iso(now);
   el.innerHTML=`<div class="fsv-wrap">
     <div class="fsv-top"><button class="fsv-back" data-lg="back">←</button><div class="fsv-htxt"><div class="k" style="color:var(--hanneung)">Ledger</div><div class="t">가계부</div></div></div>
@@ -2109,7 +2148,7 @@ function renderLedgerView(){
       <div class="lg-frow"><input id="lgMemo" type="text" maxlength="40" placeholder="메모 (선택)" value="${esc(LG_DRAFT.memo)}"></div>
       <button class="lg-add" data-lg="add">추가하기</button>
     </div>
-    ${expense?`<div class="fsv-sec"><h4>이번 달 지출 분석</h4>${catRows}</div>`:''}
+    ${expense?`<div class="fsv-sec"><h4>이번 기간 지출 분석</h4>${catRows}</div>`:''}
     <div class="fsv-sec"><h4>${ymLabel} 내역 (${arr.length})</h4>${items}</div>
     <div class="fsv-foot">모든 내역은 자동 저장 · 기기 간 동기화돼요</div>
   </div>`;
@@ -2360,7 +2399,7 @@ function renderCardsGrid(){
   const wPct=Math.min(100,ws.total);
   const es=exerciseStats();
   const ePct=Math.min(100,Math.round(es.weekDays/4*100));
-  const _ym=ymNow(),_arr=ledgerArr(_ym);
+  const _ym=ymNow(),_arr=ledgerPeriodArr(_ym);
   const _inc=_arr.filter(e=>e.type==='in').reduce((a,b)=>a+(+b.amt||0),0);
   const _exp=_arr.filter(e=>e.type==='out').reduce((a,b)=>a+(+b.amt||0),0);
   const _base=(monthBudget(_ym)!=null)?monthBudget(_ym):_inc;
