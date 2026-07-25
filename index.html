@@ -1955,7 +1955,7 @@ function iconApple(c){return `<svg viewBox="0 0 24 24" width="16" height="16" fi
 
 /* ===== 가계부 (수입·지출) ===== */
 const LG_CATS_OUT=['식비','커피/간식','자격증','구독','교통','생활','문화','쇼핑','저축','기타'];
-const LG_CATS_IN=['급여','용돈','환급','기타'];
+const LG_CATS_IN=['급여','용돈','환급','전월이월','기타'];
 let LG_OPEN=false,LG_YM=null,LG_TYPE='out',LG_CAT='식비',LG_DRAFT={amt:'',memo:'',date:''};
 let LG_EDIT=null,LG_ECAT=null,LG_EDRAFT={amt:'',memo:'',date:''};
 function subsArr(){return Object.values(STATE.subs||{});}
@@ -2215,7 +2215,7 @@ function renderLedgerView(){
       if(!amt||amt<=0){amtEl.focus();return;}
       const day=dtEl.value||iso(now);
       ledgerAdd({id:lgNewId(),day,type:LG_TYPE,amt,cat:LG_CAT,memo:(moEl.value||'').trim()});
-      LG_DRAFT={amt:'',memo:'',date:day};LG_YM=day.slice(0,7);
+      LG_DRAFT={amt:'',memo:'',date:''};  // LG_YM은 건드리지 않음 — 달 유지
       renderLedgerView();
     }
   };
