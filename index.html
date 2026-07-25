@@ -1984,22 +1984,41 @@ function ensureSubsForMonth(ym){
   if(changed)save({ledger:patch});
   return changed;
 }
-/* 월급 기준 기간: 매월 25일~익월 24일. 25일 이후면 "다음 달" 키로 귀속 */
+/* 실제 월급 지급일 계산: 매월 25일, 주말이면 그 전 금요일로 당겨짐 */
+function actualPayday(y,m){
+  // 25일이 무슨 요일인지 확인
+  const d25=new Date(y,m-1,25);
+  const dow=d25.getDay(); // 0=일, 6=토
+  if(dow===0)return new Date(y,m-1,23); // 일→금(23)
+  if(dow===6)return new Date(y,m-1,24); // 토→금(24)
+  return d25; // 평일 그대로
+}
+/* 월급 기준 기간: 실제 월급일(당월) ~ 다음달 실제 월급일 전날 */
 function ymNow(){
-  const d=new Date();
-  let y=d.getFullYear(),m=d.getMonth()+1;
-  if(d.getDate()>=25){m++;if(m>12){m=1;y++;}}
+  const today=new Date();
+  today.setHours(0,0,0,0);
+  const y=today.getFullYear(),m=today.getMonth()+1;
+  // 이번 달 실제 월급일
+  const paydayThisMonth=actualPayday(y,m);
+  // 오늘이 이번달 월급일 이후면 → 다음달 기간
+  if(today>=paydayThisMonth){
+    let nm=m+1,ny=y;
+    if(nm>12){nm=1;ny++;}
+    return ny+'-'+String(nm).padStart(2,'0');
+  }
   return y+'-'+String(m).padStart(2,'0');
 }
 /* 현재 월급기간의 시작일·종료일을 반환 (ym 기준) */
 function payPeriod(ym){
   const p=ym.split('-').map(Number);
-  // 시작: 전달 25일
+  // 시작: 전달 실제 월급일
   let sy=p[0],sm=p[1]-1;
   if(sm<1){sm=12;sy--;}
-  const start=new Date(sy,sm-1,25);
-  // 종료: 해당 달 24일
-  const end=new Date(p[0],p[1]-1,24);
+  const start=actualPayday(sy,sm);
+  // 종료: 이번 달 실제 월급일 전날
+  const paydayThisMonth=actualPayday(p[0],p[1]);
+  const end=new Date(paydayThisMonth);
+  end.setDate(end.getDate()-1);
   return {start,end};
 }
 /* 원시 저장 데이터: YYYY-MM 키 그대로 */
@@ -2053,7 +2072,7 @@ function livingHTML(ym,income,expense){
   const usingBudget=(bud!=null);
   // 수입도 예산도 없으면 안내
   if(base<=0){
-    return `<div class="lg-live empty"><div class="lab">이번 월급기간 생활비</div><div class="big">아직 계산 전</div><div class="sub">월급(수입)을 등록하면 남은 생활비가 계산돼요. (25일~익월 24일 기준)</div></div>`;
+    return `<div class="lg-live empty"><div class="lab">이번 월급기간 생활비</div><div class="big">아직 계산 전</div><div class="sub">월급(수입)을 등록하면 남은 생활비가 계산돼요. (월급일~다음 월급일 전날 기준)</div></div>`;
   }
   const left=base-expense;
   const dleft=daysLeftInMonth(ym);
