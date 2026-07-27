@@ -839,6 +839,22 @@ function esc(s){return (s==null?'':String(s)).replace(/[&<>"]/g,c=>({'&':'&amp;'
 function wkStart(w){return new Date(w.s+'T00:00:00');}
 function wkEnd(w){return new Date(w.e+'T23:59:59');}
 function weekOf(d){const w=W.find(w=>d>=wkStart(w)&&d<=wkEnd(w));return w?getWeek(w.n):null;}
+/* 텍스트를 짧은 해시로 변환 — 체크키를 인덱스 대신 내용 기반으로 만들어 순서 변경에 강하게 함 */
+function txHash(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h+s.charCodeAt(i))|0;}return (h>>>0).toString(36);}
+function itemKey(ds,tx){return ds+'::t'+txHash(tx);}
+/* 구 인덱스키(::iN) → 신 해시키(::t...) 마이그레이션 */
+function migrateCheckKeys(ds,items){
+  if(!STATE.checks)return;
+  const patch={};let changed=false;
+  items.forEach((it,i)=>{
+    const oldKey=ds+'::i'+i;
+    const newKey=itemKey(ds,it.tx);
+    if(STATE.checks[oldKey]&&STATE.checks[newKey]===undefined){
+      patch[newKey]=true;patch[oldKey]=false;changed=true;
+    }
+  });
+  if(changed)save({checks:patch});
+}
 function weekProgress(w){
   let done=0,total=0;
   let d=new Date(w.s+'T00:00:00');const end=new Date(w.e+'T00:00:00');
@@ -847,7 +863,8 @@ function weekProgress(w){
     const items=buildDay(w,new Date(d));
     items.forEach((it,i)=>{
       total++;
-      if(STATE.checks&&STATE.checks[ds+'::i'+i])done++;
+      const nk=itemKey(ds,it.tx),ok=ds+'::i'+i;
+      if(STATE.checks&&(STATE.checks[nk]||STATE.checks[ok]))done++;
     });
     d.setDate(d.getDate()+1);
   }
@@ -927,7 +944,8 @@ function renderTodo(){
   const card=document.getElementById('todayCard');
   const wk=weekOf(now), ds=iso(now);
   const baseAll=wk?buildDay(wk,now):[];
-  const base=baseAll.map((it,i)=>({...it,_key:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
+  migrateCheckKeys(ds,baseAll); // 구 인덱스키 → 신 해시키 자동 마이그레이션
+  const base=baseAll.map((it,i)=>({...it,_key:itemKey(ds,it.tx)})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
   const customs=(STATE.customTasks&&STATE.customTasks[ds])||[];
   const allItems=[...base.map(it=>({key:it._key,tm:it.tm,tx:it.tx,lec:it.lec,c:it.c,hot:it.hot})),...customs.map(c=>({key:ds+'::c'+c.id,tm:'추가',tx:c.tx,cid:c.id,origKey:c.origKey}))];
   const items=allItems.filter(x=>!(STATE.skipped&&STATE.skipped[x.key]));
@@ -966,7 +984,7 @@ function renderTodo(){
   const yd=yesterdayDs();
   const ywk=weekOf(new Date(yd+'T00:00:00'));
   const yBaseAll=ywk?buildDay(ywk,new Date(yd+'T00:00:00')):[];
-  const yBase=yBaseAll.map((it,i)=>({key:yd+'::i'+i,tx:it.tx})).filter(it=>!(STATE.checks&&STATE.checks[it.key])&&!(STATE.postponed&&STATE.postponed[it.key])&&!(STATE.skipped&&STATE.skipped[it.key]));
+  const yBase=yBaseAll.map((it,i)=>({key:itemKey(yd,it.tx),tx:it.tx})).filter(it=>{const ok=yd+'::i'+yBaseAll.indexOf(it);return !(STATE.checks&&(STATE.checks[it.key]||STATE.checks[ok]))&&!(STATE.postponed&&STATE.postponed[it.key])&&!(STATE.skipped&&STATE.skipped[it.key]);});
   const yCustoms=((STATE.customTasks&&STATE.customTasks[yd])||[]).filter(c=>!(STATE.checks&&STATE.checks[yd+'::c'+c.id])&&!(STATE.skipped&&STATE.skipped[yd+'::c'+c.id])).map(c=>({key:yd+'::c'+c.id,tx:c.tx,cid:c.id,origKey:c.origKey}));
   const yItems=[...yBase,...yCustoms];
   YEST_ITEMS=yItems;
@@ -1366,10 +1384,11 @@ function renderDaysHTML(w){
   while(d<=end){
     const dow=d.getDay(),wknd=(dow===0||dow===6),ds=iso(d);
     const isT=(ds===iso(now)),past=(d<now&&!isT);
-    const items=buildDay(w,new Date(d)).map((it,i)=>({...it,_key:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
+    const _bld=buildDay(w,new Date(d));
+    const items=_bld.map((it,i)=>({...it,_key:itemKey(ds,it.tx),_oldKey:ds+'::i'+i})).filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
     let done=0;
     const its=items.map((it)=>{
-      const key=it._key, chk=!!(STATE.checks&&STATE.checks[key]);
+      const key=it._key, chk=!!(STATE.checks&&(STATE.checks[key]||STATE.checks[it._oldKey]));
       if(chk)done++;
       const lecBtn=it.lec?`<a class="lec-link" href="https://www.youtube.com/results?search_query=${encodeURIComponent(it.lec)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">🎬 강의</a>`:'';
       return `<div class="it ${it.exam?'exam':''} ${chk?'done':''} ${it.hot?'hot':''}" data-daykey="${key}" style="${it.exam?('background:'+it.c):('border-left-color:'+it.c)}"><span class="ibox"></span><span class="tm">${esc(it.tm)}</span><span class="tx">${esc(it.tx)}${lecBtn}</span></div>`;
@@ -1427,7 +1446,7 @@ function weekReportText(wn){
   let d=new Date(w.s+'T00:00:00');const end=new Date(w.e+'T00:00:00');
   while(d<=end){
     const ds=iso(d),dow=d.getDay();
-    const items=buildDay(w,new Date(d)).map((it,i)=>Object.assign({},it,{_key:ds+'::i'+i}))
+    const items=buildDay(w,new Date(d)).map((it,i)=>Object.assign({},it,{_key:itemKey(ds,it.tx),_oldKey:ds+'::i'+i}))
       .filter(it=>!(STATE.postponed&&STATE.postponed[it._key]));
     let dn=0;
     items.forEach(it=>{
@@ -1435,7 +1454,7 @@ function weekReportText(wn){
       const label=(T[key]&&T[key][0])||key;
       if(!cat[label])cat[label]=[0,0];
       cat[label][1]++;
-      if(STATE.checks&&STATE.checks[it._key]){dn++;cat[label][0]++;}
+      if(STATE.checks&&(STATE.checks[it._key]||STATE.checks[it._oldKey])){dn++;cat[label][0]++;}
       else miss[it.tx]=(miss[it.tx]||0)+1;
     });
     totD+=dn;totT+=items.length;
@@ -2383,9 +2402,9 @@ function collectTrackItems(matchFn){
       items.forEach((it,i)=>{
         if(it.exam)return;
         if(!matchFn(it))return;
-        const key=ds+'::i'+i;
+        const key=itemKey(ds,it.tx),oldKey=ds+'::i'+i;
         if(STATE.postponed&&STATE.postponed[key])return;
-        out.push({key,ds,tx:it.tx,done:!!(STATE.checks&&STATE.checks[key])});
+        out.push({key,ds,tx:it.tx,done:!!(STATE.checks&&(STATE.checks[key]||STATE.checks[oldKey]))});
       });
       d.setDate(d.getDate()+1);
     }
