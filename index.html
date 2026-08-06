@@ -428,6 +428,17 @@
   .wt-bar{height:5px;background:var(--line);border-radius:6px;overflow:hidden;margin-top:5px;}
   .wt-bar span{display:block;height:100%;background:linear-gradient(90deg,var(--korean),var(--hanneung));border-radius:6px;transition:width .5s;}
   .wt-empty{font-size:12px;color:var(--ink-faint);margin-top:8px;}
+  .wt-chart-wrap{margin-top:12px;background:#fff;border-radius:10px;padding:10px 12px 8px;}
+  .wt-chart-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .wt-chart-title{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;}
+  .wt-chart-range{display:flex;gap:4px;}
+  .wt-chart-range button{font-size:10.5px;font-weight:700;color:var(--ink-soft);background:#f4f5fa;border:1px solid var(--line);border-radius:20px;padding:2px 9px;cursor:pointer;font-family:var(--body);}
+  .wt-chart-range button.on{background:var(--hanneung);color:#fff;border-color:var(--hanneung);}
+  .wt-chart-svg{width:100%;overflow:visible;display:block;}
+  .wt-chart-empty{font-size:11.5px;color:var(--ink-faint);text-align:center;padding:18px 0;}
+  .wt-tooltip-box{position:absolute;background:var(--ink);color:#fff;font-size:11.5px;font-weight:600;font-family:var(--display);padding:5px 10px;border-radius:9px;pointer-events:none;white-space:nowrap;z-index:10;transform:translateX(-50%);box-shadow:0 4px 14px rgba(0,0,0,.18);}
+  .wt-chart-wrap{position:relative;}
+  .wt-hit{cursor:pointer;}
   .tc-prog{height:6px;background:var(--line);border-radius:6px;overflow:hidden;margin-bottom:6px;}
   .tc-prog span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--opic),var(--hanneung));transition:width .45s;}
   .tc-pct{font-size:11px;font-weight:600;color:var(--ink-faint);text-align:right;margin-bottom:10px;}
@@ -1103,6 +1114,7 @@ function renderTodo(){
     else if(a==='postpone'){const item=TODAY_ITEMS[t.dataset.idx];if(item)postponeToTomorrow(item,ds);}
     else if(a==='pull'){const item=YEST_ITEMS[t.dataset.idx];if(item)pullFromYesterday(item,ds);}
     else if(a==='wgedit'){openWeightGoalModal();}
+    else if(a==='wtrange'){WT_RANGE=+t.dataset.v;renderTodo();}
     else if(a==='memoOpen'){openMemoModal(t.dataset.key);}
     else if(a==='skip'){SKOPEN=true;save({skipped:{[t.dataset.key]:true}});}
     else if(a==='unskip'){save({skipped:{[t.dataset.key]:false}});}
@@ -1121,6 +1133,37 @@ function renderTodo(){
   });
   const wi=card.querySelector('#wtIn');
   if(wi){wi.addEventListener('change',()=>saveWeight(wi.value));wi.addEventListener('keydown',e=>{if(e.key==='Enter'){wi.blur();}});}
+  // 몸무게 그래프 터치 툴팁
+  (function(){
+    const svg=card.querySelector('#wtSvg');
+    const tip=card.querySelector('#wtTip');
+    if(!svg||!tip)return;
+    let tipTimer=null;
+    function showTip(hitEl,svgEl){
+      const label=hitEl.dataset.label;
+      const svgRect=svgEl.getBoundingClientRect();
+      const vb=svgEl.viewBox.baseVal;
+      const scaleX=svgRect.width/vb.width;
+      const cx=parseFloat(hitEl.dataset.cx)*scaleX;
+      tip.textContent=label;
+      tip.style.display='block';
+      tip.style.left=cx+'px';
+      tip.style.top='-30px';
+      clearTimeout(tipTimer);
+      tipTimer=setTimeout(()=>{tip.style.display='none';},2000);
+    }
+    svg.addEventListener('touchstart',e=>{
+      const hit=e.target.closest('.wt-hit');
+      if(!hit)return;
+      e.preventDefault();
+      showTip(hit,svg);
+    },{passive:false});
+    svg.addEventListener('click',e=>{
+      const hit=e.target.closest('.wt-hit');
+      if(!hit)return;
+      showTip(hit,svg);
+    });
+  })();
   const ji=card.querySelector('#jlptCntIn');
   if(ji){
     ji.addEventListener('click',e=>e.stopPropagation());
@@ -1197,8 +1240,83 @@ function weightHTML(){
     </div>
     <div class="wt-stats">${weekHTML}${goalHTML2}</div>
     ${cur==null?'<div class="wt-empty">오늘 몸무게를 입력하면 변화가 계산돼요</div>':''}
+    ${wtChartHTML()}
   </div>`;
 }
+/* ---- 몸무게 그래프 ---- */
+let WT_RANGE=30; // 기본 30일
+function wtChartHTML(){
+  const GOAL=wtGoal();
+  // 날짜 범위 계산
+  const entries=Object.entries(wLog())
+    .filter(([,v])=>parseFloat(v)>0)
+    .map(([d,v])=>({d,v:parseFloat(v)}))
+    .sort((a,b)=>a.d.localeCompare(b.d));
+  if(entries.length<2){
+    return `<div class="wt-chart-wrap">
+      <div class="wt-chart-head"><span class="wt-chart-title">추이 그래프</span></div>
+      <div class="wt-chart-empty">기록이 2개 이상이면 그래프가 나타나요 📈</div>
+    </div>`;}
+  // 범위 필터
+  const start=new Date(now); start.setDate(start.getDate()-(WT_RANGE-1));
+  const startIso=iso(start);
+  const rangeEntries=entries.filter(e=>e.d>=startIso);
+  const pts=rangeEntries.length>=2?rangeEntries:(entries.slice(-Math.min(entries.length,WT_RANGE)));
+  // SVG 설정
+  const W=300,H=90,PL=4,PR=4,PT=10,PB=18;
+  const cw=W-PL-PR, ch=H-PT-PB;
+  const vals=pts.map(e=>e.v);
+  const minV=Math.min(...vals,GOAL)-0.5, maxV=Math.max(...vals,GOAL)+0.5;
+  const vRange=maxV-minV||1;
+  const xPos=i=>(PL + (pts.length===1?cw/2:i/(pts.length-1)*cw));
+  const yPos=v=>(PT + ch - (v-minV)/vRange*ch);
+  // 꺾은선 path
+  const line=pts.map((e,i)=>`${i===0?'M':'L'}${xPos(i).toFixed(1)},${yPos(e.v).toFixed(1)}`).join(' ');
+  // 목표선 y좌표
+  const goalY=yPos(GOAL).toFixed(1);
+  // X축 날짜 레이블 (처음·중간·끝)
+  function fmtShort(ds){const p=ds.split('-');return (+p[1])+'/'+(+p[2]);}
+  function fmtFull(ds){const p=ds.split('-');return (+p[1])+'월 '+(+p[2])+'일';}
+  const labelIdxs=[0,Math.floor((pts.length-1)/2),pts.length-1].filter((v,i,a)=>a.indexOf(v)===i&&pts[v]);
+  const xLabels=labelIdxs.map(i=>`<text x="${xPos(i).toFixed(1)}" y="${H}" text-anchor="middle" font-size="8" fill="#9499aa" font-family="var(--display)">${fmtShort(pts[i].d)}</text>`).join('');
+  // 점 색상: 최저=하늘색, 최근=핑크, 일반=연보라
+  const minIdx=vals.indexOf(Math.min(...vals));
+  const COL_MIN='#6ec6e8';   // 하늘색 (최저점)
+  const COL_LAST='var(--hanneung)'; // 핑크 (최근)
+  const COL_DOT='#c4bfe8';   // 연보라 (일반)
+  // 터치 툴팁용 투명 히트영역 + 점 + 고정 레이블
+  const circles=pts.map((e,i)=>{
+    const cx=xPos(i).toFixed(1), cy=yPos(e.v).toFixed(1);
+    const isLast=i===pts.length-1, isMin=i===minIdx;
+    const fill=isLast?COL_LAST:(isMin?COL_MIN:COL_DOT);
+    const r=isLast||isMin?3.5:2.2;
+    const lblY=(+cy-5).toFixed(1);
+    // 최저·최근만 상시 레이블
+    const lbl=(isLast||isMin)?`<text x="${cx}" y="${lblY}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${fill}" font-family="var(--display)">${e.v.toFixed(1)}</text>`:'';
+    // 터치 툴팁: 날짜 + kg (foreignObject 대신 SVG title + 투명 큰 원 조합)
+    const tip=`<title>${fmtFull(e.d)} · ${e.v.toFixed(1)}kg</title>`;
+    // 터치용 큰 투명 히트 원
+    const hit=`<circle cx="${cx}" cy="${cy}" r="14" fill="transparent" class="wt-hit" data-label="${fmtFull(e.d)} · ${e.v.toFixed(1)}kg" data-cx="${cx}" data-cy="${cy}"/>`;
+    return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}">${tip}</circle>${lbl}${hit}`;
+  }).join('');
+  // 범위 버튼
+  const ranges=[{n:'2주',v:14},{n:'1달',v:30},{n:'3달',v:90},{n:'전체',v:9999}];
+  const btns=ranges.map(r=>`<button data-act="wtrange" data-v="${r.v}" class="${WT_RANGE===r.v?'on':''}">${r.n}</button>`).join('');
+  return `<div class="wt-chart-wrap">
+    <div class="wt-chart-head">
+      <span class="wt-chart-title">추이 그래프</span>
+      <div class="wt-chart-range">${btns}</div>
+    </div>
+    <div class="wt-tooltip-box" id="wtTip" style="display:none"></div>
+    <svg class="wt-chart-svg" id="wtSvg" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      <line x1="${PL}" y1="${goalY}" x2="${W-PR}" y2="${goalY}" stroke="#e0d4f2" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="${W-PR-2}" y="${(+goalY-3).toFixed(1)}" text-anchor="end" font-size="7.5" fill="#9b7dc8" font-family="var(--display)" font-weight="700">목표 ${GOAL}kg</text>
+      <path d="${line}" fill="none" stroke="url(#wtgrad)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+      <defs><linearGradient id="wtgrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#7c6fe0"/><stop offset="100%" stop-color="#e06090"/></linearGradient></defs>
+      ${circles}
+      ${xLabels}
+    </svg>
+  </div>`;}
 function saveWeight(v){const n=parseFloat(v);const ds=iso(now);save({weight:{[ds]:(n&&n>0)?n:''}});}
 function openWeightGoalModal(){
   document.getElementById('modal').innerHTML=`<div class="modal">
