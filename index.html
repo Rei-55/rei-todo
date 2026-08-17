@@ -169,7 +169,8 @@
   .kp-head .sum{margin-left:auto;font-family:var(--display);font-size:12.5px;font-weight:700;}
   .kp-sec.plus .sum{color:#a33c3c;}
   .kp-sec.minus .sum{color:#3a6f42;}
-  .kp-item{display:flex;gap:6px;align-items:center;margin-bottom:6px;}
+  .kp-item{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+  .kp-item.kp-item-food{flex-direction:column;align-items:stretch;gap:3px;}
   .kp-item input.n{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:6px 9px;font-family:var(--body);font-size:12.5px;color:var(--ink);outline:none;}
   .kp-item input.c{width:64px;border:1px solid var(--line);border-radius:8px;padding:6px 7px;font-family:var(--display);font-size:12.5px;font-weight:700;color:var(--ink);outline:none;text-align:right;}
   .kp-item input:focus{border-color:var(--jlpt);}
@@ -410,6 +411,26 @@
   .wt-topline{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
   .wt-label{font-family:var(--display);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;}
   .wt-edit{font-size:10.5px;font-weight:600;color:var(--ink-soft);border:1px solid var(--line);border-radius:20px;padding:3px 10px;cursor:pointer;}
+  .macro-bar-wrap{background:#f7f5fd;border-radius:11px;padding:9px 13px 8px;margin-bottom:10px;}
+  .mb-head{display:flex;align-items:center;gap:6px;margin-bottom:7px;}
+  .mb-title{font-family:var(--display);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;flex:1;}
+  .mb-kcal{font-family:var(--display);font-size:11.5px;font-weight:700;color:#9b7dc8;}
+  .mb-edit{background:none;border:1px solid var(--line);border-radius:20px;font-size:10px;color:var(--ink-soft);padding:2px 8px;cursor:pointer;font-family:var(--body);}
+  .mb-edit:hover{border-color:var(--jlpt);color:var(--jlpt);}
+  .mb-rows{display:flex;flex-direction:column;gap:4px;}
+  .mb-row{display:flex;align-items:center;gap:7px;}
+  .mb-label{font-size:11.5px;font-weight:600;color:var(--ink-soft);width:46px;flex-shrink:0;}
+  .mb-bar-wrap{flex:1;height:5px;background:#ece9f5;border-radius:99px;overflow:hidden;}
+  .mb-bar{height:100%;border-radius:99px;transition:width .4s;}
+  .mb-val{font-family:var(--display);font-size:13px;font-weight:700;white-space:nowrap;flex-shrink:0;}
+  .mb-goal{font-size:10.5px;font-weight:600;color:var(--ink-faint);margin-left:1px;}
+  .kp-item-food{flex-direction:column;gap:3px;}
+  .kp-item-top{display:flex;align-items:center;gap:6px;width:100%;}
+  .kp-macro{display:flex;gap:5px;padding-left:2px;}
+  .kpm{font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px;}
+  .kpm.p{background:#e0f4fb;color:#3a9cc0;}
+  .kpm.f{background:#eceaf8;color:#7260b8;}
+  .kpm.cb{background:#fce8f3;color:#c05080;}
   .wt-edit:hover{color:var(--hanneung);border-color:var(--hanneung);}
   .wt-row1{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .wt-in{width:84px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-family:var(--display);font-size:15px;font-weight:700;color:var(--ink);outline:none;text-align:right;background:#fff;}
@@ -885,7 +906,7 @@ function deepMerge(t,s){for(const k in s){const v=s[k];if(v&&typeof v==='object'
 let openWeekNum=null, EDIT_N=null, KOPEN=false, SKOPEN=false;
 
 /* ================= 상태 ================= */
-let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{},subs:{},jobsExtra:{}};
+let STATE={checks:{},customTasks:{},goals:{},kcal:{},weight:{},foods:{},exs:{},postponed:{},applied:{},jlptWords:{},hanneungMock:{},weightGoal:{},memos:{},skipped:{},jobOverrides:{},ledger:{},calGoal:{},budget:{},weekOverrides:{},dayPlans:{},weekFlags:{},subs:{},jobsExtra:{},macroGoal:{}};
 function getGoals(n){return (STATE.goals&&STATE.goals[n])||DEFAULT_GOALS[n]||[];}
 /* 주간 계획: 코드의 W + 앱에서 수정한 STATE.weekOverrides 를 합쳐서 반환 */
 function getWeek(n){
@@ -907,30 +928,15 @@ function buildDay(w,date){
   const ex=EXAMS.find(x=>x.d===ds);
   if(ex){
     it.push({tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c});
-    if(dayPlan(ds)) dayPlan(ds).forEach(x=>it.push({tm:x.tm||'저녁',tx:x.tx,c:'var(--'+x.c+')',lec:x.lec,hot:x.hot}));
     it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
+    it.push({tm:'아침',tx:'몸무게 기록',c:'var(--hanneung)'});
     return it;
-  }
-  if(w.warn){ it.push({tm:'종일',tx:'학과 시험 공부 — 자격증은 잠시 STOP',c:'var(--study)'}); it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'}); it.push({tm:'자기 전',tx:'JLPT 단어 15분 (여유되면)',c:'var(--jlpt)'}); return it; }
-  const plan=dayPlan(ds);
-  if(plan) plan.forEach(x=>it.push({tm:x.tm||slotOf(dow),tx:x.tx,c:'var(--'+x.c+')',lec:x.lec,hot:x.hot}));
-  else {
-    const PC='var(--'+w.t[0]+')';
-    if(dow===1||dow===3) it.push({tm:slotOf(dow),tx:w.eve,c:PC});
-    else if(dow===2||dow===4||dow===5) it.push({tm:slotOf(dow),tx:w.day,c:PC});
-    else it.push({tm:slotOf(dow),tx:w.wk,c:PC});
-  }
-  const _wf=weekFlag(w.n);
-  if(!_wf.noEx){
-    if(dow===2) it.push({tm:'18:30–20:30',tx:'운동 · 유산소 + 하체',c:'var(--opic)'});
-    else if(dow===4) it.push({tm:'18:30–20:30',tx:'운동 · 유산소',c:'var(--opic)'});
-    else if(dow===5) it.push({tm:'18:30–20:30',tx:'운동 · 유산소 + 상체',c:'var(--opic)'});
   }
   it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
   it.push({tm:'아침',tx:'몸무게 기록',c:'var(--hanneung)'});
-  if(!it.some(x=>x.c==='var(--jlpt)')) it.push({tm:'자기 전',tx:'JLPT 단어 15분',c:'var(--jlpt)'});
   return it;
 }
+
 
 /* ================= 렌더 ================= */
 function goalHTML(n,label,edit){
@@ -1017,15 +1023,19 @@ function renderTodo(){
   card.innerHTML=`${yestHTML}<div class="tc-top"><span class="tt">Today · 오늘 할 일</span><span class="dd">${dstr}</span></div>
     <div class="tc-title">${wk?esc(wk.h.replace('★','').replace('⚠','')):'오늘'}</div>
     <div class="kcal-row">
-      <span class="kcal-net">${net>0?net.toLocaleString():'—'}<small>/ 1,200 kcal</small></span>
+      <span class="kcal-net">${net>0?net.toLocaleString():'—'}<small>/ ${macroGoal().kcal.toLocaleString()} kcal</small></span>
       ${kst?`<span class="kcal-badge" style="background:${kst.bg};color:${kst.fg}">${kst.label}</span>`:''}
       <button class="kcal-toggle" data-act="kexp">${KOPEN?'▲ 접기':'▼ 식단·운동 입력'}</button>
       <a class="kcal-ai" href="https://claude.ai/new" target="_blank" rel="noopener">🍽 AI에게 물어보기 ↗</a>
     </div>
+    ${macroBarHTML()}
     <div class="kcal-panel ${KOPEN?'open':''}">
       <div class="kp-sec plus">
         <div class="kp-head">＋ 오늘 먹은 것<span class="sum">+${inSum.toLocaleString()} kcal</span></div>
-        ${foods.map((f,i)=>`<div class="kp-item"><input class="n" data-k="f" data-i="${i}" data-f="n" placeholder="음식 (예: 메밀면)" value="${esc(f.n)}"><input class="c" data-k="f" data-i="${i}" data-f="c" type="number" inputmode="numeric" placeholder="kcal" value="${esc(f.c)}"><span class="x" data-act="fdel" data-i="${i}">✕</span></div>`).join('')}
+        ${foods.map((f,i)=>{
+          const macroTags=(f.p||f.f||f.cb)?`<span class="kp-macro"><span class="kpm p">단 ${f.p||0}g</span><span class="kpm f">지 ${f.f||0}g</span><span class="kpm cb">탄 ${f.cb||0}g</span></span>`:'';
+          return `<div class="kp-item kp-item-food"><div class="kp-item-top"><input class="n" data-k="f" data-i="${i}" data-f="n" placeholder="음식 (예: 메밀면)" value="${esc(f.n)}"><input class="c" data-k="f" data-i="${i}" data-f="c" type="number" inputmode="numeric" placeholder="kcal" value="${esc(f.c)}"><span class="x" data-act="fdel" data-i="${i}">✕</span></div>${macroTags}</div>`;
+        }).join('')}
         <button class="kp-add" data-act="fadd">＋ 음식 추가</button>
       </div>
       <div class="kp-sec minus">
@@ -1055,13 +1065,29 @@ function renderTodo(){
     else if(a==='kexp'){KOPEN=!KOPEN;renderTodo();}
     else if(a==='fprompt'){
       KOPEN=true;
-      const tpl='내가 먹은 음식과 운동의 칼로리를 알려줘.\n'
-        +'설명은 짧게만 하고, 마지막에 아래 형식의 JSON을 코드블록으로 꼭 붙여줘.\n'
-        +'{"foods":[{"n":"음식명","c":칼로리숫자}],"exs":[{"n":"운동명","c":소모칼로리숫자}]}\n'
-        +'운동이 없으면 exs는 빈 배열로 둬.\n\n오늘 먹은 것: ';
+      const g=macroGoal();
+      const tpl='아래 형식의 JSON 코드블록만 출력해줘. 설명 없이 JSON만.\n'
+        +'각 음식마다 칼로리(c), 단백질(p), 지방(f), 탄수화물(cb)을 g 단위로 추정해줘.\n'
+        +'운동이 없으면 exs는 빈 배열로.\n'
+        +'{\n'
+        +'  "foods":[{"n":"음식명","c":칼로리,"p":단백질g,"f":지방g,"cb":탄수화물g}],\n'
+        +'  "exs":[{"n":"운동명","c":소모칼로리}]\n'
+        +'}\n\n'
+        +'오늘 먹은 것: ';
       const msg=document.querySelector('.kp-msg');
       const ok=()=>{if(msg)msg.textContent='복사됐어요! AI 대화창에 붙여넣고 먹은 걸 이어서 쓰세요';};
-      const no=()=>{if(msg)msg.textContent='복사 실패 — 아래 칸에 직접 형식을 적어주세요';};
+      const no=()=>{
+        // execCommand 폴백
+        try{
+          const tmp=document.createElement('textarea');
+          tmp.value=tpl; tmp.style.cssText='position:fixed;top:-9999px;left:-9999px;opacity:0;';
+          document.body.appendChild(tmp); tmp.focus(); tmp.select();
+          const ok2=document.execCommand('copy');
+          document.body.removeChild(tmp);
+          if(ok2){if(msg)msg.textContent='복사됐어요! AI 대화창에 붙여넣고 먹은 걸 이어서 쓰세요';}
+          else{if(msg)msg.textContent='자동 복사가 안 돼요 — 아래 칸을 직접 복사해서 쓰세요'; showPromptFallback(tpl);}
+        }catch(e2){if(msg)msg.textContent='자동 복사가 안 돼요 — 아래 칸을 직접 복사해서 쓰세요'; showPromptFallback(tpl);}
+      };
       try{
         if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(tpl).then(ok,no);
         else no();
@@ -1085,7 +1111,10 @@ function renderTodo(){
       try{o=JSON.parse(raw);}catch(err){say('JSON을 읽지 못했어요. { } 부분만 붙여넣어 주세요.');return;}
       const norm=(arr)=>(Array.isArray(arr)?arr:[]).map(x=>({
         n:String(x.n||x.name||x.음식||x.운동||'').slice(0,40),
-        c:String(parseInt(x.c!=null?x.c:(x.kcal!=null?x.kcal:x.칼로리),10)||'')
+        c:String(parseInt(x.c!=null?x.c:(x.kcal!=null?x.kcal:x.칼로리),10)||''),
+        p:x.p!=null?String(Math.round(+x.p)||''):'',
+        f:x.f!=null?String(Math.round(+x.f)||''):'',
+        cb:x.cb!=null?String(Math.round(+x.cb)||''):''
       })).filter(x=>x.n);
       let addF=[],addE=[];
       if(Array.isArray(o))addF=norm(o);
@@ -1114,6 +1143,7 @@ function renderTodo(){
     else if(a==='postpone'){const item=TODAY_ITEMS[t.dataset.idx];if(item)postponeToTomorrow(item,ds);}
     else if(a==='pull'){const item=YEST_ITEMS[t.dataset.idx];if(item)pullFromYesterday(item,ds);}
     else if(a==='wgedit'){openWeightGoalModal();}
+    else if(a==='macroEdit'){openMacroModal();}
     else if(a==='wtrange'){WT_RANGE=+t.dataset.v;renderTodo();}
     else if(a==='memoOpen'){openMemoModal(t.dataset.key);}
     else if(a==='skip'){SKOPEN=true;save({skipped:{[t.dataset.key]:true}});}
@@ -1317,6 +1347,21 @@ function wtChartHTML(){
       ${xLabels}
     </svg>
   </div>`;}
+function showPromptFallback(tpl){
+  // 복사 실패 시 프롬프트를 직접 선택할 수 있는 textarea 노출
+  let fb=document.getElementById('kp-fallback');
+  if(!fb){
+    fb=document.createElement('textarea');
+    fb.id='kp-fallback';
+    fb.style.cssText='width:100%;box-sizing:border-box;min-height:90px;margin-top:6px;border:1px dashed var(--jlpt);border-radius:8px;padding:8px 9px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:10.5px;line-height:1.5;color:var(--ink);background:#f8f6ff;resize:vertical;';
+    fb.readOnly=true;
+    const paste=document.querySelector('.kp-sec.paste');
+    if(paste)paste.appendChild(fb);
+  }
+  fb.value=tpl;
+  fb.style.display='block';
+  fb.focus(); fb.select();
+}
 function saveWeight(v){const n=parseFloat(v);const ds=iso(now);save({weight:{[ds]:(n&&n>0)?n:''}});}
 function openWeightGoalModal(){
   document.getElementById('modal').innerHTML=`<div class="modal">
@@ -2370,6 +2415,65 @@ function calGoal(){
   return base;
 }
 function setCalGoal(n){save({calGoal:{goal:(n&&n>0)?n:''}});}
+function macroGoal(){
+  const m=STATE.macroGoal||{};
+  return {kcal:+(m.kcal||1244),prot:+(m.prot||93),fat:+(m.fat||48),carb:+(m.carb||109)};
+}
+function setMacroGoal(o){save({macroGoal:o});}
+function macroBarHTML(){
+  const g=macroGoal();
+  const ds=iso(now);
+  const todayFoods=(STATE.foods&&STATE.foods[ds])||[];
+  const sumP=todayFoods.reduce((a,f)=>a+(parseInt(f.p,10)||0),0);
+  const sumF=todayFoods.reduce((a,f)=>a+(parseInt(f.f,10)||0),0);
+  const sumCb=todayFoods.reduce((a,f)=>a+(parseInt(f.cb,10)||0),0);
+  const hasMacro=sumP||sumF||sumCb;
+  const bars=[
+    {label:'단백질',cur:sumP,goal:g.prot,col:'#7ec8e3'},
+    {label:'지방',cur:sumF,goal:g.fat,col:'#b4a7e8'},
+    {label:'탄수화물',cur:sumCb,goal:g.carb,col:'#f0a9c8'},
+  ];
+  const rows=bars.map(b=>{
+    const pct=b.goal?Math.min(100,Math.round(b.cur/b.goal*100)):0;
+    const valTxt=hasMacro?`<span class="mb-val" style="color:${b.col}">${b.cur}g<span class="mb-goal">/${b.goal}g</span></span>`
+      :`<span class="mb-val" style="color:${b.col}">${b.goal}g</span>`;
+    return `<div class="mb-row">
+      <span class="mb-label">${b.label}</span>
+      ${hasMacro?`<div class="mb-bar-wrap"><div class="mb-bar" style="width:${pct}%;background:${b.col}"></div></div>`:''}
+      ${valTxt}
+    </div>`;
+  }).join('');
+  return `<div class="macro-bar-wrap">
+    <div class="mb-head">
+      <span class="mb-title">권장 영양소</span>
+      <span class="mb-kcal">${g.kcal.toLocaleString()} kcal/일</span>
+      <button class="mb-edit" data-act="macroEdit">✎</button>
+    </div>
+    <div class="mb-rows">${rows}</div>
+  </div>`;}
+function openMacroModal(){
+  const g=macroGoal();
+  document.getElementById('modal').innerHTML=`<div class="modal">
+    <h3>🥗 권장 영양소 수정</h3>
+    <div class="msub">하루 권장 섭취량을 수정할 수 있어요.</div>
+    <div class="mrow"><label>칼로리 (kcal)</label><input id="mgKcal" type="number" inputmode="decimal" value="${g.kcal}"></div>
+    <div class="mrow"><label>단백질 (g)</label><input id="mgProt" type="number" inputmode="decimal" value="${g.prot}"></div>
+    <div class="mrow"><label>지방 (g)</label><input id="mgFat" type="number" inputmode="decimal" value="${g.fat}"></div>
+    <div class="mrow"><label>탄수화물 (g)</label><input id="mgCarb" type="number" inputmode="decimal" value="${g.carb}"></div>
+    <div class="mbtns"><button id="mgClose" class="mc">취소</button><button id="mgSave" class="ms">저장</button></div>
+  </div><div class="moverlay" id="mgOv"></div>`;
+  document.getElementById('modal').classList.add('open');
+  document.getElementById('mgClose').onclick=()=>{document.getElementById('modal').classList.remove('open');};
+  document.getElementById('mgOv').onclick=()=>{document.getElementById('modal').classList.remove('open');};
+  document.getElementById('mgSave').onclick=()=>{
+    const kcal=+document.getElementById('mgKcal').value||1244;
+    const prot=+document.getElementById('mgProt').value||93;
+    const fat=+document.getElementById('mgFat').value||48;
+    const carb=+document.getElementById('mgCarb').value||109;
+    setMacroGoal({kcal,prot,fat,carb});
+    document.getElementById('modal').classList.remove('open');
+  };
+}
 function dayIntake(ds){return ((STATE.foods&&STATE.foods[ds])||[]).reduce((a,b)=>a+(parseInt(b.c,10)||0),0);}
 function dayBurn(ds){return ((STATE.exs&&STATE.exs[ds])||[]).reduce((a,b)=>a+(parseInt(b.c,10)||0),0);}
 function dayNet(ds){return dayIntake(ds)-dayBurn(ds);}
@@ -2709,7 +2813,7 @@ async function initFirebase(){
       // 내가 방금 저장해서 되돌아온 스냅샷(에코)이면 화면은 이미 최신이라 다시 안 그림
       const isLocalEcho=snap.metadata.hasPendingWrites;
       const d=snap.exists()?snap.data():{};
-      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{},subs:d.subs||{},jobsExtra:d.jobsExtra||{}};
+      STATE={checks:d.checks||{},customTasks:d.customTasks||{},goals:d.goals||{},kcal:d.kcal||{},weight:d.weight||{},foods:d.foods||{},exs:d.exs||{},postponed:d.postponed||{},applied:d.applied||{},jlptWords:d.jlptWords||{},hanneungMock:d.hanneungMock||{},weightGoal:d.weightGoal||{},memos:d.memos||{},skipped:d.skipped||{},jobOverrides:d.jobOverrides||{},ledger:d.ledger||{},calGoal:d.calGoal||{},budget:d.budget||{},weekOverrides:d.weekOverrides||{},dayPlans:d.dayPlans||{},weekFlags:d.weekFlags||{},subs:d.subs||{},jobsExtra:d.jobsExtra||{},macroGoal:d.macroGoal||{}};
       setSync(snap.metadata.fromCache?'wait':'on');
       if(!isLocalEcho)scheduleRender();  // 외부(다른 기기)에서 온 변경일 때만 렌더
     },err=>{console.warn('구독 오류',err);setSync('off');});
