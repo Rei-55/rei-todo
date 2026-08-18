@@ -625,6 +625,15 @@
   .msave .cancel{background:transparent;color:var(--ink-soft);border:1px solid var(--line)!important;}
 
   .foot{margin-top:20px;font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.6;}
+
+  /* ── 숨김(만료) 탭 ── */
+  .jv-hidden-toggle{width:100%;border:1px dashed var(--line);background:transparent;border-radius:12px;padding:11px;font-family:var(--body);font-size:12.5px;font-weight:600;color:var(--ink-faint);cursor:pointer;margin:10px 0;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .jv-hidden-toggle:hover{border-color:var(--ink-soft);color:var(--ink-soft);}
+  .jv-hidden-section{margin-top:4px;}
+  .jv-hidden-label{font-family:var(--display);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;padding:6px 4px 10px;display:flex;align-items:center;gap:8px;}
+  .jv-hidden-label::after{content:"";flex:1;height:1px;background:var(--line);}
+  .jv-card.jv-hidden-card{opacity:.5;filter:grayscale(.35);}
+  .jv-card.jv-hidden-card:hover{opacity:.75;}
 </style>
 </head>
 <body>
@@ -1897,37 +1906,88 @@ function jobList(){
   return out.sort((a,b)=>(b.imp||0)-(a.imp||0));
 }
 /* ===== 지원 현황 데이터 — 공고 목록. 값만 바뀌는 상태·메모는 STATE.jobOverrides에 저장 ===== */
+/* 마감 기준: 2026-08-05 이전 → kind:'done' (오늘 8/19 기준 2주 이상 경과) */
 const JOBS=[
+  /* ── 기존 공고 ── */
   {id:"kakao-policy",rank:1,company:"카카오",role:"정책연구 지원_어시스턴트",type:"인턴",stars:5,deadline:{kind:"rolling"},loc:"판교",pay:"",track:"리서치",status:"작성중",note:"매칭 최상. 자기소개 2,500자 + 프로젝트 이력 1,500자 작성 중. 상시라 조기마감 리스크."},
-  {id:"naver-health",rank:2,company:"네이버",role:"헬스케어 산업 리서치",type:"인턴",stars:5,deadline:{kind:"date",date:"2026-07-22"},loc:"분당",pay:"",track:"리서치",status:"예정",note:"글로벌 헬스케어 산업분석. 마감 임박."},
-  {id:"kakaobank-survey",rank:3,company:"카카오뱅크",role:"신사업 서베이 어시스턴트",type:"인턴",stars:4,deadline:{kind:"date",date:"2026-07-24"},loc:"판교",pay:"월 235만",track:"리서치",status:"예정",note:"서베이·데이터분석, AI 활용 우대. SQL은 우대라 공백 무방."},
+  {id:"naver-health",rank:2,company:"네이버",role:"헬스케어 산업 리서치",type:"인턴",stars:5,deadline:{kind:"done"},loc:"분당",pay:"",track:"리서치",status:"후순위",note:"마감 7/22 — 2주 이상 경과."},
+  {id:"kakaobank-survey",rank:3,company:"카카오뱅크",role:"신사업 서베이 어시스턴트",type:"인턴",stars:4,deadline:{kind:"done"},loc:"판교",pay:"월 235만",track:"리서치",status:"후순위",note:"마감 7/24 — 2주 이상 경과."},
   {id:"alphasights",rank:4,company:"AlphaSights",role:"Client Service Associate",type:"정규",stars:4,deadline:{kind:"flexible"},loc:"서울→런던",pay:"1년차 6,867만+",track:"리서치",status:"검토중",note:"영어 실전회화가 관문. OPIc IH 찍고 도전 옵션."},
   {id:"kakao-esg",rank:5,company:"카카오",role:"ESG 추진 지원_어시스턴트",type:"인턴",stars:3.5,deadline:{kind:"rolling"},loc:"판교",pay:"",track:"리서치",status:"검토중",note:"ESG 동향조사·데이터 취합. 정책연구 다음 서브 카드."},
   {id:"ably",rank:6,company:"에이블리",role:"사업개발 매니저",type:"인턴",stars:4,deadline:{kind:"flexible"},loc:"신논현",pay:"",track:"전략",status:"검토중",note:"신사업 기획 + 정규직 전환 검토."},
   {id:"ohouse",rank:7,company:"오늘의집",role:"CEO Staff Assistant",type:"인턴",stars:4,deadline:{kind:"flexible"},loc:"서초",pay:"",track:"전략",status:"검토중",note:"전략·리서치. 공공→민간 전략 서사와 직결."},
   {id:"kakaopay",rank:8,company:"카카오페이",role:"그로스 마케팅 어시스턴트",type:"인턴",stars:3.5,deadline:{kind:"rolling"},loc:"판교",pay:"월 247만",track:"기타",status:"후순위",note:"AI 활용 우대. 방향은 마케팅."},
   {id:"toss-ra",rank:9,company:"토스",role:"Research Assistant",type:"정규",stars:4,deadline:{kind:"unknown"},loc:"서울",pay:"",track:"리서치",status:"검토중",note:"RA·경영전략. 경력요건 확인 필요."},
-  {id:"kinfa",rank:10,company:"서민금융진흥원",role:"체험형 청년 인턴(기획/경영)",type:"인턴",stars:3.5,deadline:{kind:"date",date:"2026-07-22"},loc:"서울",pay:"",track:"기타",status:"검토중",note:"공공기관. 공공 산업분석 배경과 결 맞음."},
-  {id:"gggi",rank:11,company:"GGGI",role:"Finance 인턴",type:"인턴",stars:3.5,deadline:{kind:"date",date:"2026-08-07"},loc:"서울",pay:"월 $500",track:"기타",status:"후순위",note:"저보수라 후순위."},
+  {id:"kinfa",rank:10,company:"서민금융진흥원",role:"체험형 청년 인턴(기획/경영)",type:"인턴",stars:3.5,deadline:{kind:"done"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"마감 7/22 — 2주 이상 경과."},
+  {id:"gggi",rank:11,company:"GGGI",role:"Finance 인턴",type:"인턴",stars:3.5,deadline:{kind:"done"},loc:"서울",pay:"월 $500",track:"기타",status:"후순위",note:"마감 8/7 — 2주 이상 경과."},
   {id:"musinsa",rank:12,company:"무신사",role:"커뮤니케이션 기획 인턴",type:"인턴",stars:3,deadline:{kind:"rolling"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"홍보·커뮤니케이션 방향."},
-  {id:"cj",rank:13,company:"CJ푸드빌",role:"인사 사무보조 Staff",type:"인턴",stars:2.5,deadline:{kind:"date",date:"2026-07-19"},loc:"서울 중구",pay:"",track:"기타",status:"후순위",note:"인사·사무보조. 직무 안 맞음."},
-  {id:"ehyundai",rank:14,company:"현대이지웰",role:"사무직(운영·정산)",type:"계약",stars:2.5,deadline:{kind:"rolling"},loc:"서대문",pay:"",track:"기타",status:"후순위",note:"정산 사무."},
-  {id:"satrec",rank:15,company:"쎄트렉아이",role:"사무행정 지원",type:"계약",stars:2,deadline:{kind:"date",date:"2026-07-22"},loc:"대전",pay:"",track:"기타",status:"후순위",note:"생산 사무·전환 없음. 대전 통근권."},
-  {id:"hana",rank:16,company:"하나은행",role:"총무부 일반사무",type:"계약",stars:2,deadline:{kind:"date",date:"2026-07-17"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"총무·계약직. 직무 안 맞음."},
+  {id:"cj",rank:13,company:"CJ푸드빌",role:"인사 사무보조 Staff",type:"인턴",stars:2.5,deadline:{kind:"done"},loc:"서울 중구",pay:"",track:"기타",status:"후순위",note:"마감 7/19 — 2주 이상 경과."},
+  {id:"ehyundai-old",rank:14,company:"현대이지웰",role:"사무직(운영·정산)",type:"계약",stars:2.5,deadline:{kind:"rolling"},loc:"서대문",pay:"",track:"기타",status:"후순위",note:"정산 사무."},
+  {id:"satrec",rank:15,company:"쎄트렉아이",role:"사무행정 지원",type:"계약",stars:2,deadline:{kind:"done"},loc:"대전",pay:"",track:"기타",status:"후순위",note:"마감 7/22 — 2주 이상 경과."},
+  {id:"hana",rank:16,company:"하나은행",role:"총무부 일반사무",type:"계약",stars:2,deadline:{kind:"done"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"마감 7/17 — 2주 이상 경과."},
   {id:"miridih",rank:17,company:"미리디",role:"피플팀 오피스 매니저",type:"계약",stars:2,deadline:{kind:"flexible"},loc:"구로",pay:"연 3,200만",track:"기타",status:"후순위",note:"총무·오피스매니저."},
-  {id:"webtoon",rank:18,company:"네이버웹툰",role:"HR Assistant",type:"인턴",stars:2.5,deadline:{kind:"date",date:"2026-07-22"},loc:"정자동",pay:"",track:"기타",status:"후순위",note:"HR 채용운영·총무성."},
-  {id:"hanwha",rank:19,company:"한화컴파운드",role:"재무회계 사무보조",type:"계약",stars:1.5,deadline:{kind:"date",date:"2026-07-23"},loc:"서울 중구",pay:"",track:"기타",status:"제외",note:"지원자격 초대졸 이하 → 학사 자격 밖 가능성."},
+  {id:"webtoon",rank:18,company:"네이버웹툰",role:"HR Assistant",type:"인턴",stars:2.5,deadline:{kind:"done"},loc:"정자동",pay:"",track:"기타",status:"후순위",note:"마감 7/22 — 2주 이상 경과."},
+  {id:"hanwha",rank:19,company:"한화컴파운드",role:"재무회계 사무보조",type:"계약",stars:1.5,deadline:{kind:"done"},loc:"서울 중구",pay:"",track:"기타",status:"제외",note:"마감 7/23 — 2주 이상 경과. 지원자격 초대졸 이하 → 학사 자격 밖 가능성."},
   {id:"vw",rank:0,company:"폭스바겐 GMBD",role:"인턴",type:"인턴",stars:0,deadline:{kind:"done"},loc:"",pay:"",track:"전략",status:"지원완료",note:"이력서(한/영) + 자기소개 PPT 제출 완료."},
   {id:"navercloud",rank:0,company:"네이버클라우드",role:"공공·민간 사업지원 인턴",type:"인턴",stars:0,deadline:{kind:"done"},loc:"분당",pay:"",track:"기타",status:"지원완료",note:"지원 완료."},
-  {id:"acrc-intern3",rank:5,company:"국민권익위원회",role:"제3기 청년인턴 (일반행정·조사행정)",type:"청년인턴",stars:4,deadline:{kind:"date",date:"2026-08-10",time:"18:00"},loc:"세종·서울·청주",pay:"월 215.7만(세전)",track:"공공",status:"예정",note:"5개 코드(인턴01~04) / 총 6명 선발. 원서접수 8/10 18:00 마감. 서류합격 발표 8/18, 면접 8/27. 청년인재DB(www.2030db.go.kr) 제출. 계약 26.9월~3개월. 정책제안서 필수(서류합격자 8/18~8/24 제출). 문의 ☎044-200-7185."},
-  {id:"pmo-intern2",rank:5,company:"국무조정실·국무총리비서실",role:"제2차 청년인턴 (행정·법무 외 4개 분야)",type:"청년인턴",stars:4,deadline:{kind:"date",date:"2026-08-10",time:"18:00"},loc:"세종",pay:"월 215.7만 내외",track:"공공",status:"예정",note:"5개 코드(인턴A~E) / 총 22명 선발. 원서접수 8/10 18:00 마감. 서류합격 발표 8/14, 면접 8/20~21. 청년인재DB 제출. 계약 26.9.1~12.31. 지원서 A4 2매 이내(변경공고). 문의 ☎044-200-2801."}
+  /* ── 청년인턴 공고 (청년인재DB) ── */
+  {id:"acrc-intern3",rank:5,company:"국민권익위원회",role:"제3기 청년인턴 (일반행정·조사행정)",type:"청년인턴",stars:4,deadline:{kind:"done"},loc:"세종·서울·청주",pay:"월 215.7만(세전)",track:"공공",status:"미지원",note:"마감 8/10 18:00 — 지원 안 함. 서류합격 발표 8/18, 면접 8/27. 총 6명 선발."},
+  {id:"pmo-intern2",rank:5,company:"국무조정실·국무총리비서실",role:"제2차 청년인턴 (행정·법무 외 4개 분야)",type:"청년인턴",stars:4,deadline:{kind:"done"},loc:"세종",pay:"월 215.7만 내외",track:"공공",status:"지원완료",note:"마감 8/10 18:00 — 지원 완료. 서류합격 발표 8/14, 면접 8/20~21. 총 22명 선발."},
+  /* ── 8/19 기준 활성 공고 (텍스트 기반 + 청년인턴HTML) ── */
+  /* A급 */
+  {id:"knoc-admin",rank:1,company:"한국석유공사",role:"사무/상경 정규직",type:"정규",stars:5,deadline:{kind:"date",date:"2026-08-28"},loc:"울산",pay:"",track:"전략",status:"예정",note:"A급. 상경 전공+OPIc IM2 충족+지역인재 가점 35%. 필기 통과가 핵심."},
+  {id:"hwainin-intern",rank:2,company:"환인제약",role:"채용연계형 인턴(총무)",type:"인턴",stars:5,deadline:{kind:"date",date:"2026-08-23"},loc:"서울",pay:"",track:"전략",status:"예정",note:"A급. 학생회 재정·총무 서사 정확히 매칭. 경쟁률 낮음, 정규 전환."},
+  {id:"ey-somu",rank:3,company:"EY한영",role:"경영지원본부 총무팀 전환형인턴",type:"인턴",stars:5,deadline:{kind:"date",date:"2026-08-27"},loc:"서울",pay:"",track:"전략",status:"예정",note:"A급. 총무 서사+비즈니스 영어 가능, 전환형."},
+  {id:"dayone-somu",rank:4,company:"데이원컴퍼니",role:"총무 담당자 신입",type:"정규",stars:4.5,deadline:{kind:"flexible"},loc:"서울",pay:"",track:"전략",status:"검토중",note:"A급. 총무 서사+AI 업무효율화 어필 가능. 채용 시 마감."},
+  {id:"nhnkcp-ops",rank:5,company:"NHN KCP",role:"서비스운영·사업지원 정규직",type:"정규",stars:4.5,deadline:{kind:"date",date:"2026-08-31"},loc:"서울",pay:"",track:"전략",status:"예정",note:"A급. 운영·협업 서사, 신입 가능, 정규직, 경쟁률 낮음."},
+  /* B급 */
+  {id:"hancom-sales",rank:6,company:"한컴",role:"공공시장 영업 전환형인턴",type:"인턴",stars:4,deadline:{kind:"rolling"},loc:"서울",pay:"",track:"전략",status:"검토중",note:"B급. 산업부 공공 경험+AI 관심 직접 매칭, 전환형."},
+  {id:"sk-hrm",rank:7,company:"SK 행복모아",role:"인사담당자 HRM·HRD",type:"정규",stars:4,deadline:{kind:"date",date:"2026-08-23"},loc:"서울",pay:"",track:"전략",status:"예정",note:"B급. 학생회 인사·PPT·Excel 서사. SKCT 관문."},
+  {id:"yuhan-hr",rank:8,company:"유한양행",role:"인사팀·안전보건팀",type:"인턴",stars:4,deadline:{kind:"date",date:"2026-08-26"},loc:"서울",pay:"",track:"전략",status:"예정",note:"B급. 인사 서사 매칭, 대기업 계약직."},
+  {id:"jongkeundang-finance",rank:9,company:"종근당바이오",role:"재경파트 사원",type:"정규",stars:3.5,deadline:{kind:"date",date:"2026-08-24"},loc:"서울",pay:"",track:"전략",status:"예정",note:"B급. 상경 전공(경영·회계) 매칭, 신입 가능."},
+  {id:"ktcloud-ops",rank:10,company:"kt cloud",role:"사무지원(정산) 계약직",type:"계약",stars:3.5,deadline:{kind:"date",date:"2026-08-31"},loc:"분당",pay:"",track:"기타",status:"예정",note:"B급. Excel·정산 사무, 자격 충족 쉬움."},
+  {id:"hyundai-ribart",rank:11,company:"현대리바트M&S",role:"지원팀 사무지원 계약직",type:"계약",stars:3.5,deadline:{kind:"date",date:"2026-08-30"},loc:"서울",pay:"",track:"기타",status:"예정",note:"B급. 근태·급여·마감 사무, 진입장벽 낮음."},
+  {id:"bumhan-budget",rank:12,company:"범한메카텍",role:"FA팀 예산관리·사무지원",type:"정규",stars:3,deadline:{kind:"date",date:"2026-08-24"},loc:"서울",pay:"",track:"기타",status:"예정",note:"B급. 상경+예산 사무. Oracle ERP 우대."},
+  /* C급 (경쟁률 극악) */
+  {id:"kakaobank-ai",rank:13,company:"카카오뱅크",role:"AI 운영 어시스턴트 인턴",type:"인턴",stars:4,deadline:{kind:"date",date:"2026-08-26"},loc:"판교",pay:"",track:"리서치",status:"예정",note:"C급. ADsP·Firebase·AI 서사 완벽. 지원자 폭주 예상."},
+  {id:"kakao-style",rank:14,company:"카카오스타일",role:"트렌드&유저 전략 리서처 인턴",type:"인턴",stars:4,deadline:{kind:"flexible"},loc:"서울",pay:"",track:"리서치",status:"검토중",note:"C급. KMI 리서치 서사 매칭. 인기 최상."},
+  {id:"ohouse-recruit",rank:15,company:"오늘의집",role:"Recruiting Coordinator 인턴",type:"인턴",stars:4,deadline:{kind:"flexible"},loc:"서초",pay:"",track:"기타",status:"검토중",note:"C급. AI 툴 활용(Claude 명시)·인사 매칭. 경쟁 치열."},
+  {id:"shinhan-savings",rank:16,company:"신한저축은행",role:"채용연계형 인턴",type:"인턴",stars:3.5,deadline:{kind:"date",date:"2026-08-23"},loc:"서울",pay:"",track:"기타",status:"예정",note:"C급. 다직군(전략·AI 등) 선택 가능, 금융권 경쟁."},
+  {id:"ktg-recruit",rank:17,company:"KT&G",role:"하반기 신입 공채",type:"정규",stars:3.5,deadline:{kind:"date",date:"2026-09-10"},loc:"서울",pay:"",track:"기타",status:"예정",note:"C급. 대형 공채, 인적성 관문."},
+  {id:"nh-invest",rank:18,company:"NH투자증권",role:"하반기 업무직 신입",type:"정규",stars:3.5,deadline:{kind:"date",date:"2026-08-31"},loc:"서울",pay:"",track:"기타",status:"예정",note:"C급. 정규직 공채, 금융권 경쟁."},
+  /* D급 (청년인턴) */
+  {id:"pipc-intern",rank:19,company:"개인정보보호위원회",role:"청년인턴(행정·AI프라이버시)",type:"청년인턴",stars:4,deadline:{kind:"date",date:"2026-08-28",time:"18:00"},loc:"서울 종로",pay:"시급 10,320원",track:"공공",status:"예정",note:"D급. 공공·정책 서사, AI 프라이버시 직결. 정책제안서 별도 제출. 세종→서울 통근."},
+  {id:"semas-intern",rank:20,company:"소상공인시장진흥공단",role:"청년인턴",type:"청년인턴",stars:3.5,deadline:{kind:"date",date:"2026-08-25"},loc:"대전",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. ADsP 가점 반영, 규모 큼."},
+  {id:"kei-intern",rank:21,company:"한국환경연구원",role:"행정인턴",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-27"},loc:"세종",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 세종 근무, MS오피스 활용, 4개월."},
+  {id:"foodsafety-intern",rank:22,company:"한국식품안전관리인증원",role:"체험형인턴",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-20"},loc:"서울",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 식품+전공 매칭, 한국사 가점."},
+  {id:"nhrd-somu",rank:23,company:"국가재난안전교육원",role:"청년인턴 행정·외국어",type:"청년인턴",stars:3,deadline:{kind:"done"},loc:"충남 공주",pay:"월 215.7만",track:"공공",status:"미지원",note:"마감 8/19 — 공주 근무, 숙소 지원. 8/19 18:00 마감(오늘)."},
+  {id:"nier-intern",rank:24,company:"국립환경과학원",role:"환경연구 청년인턴",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-20",time:"18:00"},loc:"제주·대구·충북·전남",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 4개 지방사무소. 환경 측정·분석. 마감 8/20 18:00."},
+  {id:"mke-intern",rank:25,company:"기후에너지환경부",role:"청년인턴 행정·국제",type:"청년인턴",stars:4,deadline:{kind:"date",date:"2026-08-21",time:"18:00"},loc:"세종",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 세종 본부 근무, 6명 선발. 국제협력·행정 선택 가능. 산업부 경력 서사 강력."},
+  {id:"moel-intern",rank:26,company:"고용노동부",role:"청년인턴 고용노동",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-21",time:"18:00"},loc:"충남 천안·아산",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 고용·노동 행정업무. 마감 8/21 18:00."},
+  {id:"mfds-main",rank:27,company:"식품의약품안전처",role:"청년인턴 (식중독·의약품·마약·화장품)",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-24",time:"10:00"},loc:"충북 청주 오송",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 마감 8/24 10:00. 6명 선발. 10월 근무 개시."},
+  {id:"mfds-eval",rank:28,company:"식품의약품안전평가원",role:"청년인턴 행정·정책·의료기기",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-24",time:"10:00"},loc:"충북 청주/제주",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 마감 8/24 10:00. 4명 선발."},
+  {id:"mfds-dj",rank:29,company:"대전지방식약청",role:"청년인턴 식품안전",type:"청년인턴",stars:3,deadline:{kind:"date",date:"2026-08-24",time:"10:00"},loc:"대전 서구",pay:"월 215.7만",track:"공공",status:"예정",note:"D급. 마감 8/24. 1명 선발. 대전 근무."},
+  {id:"ogc-intern",rank:30,company:"정부청사관리본부",role:"청년인턴 노사후생·산업안전",type:"청년인턴",stars:3.5,deadline:{kind:"date",date:"2026-08-26",time:"18:00"},loc:"세종",pay:"시급 10,320원",track:"공공",status:"예정",note:"D급. 세종 근무. 1명 선발. 마감 8/26 18:00."},
+  /* E급 (후순위·직무핏 약함) */
+  {id:"mimebox",rank:31,company:"미미박스",role:"아마존 운영 인턴",type:"인턴",stars:2,deadline:{kind:"flexible"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. 해외마케팅, 실무경험 부족."},
+  {id:"dkpharm",rank:32,company:"동국제약",role:"헬스앤뷰티 마케팅·MD",type:"인턴",stars:2,deadline:{kind:"date",date:"2026-08-26"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. 마케팅 실무 부족."},
+  {id:"ey-digital",rank:33,company:"EY한영",role:"Digital 컨설팅 인턴",type:"인턴",stars:2,deadline:{kind:"date",date:"2026-08-23"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. 컨설팅 경쟁 치열."},
+  {id:"shinhan-ib",rank:34,company:"신한투자증권",role:"IB종합금융부 인턴",type:"인턴",stars:2,deadline:{kind:"date",date:"2026-08-24"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. IB 전문성·상경 심화 필요."},
+  {id:"ls-networks",rank:35,company:"LS네트웍스",role:"인사팀 채용/보상",type:"계약",stars:1.5,deadline:{kind:"done"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"마감 8/18 — 2주 이상 경과. 경력 우대, 신입 불리."},
+  {id:"ehyundai-mkt",rank:36,company:"현대이지웰",role:"마케팅 계약직",type:"계약",stars:1.5,deadline:{kind:"done"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"마감 8/19 — 마케팅 실무 부족. 육아휴직 대체."},
+  {id:"orion-intern",rank:37,company:"오리온",role:"글로벌연구소 인턴",type:"인턴",stars:1.5,deadline:{kind:"done"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"마감 8/19 — 식품공학·연구 성격, 전공 다름."},
+  {id:"crevis-pm",rank:38,company:"크레비스파트너스",role:"SaaS PM 인턴",type:"인턴",stars:1.5,deadline:{kind:"flexible"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. 개발 기획 전문성 필요."},
+  {id:"douzone-erp",rank:39,company:"더존ICT",role:"ERP컨설턴트 인턴",type:"인턴",stars:1.5,deadline:{kind:"rolling"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. ERP 전문성 필요."},
+  {id:"hyundai-lnc",rank:40,company:"현대L&C",role:"경영지원 사무계약직",type:"계약",stars:1.5,deadline:{kind:"flexible"},loc:"서울",pay:"",track:"기타",status:"후순위",note:"E급. 고졸 이상, 무난하나 매력도 낮음."},
 ];
-const JV_STATUSES=['예정','작성중','지원완료','검토중','후순위','제외'];
+const JV_STATUSES=['예정','작성중','지원완료','검토중','후순위','미지원','제외'];
 const JV_ST={
   '지원완료':{bg:'#e7f5ee',fg:'#2e8f60'},'작성중':{bg:'#fdeaf3',fg:'#c25b8a'},
   '예정':{bg:'#e7f0fb',fg:'#3f74c0'},'검토중':{bg:'#eef0f6',fg:'#6a6f80'},
-  '후순위':{bg:'#f1f1f6',fg:'#9a9fb0'},'제외':{bg:'#f3f3f6',fg:'#aeb2c0'}
+  '후순위':{bg:'#f1f1f6',fg:'#9a9fb0'},'미지원':{bg:'#f3f3f6',fg:'#9ca3af'},
+  '제외':{bg:'#f3f3f6',fg:'#aeb2c0'}
 };
+let JV_SHOW_HIDDEN=false;
 let JV_OPEN=false,JV_SORT='deadline',JV_CORE=false,JV_EDIT=null;
 
 function jvDaysLeft(ds){const p=ds.split('-').map(Number);const t=new Date(p[0],p[1]-1,p[2]);const n=new Date();const today=new Date(n.getFullYear(),n.getMonth(),n.getDate());return Math.round((t-today)/86400000);}
@@ -2009,70 +2069,91 @@ function jobStatus(j){const o=STATE.jobOverrides&&STATE.jobOverrides[j.id];retur
 function jobNote(j){const o=STATE.jobOverrides&&STATE.jobOverrides[j.id];return (o&&typeof o.note==='string')?o.note:j.note;}
 function setJobOverride(id,patch){const cur=(STATE.jobOverrides&&STATE.jobOverrides[id])||{};save({jobOverrides:{[id]:Object.assign({},cur,patch)}});}
 function jobsSummary(){
-  const list=JOBS.map(j=>({...j,status:jobStatus(j)}));
+  const list=jobsAll().map(j=>({...j,status:jobStatus(j)}));
+  const active=list.filter(j=>!isHiddenJob(j));
   const total=list.length;
   const applied=list.filter(j=>j.status==='지원완료').length;
   const writing=list.filter(j=>j.status==='작성중').length;
-  const week=list.filter(j=>{const dl=j.deadline;if(dl.kind!=='date')return false;const n=jvDaysLeft(dl.date);return n>=0&&n<=7&&j.status!=='지원완료'&&j.status!=='제외';}).length;
-  const top=list.filter(j=>j.stars===5).length;
+  const week=active.filter(j=>{const dl=j.deadline;if(dl.kind!=='date')return false;const n=jvDaysLeft(dl.date);return n>=0&&n<=7&&j.status!=='지원완료'&&j.status!=='제외';}).length;
+  const top=active.filter(j=>j.stars===5).length;
   return {total,applied,writing,week,top};
 }
 function openJobsView(){JV_OPEN=true;JV_EDIT=null;document.getElementById('jobsView').classList.add('open');document.body.style.overflow='hidden';renderJobsView();}
 function closeJobsView(){JV_OPEN=false;JV_EDIT=null;document.getElementById('jobsView').classList.remove('open');document.body.style.overflow='';}
+/* 공고가 '숨김' 대상인지 판단: kind==='done' 이고 지원완료·작성중이 아닌 경우 */
+function isHiddenJob(j){
+  if(j.deadline.kind!=='done')return false;
+  const s=j.status;
+  return s!=='지원완료'&&s!=='작성중';
+}
+function makeJobCard(j,hidden){
+  const b=jvBadge(j.deadline);
+  const st=JV_ST[j.status]||JV_ST['검토중'];
+  const editing=JV_EDIT===j.id;
+  const chips=[
+    `<span class="jv-chip">${esc(j.type)}</span>`,
+    (j.track&&j.track!=='기타')?`<span class="jv-chip track">${esc(j.track)}</span>`:'',
+    j.loc?`<span class="jv-chip">${esc(j.loc)}</span>`:'',
+    j.pay?`<span class="jv-chip pay">${esc(j.pay)}</span>`:''
+  ].join('');
+  const ddText=jvDeadlineText(j.deadline);
+  const noteBlock=editing
+    ? `<textarea id="jvNoteEd" class="jv-note-ed">${esc(j.note||'')}</textarea><div class="jv-note-btns"><button class="jv-nsave" data-jv="noteSave" data-id="${j.id}">저장</button><button class="jv-ncancel" data-jv="noteCancel">취소</button></div>`
+    : (j.note?`<div class="jv-note">${esc(j.note)}</div>`:'');
+  const ddayStyle=b.tone==='solid'?`background:${b.color}`:`color:${b.color}`;
+  const opts=JV_STATUSES.map(s=>`<option value="${s}"${s===j.status?' selected':''}>${s}</option>`).join('');
+  return `<div class="jv-card${hidden?' jv-hidden-card':''}">
+    <span class="jv-spine" style="background:${b.color}"></span>
+    <div class="jv-main">
+      <div class="jv-r1"><span class="jv-rank">${j.rank?('#'+j.rank):'·'}</span><span class="jv-co">${esc(j.company)}</span><span class="jv-stars">${jvStars(j.stars)}</span></div>
+      <div class="jv-role${j.status==='제외'?' ex':''}">${esc(j.role)}</div>
+      <div class="jv-chips">${chips}</div>
+      ${ddText?`<div class="jv-ddtext">${esc(ddText)}</div>`:''}
+      ${noteBlock}
+    </div>
+    <div class="jv-right">
+      <span class="jv-dday ${b.tone}${b.pulse?' jv-pulse':''}" style="${ddayStyle}">${b.text}</span>
+      <span class="jv-selwrap" style="background:${st.bg}"><select data-jv="status" data-id="${j.id}" style="color:${st.fg}">${opts}</select><span class="cr" style="color:${st.fg}">▼</span></span>
+      ${editing?'':`<button class="jv-notebtn" data-jv="noteEdit" data-id="${j.id}">메모 ✎</button>`}
+      ${j.custom?`<button class="jv-delbtn" data-jv="del" data-id="${j.id}">삭제</button>`:''}
+    </div>
+  </div>`;
+}
 function renderJobsView(){
   if(!JV_OPEN)return;
   const el=document.getElementById('jobsView'); if(!el)return;
   let list=jobsAll().map(j=>({...j,status:jobStatus(j),note:jobNote(j)}));
-  if(JV_CORE)list=list.filter(j=>j.stars>=4&&j.status!=='제외');
+  if(JV_CORE)list=list.filter(j=>j.stars>=4&&!isHiddenJob(j));
   list.sort((a,b)=>{
     if(JV_SORT==='stars')return (b.stars-a.stars)||(jvSortKey(a)-jvSortKey(b));
     if(JV_SORT==='rank')return (a.rank||999)-(b.rank||999);
     return jvSortKey(a)-jvSortKey(b);
   });
+
+  /* 활성 공고 / 숨김 공고 분리 */
+  const activeList=list.filter(j=>!isHiddenJob(j));
+  const hiddenList=list.filter(j=>isHiddenJob(j));
+
   const sm=jobsSummary();
   const d=new Date();
   const dl=d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');
-  const cards=list.map(j=>{
-    const b=jvBadge(j.deadline);
-    const st=JV_ST[j.status]||JV_ST['검토중'];
-    const editing=JV_EDIT===j.id;
-    const chips=[
-      `<span class="jv-chip">${esc(j.type)}</span>`,
-      (j.track&&j.track!=='기타')?`<span class="jv-chip track">${esc(j.track)}</span>`:'',
-      j.loc?`<span class="jv-chip">${esc(j.loc)}</span>`:'',
-      j.pay?`<span class="jv-chip pay">${esc(j.pay)}</span>`:''
-    ].join('');
-    const ddText=jvDeadlineText(j.deadline);
-    const noteBlock=editing
-      ? `<textarea id="jvNoteEd" class="jv-note-ed">${esc(j.note||'')}</textarea><div class="jv-note-btns"><button class="jv-nsave" data-jv="noteSave" data-id="${j.id}">저장</button><button class="jv-ncancel" data-jv="noteCancel">취소</button></div>`
-      : (j.note?`<div class="jv-note">${esc(j.note)}</div>`:'');
-    const ddayStyle=b.tone==='solid'?`background:${b.color}`:`color:${b.color}`;
-    const opts=JV_STATUSES.map(s=>`<option value="${s}"${s===j.status?' selected':''}>${s}</option>`).join('');
-    return `<div class="jv-card">
-      <span class="jv-spine" style="background:${b.color}"></span>
-      <div class="jv-main">
-        <div class="jv-r1"><span class="jv-rank">${j.rank?('#'+j.rank):'·'}</span><span class="jv-co">${esc(j.company)}</span><span class="jv-stars">${jvStars(j.stars)}</span></div>
-        <div class="jv-role${j.status==='제외'?' ex':''}">${esc(j.role)}</div>
-        <div class="jv-chips">${chips}</div>
-        ${ddText?`<div class="jv-ddtext">${esc(ddText)}</div>`:''}
-        ${noteBlock}
-      </div>
-      <div class="jv-right">
-        <span class="jv-dday ${b.tone}${b.pulse?' jv-pulse':''}" style="${ddayStyle}">${b.text}</span>
-        <span class="jv-selwrap" style="background:${st.bg}"><select data-jv="status" data-id="${j.id}" style="color:${st.fg}">${opts}</select><span class="cr" style="color:${st.fg}">▼</span></span>
-        ${editing?'':`<button class="jv-notebtn" data-jv="noteEdit" data-id="${j.id}">메모 ✎</button>`}
-        ${j.custom?`<button class="jv-delbtn" data-jv="del" data-id="${j.id}">삭제</button>`:''}
-      </div>
-    </div>`;
-  }).join('');
+  const cards=activeList.map(j=>makeJobCard(j,false)).join('');
+  const hiddenCards=hiddenList.map(j=>makeJobCard(j,true)).join('');
+  const hiddenSection=hiddenList.length?`
+    <button class="jv-hidden-toggle" data-jv="toggleHidden">
+      ${JV_SHOW_HIDDEN?'▲ 숨김 공고 접기':'▼ 숨김 공고 보기 (마감 2주+ 경과 · '+hiddenList.length+'개)'}
+    </button>
+    ${JV_SHOW_HIDDEN?`<div class="jv-hidden-section"><div class="jv-hidden-label">마감 2주 이상 경과 — 숨김</div>${hiddenCards}</div>`:''}
+  `:'';
+
   el.innerHTML=`<div class="jv-wrap">
     <div class="jv-top"><button class="jv-back" data-jv="back" aria-label="뒤로">←</button><div class="jv-htxt"><div class="k">Job Pipeline</div><div class="t">지원 현황</div></div></div>
-    <div class="jv-goal"><b>공공 산업분석 → 민간 전략·리서치</b> · ${dl} 기준</div>
+    <div class="jv-goal"><b>공공 청년인턴 + 민간 전략·리서치</b> · ${dl} 기준</div>
     <div class="jv-stats">
-      <div class="jv-stat"><div class="n">${sm.total}</div><div class="l">전체</div></div>
+      <div class="jv-stat"><div class="n">${activeList.length}</div><div class="l">활성</div></div>
       <div class="jv-stat"><div class="n" style="color:#3f9e78">${sm.applied}</div><div class="l">지원완료</div></div>
       <div class="jv-stat"><div class="n" style="color:${sm.week?'#e0637a':'var(--ink)'}">${sm.week}</div><div class="l">이번주 마감</div></div>
-      <div class="jv-stat"><div class="n" style="color:#e6a92e">${sm.top}</div><div class="l">최우선 ★5</div></div>
+      <div class="jv-stat"><div class="n" style="color:#e6a92e">${sm.top}</div><div class="l">★5 최우선</div></div>
     </div>
     <div class="jv-controls">
       <div class="jv-seg">
@@ -2091,6 +2172,7 @@ function renderJobsView(){
       </div>
     </details>
     ${cards}
+    ${hiddenSection}
     <div class="jv-foot">상태·메모는 자동 저장 · 기기 간 동기화돼요</div>
   </div>`;
 }
@@ -2100,6 +2182,7 @@ function renderJobsView(){
     if(e.target.closest('[data-jv="back"]')){closeJobsView();return;}
     const sb=e.target.closest('[data-jv="sort"]'); if(sb){JV_SORT=sb.dataset.val;renderJobsView();return;}
     if(e.target.closest('[data-jv="core"]')){JV_CORE=!JV_CORE;renderJobsView();return;}
+    if(e.target.closest('[data-jv="toggleHidden"]')){JV_SHOW_HIDDEN=!JV_SHOW_HIDDEN;renderJobsView();return;}
     const ne=e.target.closest('[data-jv="noteEdit"]'); if(ne){JV_EDIT=ne.dataset.id;renderJobsView();return;}
     const nc=e.target.closest('[data-jv="noteCancel"]'); if(nc){JV_EDIT=null;renderJobsView();return;}
     const ns=e.target.closest('[data-jv="noteSave"]'); if(ns){const ta=el.querySelector('#jvNoteEd');if(ta)setJobOverride(ns.dataset.id,{note:ta.value});JV_EDIT=null;renderJobsView();return;}
