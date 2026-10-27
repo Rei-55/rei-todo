@@ -23,7 +23,7 @@
 <style>
   :root{
     --paper:#eef0f8;--surface:#ffffff;--ink:#2c303c;--ink-soft:#5a5f70;--ink-faint:#8b90a2;--line:#dde0ec;
-    --adsp:#9fb0e8;--hanneung:#f0a9c8;--korean:#a6cef0;--opic:#aacef2;--office:#b4bef0;--jlpt:#c3a8e2;--study:#e7abcf;--python:#a9d0ef;--sqld:#b8a4e0;--rest:#eeb2d2;
+    --adsp:#9fb0e8;--hanneung:#f0a9c8;--korean:#a6cef0;--opic:#aacef2;--office:#b4bef0;--jlpt:#c3a8e2;--study:#e7abcf;--python:#a9d0ef;--sqld:#b8a4e0;--rest:#eeb2d2;--toeic:#8fd0c0;--jae:#f2bf8c;
     --display:'Space Grotesk','Pretendard Variable',sans-serif;
     --body:'Pretendard Variable','Pretendard',-apple-system,sans-serif;
   }
@@ -656,7 +656,7 @@
   <div class="cert-row" id="cardsGrid"></div>
 
   <div class="mini">
-    <div class="h">6개월 한눈에 · 주를 누르면 일별로 펼쳐져요</div>
+    <div class="h">9개월 한눈에 · 주를 누르면 일별로 펼쳐져요</div>
     <div id="grid"></div>
     <div class="day-panel" id="dayPanel"></div>
     <div class="legend" id="legend"></div>
@@ -685,7 +685,7 @@ const firebaseConfig = {
 };
 
 /* ================= 정적 계획 데이터 ================= */
-const T={adsp:['ADSP','var(--adsp)'],hanneung:['한능검','var(--hanneung)'],sqld:['SQLD','var(--sqld)'],korean:['KBS 한국어','var(--korean)'],opic:['OPIc','var(--opic)'],office:['워드·컴활','var(--office)'],jlpt:['JLPT N2','var(--jlpt)'],study:['학과','var(--study)'],python:['파이썬','var(--python)'],rest:['회복·정리','var(--rest)']};
+const T={adsp:['ADSP','var(--adsp)'],hanneung:['한능검','var(--hanneung)'],sqld:['SQLD','var(--sqld)'],korean:['KBS 한국어','var(--korean)'],opic:['OPIc','var(--opic)'],office:['워드·컴활','var(--office)'],jlpt:['JLPT·HSK','var(--jlpt)'],toeic:['TOEIC','var(--toeic)'],jae:['재경관리사','var(--jae)'],study:['학과','var(--study)'],python:['파이썬','var(--python)'],rest:['회복·정리','var(--rest)']};
 const W=[
  {n:1,s:'2026-07-08',e:'2026-07-12',m:7,h:'ADSP 개념 훑기 (유튜브)',day:'시험 구조 파악 + 1·2과목',eve:'용어 암기',wk:'1·2과목 요약강의',t:['adsp']},
  {n:2,s:'2026-07-13',e:'2026-07-19',m:7,h:'ADSP 3과목 진입',day:'R 기초·기술통계·회귀',eve:'1·2과목 복습',wk:'기출 첫 도전 + 한능검 감각',t:['adsp','hanneung']},
@@ -703,17 +703,43 @@ const W=[
  {n:14,s:'2026-10-05',e:'2026-10-11',m:10,h:'JLPT 메인+컴활 실기',day:'JLPT 독해·청해 / 실기',eve:'JLPT',wk:'컴활 실기 실습',t:['jlpt','office']},
  {n:15,s:'2026-10-12',e:'2026-10-18',m:10,h:'중간고사 직전',day:'학과↑, JLPT 단어만',eve:'학과 대비',wk:'학과 집중',t:['study','jlpt']},
  {n:16,s:'2026-10-19',e:'2026-10-24',m:10,h:'⚠중간고사',day:'학업 올인',eve:'학과 대비',wk:'—',t:['study'],warn:1},
- {n:17,s:'2026-10-25',e:'2026-10-31',m:10,h:'회복+JLPT 재가속',day:'JLPT 문법·독해 복귀 / 컴활 실기',eve:'JLPT',wk:'실기 / 파이썬 재개',t:['jlpt','office','python']},
- {n:18,s:'2026-11-02',e:'2026-11-08',m:11,h:'JLPT 집중+실기 마무리',day:'JLPT 3영역 / 컴활 실기',eve:'JLPT 청해',wk:'컴활 실기 응시',t:['jlpt','office'],dot:1},
- {n:19,s:'2026-11-09',e:'2026-11-15',m:11,h:'JLPT 기출·모의',day:'JLPT 기출 1회분',eve:'오답·문법',wk:'모의 1회 실전',t:['jlpt']},
- {n:20,s:'2026-11-16',e:'2026-11-22',m:11,h:'JLPT 약점 보강',day:'취약 영역 집중',eve:'문법·단어',wk:'모의 2회차',t:['jlpt']},
- {n:21,s:'2026-11-23',e:'2026-11-29',m:11,h:'JLPT 실전 모드',day:'시간 재고 실전 모의',eve:'청해 집중',wk:'최종 모의+오답',t:['jlpt']},
- {n:22,s:'2026-11-30',e:'2026-12-06',m:12,h:'★JLPT N2 → 시험',day:'요약·오답 총정리',eve:'청해 유지, 밤샘 금지',wk:'12/6 JLPT 응시',t:['jlpt'],ex:1},
- {n:23,s:'2026-12-07',e:'2026-12-14',m:12,h:'JLPT 끝+기말 시동',day:'학과 공부 시작',eve:'학과 정리',wk:'학과 집중',t:['study','rest']},
- {n:24,s:'2026-12-15',e:'2026-12-21',m:12,h:'⚠기말고사',day:'학업 올인',eve:'학과 대비',wk:'—',t:['study'],warn:1},
- {n:25,s:'2026-12-22',e:'2026-12-31',m:12,h:'한 해 정리',day:'성과 정리',eve:'재충전',wk:'상반기 공고 리서치',t:['rest']},
+ {n:17,s:'2026-10-25',e:'2026-11-01',m:10,h:'3트랙 시작 — 토익·SQLD·컴활 필기',day:'토익 3h + SQLD 2h + 컴활 필기 1h',eve:'수요일은 토익 2h + SQLD·컴활 1h',wk:'접수 3개 처리 (컴활 필기·워드·오픽)',t:['toeic','sqld','office']},
+ {n:18,s:'2026-11-02',e:'2026-11-08',m:11,h:'SQLD 본격 + 토익 매일',day:'토익 3h + SQLD 2h',eve:'컴활 필기 기출 CBT 1h',wk:'11/3 행사 · KBS 접수 열림(11/2)',t:['sqld','toeic','office']},
+ {n:19,s:'2026-11-09',e:'2026-11-15',m:11,h:'★SQLD (11/14)',day:'SQLD 모의고사 + 토익',eve:'컴활 필기 기출 1h',wk:'11/13 지구청년 서울 · 토 SQLD 응시',t:['sqld','toeic'],ex:1},
+ {n:20,s:'2026-11-16',e:'2026-11-22',m:11,h:'★컴활 필기 (11/19)',day:'컴활 필기 막판 + 토익',eve:'오픽 스크립트 / 워드 실기 시작',wk:'11/20 견학 · 주말 워드 실기 반복',t:['office','toeic'],ex:1},
+ {n:21,s:'2026-11-23',e:'2026-11-29',m:11,h:'★워드 11/24 · 오픽 11/26',day:'토익 + 워드 → 컴활 실기',eve:'오픽 리허설 → KBS 어법',wk:'토익 모의 1회 + 컴활 액세스',t:['office','opic'],ex:1},
+ {n:22,s:'2026-11-30',e:'2026-12-06',m:12,h:'컴활 실기 + KBS 어법',day:'토익 3h + 컴활 실기 2h',eve:'KBS 어법→국어문화 1h',wk:'12/3 오픽 2차(필요 시) · 12/4~6 가족여행',t:['office','korean'],dot:1},
+ {n:23,s:'2026-12-07',e:'2026-12-14',m:12,h:'★컴활 실기 12/8 · 12/11',day:'컴활 실기 응시 / 오답 반복',eve:'기말 준비 시작',wk:'12/12~13 인턴 여행',t:['office','study'],ex:1},
+ {n:24,s:'2026-12-15',e:'2026-12-21',m:12,h:'⚠기말 + ★KBS (12/20)',day:'기말 3h',eve:'토익 유지 1h + KBS 기출 1h',wk:'12/16 포럼 · 일 12/20 KBS 응시',t:['study','korean'],warn:1,ex:1},
+ {n:25,s:'2026-12-22',e:'2026-12-31',m:12,h:'★TOEIC (12/27)',day:'토익 실전 모의 4h',eve:'ADsP 개념 / 재경 입문',wk:'일 12/27 토익 응시',t:['toeic','adsp'],ex:1},
+ {n:26,y:2027,s:'2027-01-01',e:'2027-01-10',m:1,h:'ADsP + 토익 2차(필요 시)',day:'ADsP 이론·기출',eve:'토익 오답 / 재경 입문',wk:'ADsP 첫 회차 일정 확인',t:['adsp','toeic']},
+ {n:27,y:2027,s:'2027-01-11',e:'2027-01-17',m:1,h:'ADsP + 토익 2차(필요 시)',day:'ADsP 이론·기출',eve:'토익 오답 / 재경 입문',wk:'ADsP 첫 회차 일정 확인',t:['adsp','toeic']},
+ {n:28,y:2027,s:'2027-01-18',e:'2027-01-24',m:1,h:'ADsP + 토익 2차(필요 시)',day:'ADsP 이론·기출',eve:'토익 오답 / 재경 입문',wk:'ADsP 첫 회차 일정 확인',t:['adsp','toeic']},
+ {n:29,y:2027,s:'2027-01-25',e:'2027-01-31',m:1,h:'ADsP + 토익 2차(필요 시)',day:'ADsP 이론·기출',eve:'토익 오답 / 재경 입문',wk:'ADsP 첫 회차 일정 확인',t:['adsp','toeic']},
+ {n:30,y:2027,s:'2027-02-01',e:'2027-02-07',m:2,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:31,y:2027,s:'2027-02-08',e:'2027-02-14',m:2,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:32,y:2027,s:'2027-02-15',e:'2027-02-21',m:2,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:33,y:2027,s:'2027-02-22',e:'2027-02-28',m:2,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:34,y:2027,s:'2027-03-01',e:'2027-03-07',m:3,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:35,y:2027,s:'2027-03-08',e:'2027-03-14',m:3,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:36,y:2027,s:'2027-03-15',e:'2027-03-21',m:3,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:37,y:2027,s:'2027-03-22',e:'2027-03-28',m:3,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:38,y:2027,s:'2027-03-29',e:'2027-04-04',m:4,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:39,y:2027,s:'2027-04-05',e:'2027-04-11',m:4,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:40,y:2027,s:'2027-04-12',e:'2027-04-18',m:4,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:41,y:2027,s:'2027-04-19',e:'2027-04-25',m:4,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:42,y:2027,s:'2027-04-26',e:'2027-05-02',m:4,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:43,y:2027,s:'2027-05-03',e:'2027-05-09',m:5,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:44,y:2027,s:'2027-05-10',e:'2027-05-16',m:5,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:45,y:2027,s:'2027-05-17',e:'2027-05-23',m:5,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:46,y:2027,s:'2027-05-24',e:'2027-05-30',m:5,h:'재경관리사',day:'재무회계·원가·세무',eve:'일본어 30분',wk:'재경 모의고사',t:['jae','jlpt']},
+ {n:47,y:2027,s:'2027-05-31',e:'2027-06-06',m:6,h:'JLPT N3 집중',day:'N3 문법·독해',eve:'청해',wk:'N3 모의고사',t:['jlpt']},
+ {n:48,y:2027,s:'2027-06-07',e:'2027-06-13',m:6,h:'JLPT N3 집중',day:'N3 문법·독해',eve:'청해',wk:'N3 모의고사',t:['jlpt']},
+ {n:49,y:2027,s:'2027-06-14',e:'2027-06-20',m:6,h:'JLPT N3 집중',day:'N3 문법·독해',eve:'청해',wk:'N3 모의고사',t:['jlpt']},
+ {n:50,y:2027,s:'2027-06-21',e:'2027-06-27',m:6,h:'JLPT N3 집중',day:'N3 문법·독해',eve:'청해',wk:'N3 모의고사',t:['jlpt']},
+ {n:51,y:2027,s:'2027-06-28',e:'2027-06-30',m:6,h:'JLPT N3 집중',day:'N3 문법·독해',eve:'청해',wk:'N3 모의고사',t:['jlpt']},
 ];
-const EXAMS=[{l:'ADSP',d:'2026-08-08',c:'var(--adsp)'},{l:'한능검',d:'2026-08-09',c:'var(--hanneung)'},{l:'SQLD',d:'2026-08-22',c:'var(--sqld)'},{l:'사무자동화 필기',d:'2026-08-23',c:'var(--office)'},{l:'OPIc',d:'2026-09-12',c:'var(--opic)'},{l:'JLPT N2',d:'2026-12-06',c:'var(--jlpt)'}];
+const EXAMS=[{l:'ADSP',d:'2026-08-08',c:'var(--adsp)'},{l:'한능검',d:'2026-08-09',c:'var(--hanneung)'},{l:'SQLD',d:'2026-08-22',c:'var(--sqld)'},{l:'사무자동화 필기',d:'2026-08-23',c:'var(--office)'},{l:'OPIc',d:'2026-09-12',c:'var(--opic)'},{l:'SQLD',d:'2026-11-14',c:'var(--sqld)'},{l:'컴활 1급 필기',d:'2026-11-19',c:'var(--office)'},{l:'워드 실기',d:'2026-11-24',c:'var(--office)'},{l:'OPIc 1차',d:'2026-11-26',c:'var(--opic)'},{l:'컴활 실기 1차',d:'2026-12-08',c:'var(--office)'},{l:'컴활 실기 2차',d:'2026-12-11',c:'var(--office)'},{l:'KBS 한국어',d:'2026-12-20',c:'var(--korean)'},{l:'TOEIC',d:'2026-12-27',c:'var(--toeic)'}];
 const IMP={5:'★★★★★',4:'★★★★',3:'★★★',2:'★★',1:'★'};
 const DEFAULT_GOALS={
  1:[{type:'job',name:'LG AI연구원 사업전략·기획 인턴',imp:5,due:'수시 · 최우선'},{type:'todo',text:'📌 SQLD 접수 (다음 주, dataq.or.kr)'},{type:'todo',text:'📌 사무자동화 필기 접수 7/20~7/23 (q-net)'},{type:'todo',text:'ADSP 3과목(R·통계) 궤도 올리기'}],
@@ -732,15 +758,15 @@ const DEFAULT_GOALS={
  14:[{type:'todo',text:'⚡ 하반기 공채 시즌 — 공고 몰아보기'},{type:'todo',text:'JLPT 궤도 · 컴활 실기'}],
  15:[{type:'todo',text:'⚡ 공채 마감 러시! 지원 몰아치기'},{type:'todo',text:'중간고사 대비 시작'}],
  16:[{type:'exam',text:'중간고사 집중 (자격증·공고 STOP)'}],
- 17:[{type:'todo',text:'밀린 공고 몰아서 지원'},{type:'todo',text:'JLPT 재가속'}],
- 18:[{type:'exam',text:'컴활 실기 응시'},{type:'todo',text:'공고 체크'}],
- 19:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 기출 시작'}],
- 20:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 약점 보강'}],
- 21:[{type:'todo',text:'이번 주 마감 공고 체크 & 지원'},{type:'todo',text:'JLPT 실전 모의'}],
- 22:[{type:'exam',text:'JLPT N2 응시! (공고 STOP)'}],
- 23:[{type:'todo',text:'밀린 공고 지원'},{type:'todo',text:'기말 대비 시작'}],
- 24:[{type:'exam',text:'기말고사 집중 (STOP)'}],
- 25:[{type:'todo',text:'한 해 성과 정리'},{type:'todo',text:'상반기 공채 리서치'}],
+ 17:[{type:'todo',text:'📌 컴활 1급 필기 접수 (11/19 목)'},{type:'todo',text:'📌 워드 실기 접수 (11/24 화)'},{type:'todo',text:'📌 오픽 서면점 접수 (11/26 목)'},{type:'todo',text:'이번 주 마감 공고 체크 & 지원'}],
+ 18:[{type:'todo',text:'📌 KBS 한국어 94회 접수 (12/20, 마감 12/4)'},{type:'todo',text:'이번 주 마감 공고 체크 & 지원'}],
+ 19:[{type:'exam',text:'SQLD 응시 (11/14 토)'},{type:'todo',text:'공고 체크'}],
+ 20:[{type:'exam',text:'컴활 1급 필기 (11/19 목)'},{type:'todo',text:'📌 필기 발표 후 컴활 실기 12/8·12/11 접수'}],
+ 21:[{type:'exam',text:'워드 실기 (11/24 화) · 오픽 1차 (11/26 목)'},{type:'todo',text:'공고 체크'}],
+ 22:[{type:'todo',text:'오픽 결과 확인 → 미달이면 12/3 2차'},{type:'todo',text:'📌 토익 12/27 정기접수'},{type:'todo',text:'SQLD 발표 12/4'}],
+ 23:[{type:'exam',text:'컴활 실기 1차 12/8 · 2차 12/11'},{type:'todo',text:'기말 준비 시작'}],
+ 24:[{type:'exam',text:'기말고사 + KBS 한국어 (12/20 일)'}],
+ 25:[{type:'exam',text:'TOEIC (12/27 일)'},{type:'todo',text:'컴활 실기 결과 → 필요 시 3차'},{type:'todo',text:'KBS 발표 12/31'}],
 };
 const DETAIL={
  '2026-07-08':[{tx:'ADSP 개념 — 데이터 이해·분석 기획',c:'adsp'}],
@@ -838,45 +864,69 @@ const DETAIL={
  '2026-10-11':[{tx:'주간 총정리',c:'jlpt'}],
  '2026-10-25':[{tx:'N2 문법 속성 1회독 시작 (Day1)',c:'jlpt'}],
  '2026-10-26':[{tx:'N2 문법 속성 1회독 (Day2)',c:'jlpt'}],
- '2026-10-27':[{tx:'N2 문법 속성 1회독 (Day3)',c:'jlpt'}],
- '2026-10-28':[{tx:'N2 문법 속성 1회독 (Day4)',c:'jlpt'}],
- '2026-10-29':[{tx:'N2 문법 속성 1회독 (Day5, 1회독 완료 목표)',c:'jlpt'}],
- '2026-10-30':[{tx:'문자·어휘 확인문제 4~6',c:'jlpt'}],
- '2026-10-31':[{tx:'주간 총정리 + 오답 정리',c:'jlpt'}],
- '2026-11-02':[{tx:'독해요령 알아두기 + 독해공략 01',c:'jlpt'}],
- '2026-11-03':[{tx:'독해공략 02',c:'jlpt'}],
- '2026-11-04':[{tx:'독해공략 03',c:'jlpt'}],
- '2026-11-05':[{tx:'독해공략 04',c:'jlpt'}],
- '2026-11-06':[{tx:'독해공략 05',c:'jlpt'}],
- '2026-11-07':[{tx:'청해요령 알아두기 + 청해공략 01',c:'jlpt'}],
- '2026-11-08':[{tx:'이번주 독해 오답 총정리',c:'jlpt'}],
- '2026-11-09':[{tx:'청해공략 02',c:'jlpt'}],
- '2026-11-10':[{tx:'실전모의고사 1회 (시간 재고 풀기)',c:'jlpt'}],
- '2026-11-11':[{tx:'모의고사 1회 오답노트 작성',c:'jlpt'}],
- '2026-11-12':[{tx:'스피드체크북 어휘 회독 시작',c:'jlpt'}],
- '2026-11-13':[{tx:'스피드체크북 어휘 이어서',c:'jlpt'}],
- '2026-11-14':[{tx:'오답노트 취약유형 재점검',c:'jlpt'}],
- '2026-11-15':[{tx:'주간 총정리',c:'jlpt'}],
- '2026-11-16':[{tx:'실전모의고사 2회',c:'jlpt'}],
- '2026-11-17':[{tx:'모의고사 2회 오답노트',c:'jlpt'}],
- '2026-11-18':[{tx:'스피드체크북 문법 회독',c:'jlpt'}],
- '2026-11-19':[{tx:'취약 유형 집중 보강 (직전 오답 기준)',c:'jlpt'}],
- '2026-11-20':[{tx:'청해 재복습 (쉐도잉 포함)',c:'jlpt'}],
- '2026-11-21':[{tx:'취약 어휘·문법 재점검',c:'jlpt'}],
- '2026-11-22':[{tx:'주간 총정리',c:'jlpt'}],
- '2026-11-23':[{tx:'실전모의고사 3회 (시간 엄수, 실전처럼)',c:'jlpt'}],
- '2026-11-24':[{tx:'모의고사 3회 오답노트',c:'jlpt'}],
- '2026-11-25':[{tx:'청해 집중 복습',c:'jlpt'}],
- '2026-11-26':[{tx:'취약 파트 마지막 보강',c:'jlpt'}],
- '2026-11-27':[{tx:'스피드체크북 총정리 1회독',c:'jlpt'}],
- '2026-11-28':[{tx:'전체 오답노트 재점검',c:'jlpt'}],
- '2026-11-29':[{tx:'주간 총정리 (파이널 위크 준비)',c:'jlpt'}],
- '2026-11-30':[{tx:'오답노트+스피드체크북 총정리 (새 문제 X)',c:'jlpt'}],
- '2026-12-01':[{tx:'오답노트+스피드체크북 총정리 이어서',c:'jlpt'}],
- '2026-12-02':[{tx:'취약 유형만 압축 복습',c:'jlpt'}],
- '2026-12-03':[{tx:'청해 쉐도잉만 (암기 최소화)',c:'jlpt'}],
- '2026-12-04':[{tx:'청해 쉐도잉 유지 + 컨디션 관리',c:'jlpt'}],
- '2026-12-05':[{tx:'최종 점검, 일찍 취침',c:'jlpt'}],
+ '2026-10-27':[{tx:'📌 컴활 1급 필기 접수 (11/19 목)',c:'rest',tm:'할 일',hot:1},{tx:'📌 워드 실기 접수 (11/24 화)',c:'rest',tm:'할 일',hot:1},{tx:'📌 오픽 서면점 접수 (11/26 목)',c:'rest',tm:'할 일',hot:1}],
+ '2026-10-28':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'2시간'},{tx:'SQLD · 기출',c:'sqld',tm:'1시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-10-29':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-10-30':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-10-31':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-01':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-02':[{tx:'📌 KBS 한국어 94회 접수 (12/20 일, ~12/4)',c:'rest',tm:'할 일',hot:1},{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-03':[{tx:'행사 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-11-04':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'2시간'},{tx:'SQLD · 기출',c:'sqld',tm:'1시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-05':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-06':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-07':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-08':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 이론+기출',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-09':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 모의고사',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-10':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 모의고사',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-11':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'2시간'},{tx:'SQLD · 기출',c:'sqld',tm:'1시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-12':[{tx:'토익 · LC·RC 문풀+오답',c:'toeic',tm:'3시간'},{tx:'SQLD · 모의고사',c:'sqld',tm:'2시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'1시간'}],
+ '2026-11-13':[{tx:'외교부 지구청년 (서울) — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-11-14':[{tx:'토익 · 오답 정리',c:'toeic',tm:'1시간'}],
+ '2026-11-15':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'2시간'},{tx:'오픽 · 주제 스크립트',c:'opic',tm:'1시간'}],
+ '2026-11-16':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'2시간'},{tx:'오픽 · 주제 스크립트',c:'opic',tm:'1시간'}],
+ '2026-11-17':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 필기 · 기출 CBT',c:'office',tm:'2시간'},{tx:'오픽 · 주제 스크립트',c:'opic',tm:'1시간'}],
+ '2026-11-18':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'컴활 필기 · 막판 기출',c:'office',tm:'2시간'}],
+ '2026-11-19':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'워드 실기 · 실기 1일차',c:'office',tm:'1시간'}],
+ '2026-11-20':[{tx:'대한항공 견학 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-11-21':[{tx:'📌 컴활 필기 발표 확인 → 실기 12/8·12/11 접수',c:'rest',tm:'할 일',hot:1},{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'워드 실기 · 실기 반복',c:'office',tm:'2시간'},{tx:'오픽 · 녹음 연습',c:'opic',tm:'1시간'}],
+ '2026-11-22':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'워드 실기 · 실기 반복',c:'office',tm:'2시간'},{tx:'오픽 · 녹음 연습',c:'opic',tm:'1시간'}],
+ '2026-11-23':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'워드 실기 · 실기 반복',c:'office',tm:'2시간'},{tx:'오픽 · 녹음 연습',c:'opic',tm:'1시간'}],
+ '2026-11-24':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'오픽 · 롤플레이',c:'opic',tm:'1시간'}],
+ '2026-11-25':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'컴활 실기 · 엑셀 함수',c:'office',tm:'1시간'},{tx:'오픽 · 막판 리허설',c:'opic',tm:'1시간'}],
+ '2026-11-26':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'컴활 실기 · 엑셀 함수',c:'office',tm:'1시간'}],
+ '2026-11-27':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 액세스',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법',c:'korean',tm:'1시간'}],
+ '2026-11-28':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 액세스',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법',c:'korean',tm:'1시간'}],
+ '2026-11-29':[{tx:'토익 · 모의 1회',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 엑셀 기출',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법',c:'korean',tm:'1시간'}],
+ '2026-11-30':[{tx:'오픽 1차 결과 확인 → IH 미달이면 12/3 2차 접수 (25일 면제)',c:'rest',tm:'할 일',hot:1},{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 엑셀·액세스 기출',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법',c:'korean',tm:'1시간'}],
+ '2026-12-01':[{tx:'📌 토익 12/27 정기접수',c:'rest',tm:'할 일',hot:1},{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 엑셀·액세스 기출',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법 (오픽 IH 미달이면 오픽 리허설)',c:'korean',tm:'1시간'}],
+ '2026-12-02':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'컴활 실기 · 기출',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 어법 (오픽 IH 미달이면 오픽 리허설)',c:'korean',tm:'1시간'}],
+ '2026-12-03':[{tx:'오픽 2차 (IH 미달 시만)',c:'opic',tm:'할 일',hot:1},{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 엑셀·액세스 기출',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 국어문화',c:'korean',tm:'1시간'}],
+ '2026-12-04':[{tx:'SQLD 합격 발표 확인',c:'rest',tm:'할 일',hot:1},{tx:'가족 서울여행 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-05':[{tx:'가족 서울여행 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-06':[{tx:'가족 서울여행 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-07':[{tx:'토익 · 문풀+오답',c:'toeic',tm:'3시간'},{tx:'컴활 실기 · 실전 모의',c:'office',tm:'2시간'},{tx:'KBS 한국어 · 국어문화',c:'korean',tm:'1시간'}],
+ '2026-12-08':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'}],
+ '2026-12-09':[{tx:'토익 · 단어',c:'toeic',tm:'1시간'},{tx:'컴활 실기 · 오답 반복',c:'office',tm:'2시간'}],
+ '2026-12-10':[{tx:'토익 · 문풀',c:'toeic',tm:'2시간'},{tx:'컴활 실기 · 오답 반복',c:'office',tm:'2시간'},{tx:'기말 · 기말 준비',c:'study',tm:'1시간'}],
+ '2026-12-11':[{tx:'기말 · 기말 준비',c:'study',tm:'2시간'}],
+ '2026-12-12':[{tx:'인턴 여행 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-13':[{tx:'인턴 여행 — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-14':[{tx:'기말 · 기말',c:'study',tm:'3시간'},{tx:'토익 · 유지',c:'toeic',tm:'2시간'},{tx:'KBS 한국어 · 기출·어휘',c:'korean',tm:'1시간'}],
+ '2026-12-15':[{tx:'기말 · 기말',c:'study',tm:'3시간'},{tx:'토익 · 유지',c:'toeic',tm:'1시간'},{tx:'KBS 한국어 · 기출·어휘',c:'korean',tm:'1시간'}],
+ '2026-12-16':[{tx:'한국지방외교포럼 (세종) — 공부 쉬는 날',c:'rest',tm:'일정'}],
+ '2026-12-17':[{tx:'기말 · 기말',c:'study',tm:'3시간'},{tx:'토익 · 유지',c:'toeic',tm:'1시간'},{tx:'KBS 한국어 · 기출·어휘',c:'korean',tm:'1시간'}],
+ '2026-12-18':[{tx:'기말 · 기말',c:'study',tm:'3시간'},{tx:'토익 · 유지',c:'toeic',tm:'1시간'},{tx:'KBS 한국어 · 기출·어휘',c:'korean',tm:'1시간'}],
+ '2026-12-21':[{tx:'기말 · 기말',c:'study',tm:'3시간'},{tx:'토익 · 유지',c:'toeic',tm:'1시간'}],
+ '2026-12-22':[{tx:'컴활 실기 1차 결과 확인 → 필요 시 3차 접수',c:'rest',tm:'할 일',hot:1},{tx:'토익 · 실전 모의',c:'toeic',tm:'4시간'},{tx:'컴활 실기 · 3차 대비 (1·2차 불합 시)',c:'office',tm:'1시간'},{tx:'ADsP · 개념 훑기',c:'adsp',tm:'1시간'}],
+ '2026-12-23':[{tx:'토익 · 실전 모의',c:'toeic',tm:'4시간'},{tx:'컴활 실기 · 3차 대비 (1·2차 불합 시)',c:'office',tm:'1시간'},{tx:'ADsP · 개념 훑기',c:'adsp',tm:'1시간'}],
+ '2026-12-24':[{tx:'토익 · 실전 모의',c:'toeic',tm:'4시간'},{tx:'컴활 실기 · 3차 대비 (1·2차 불합 시)',c:'office',tm:'1시간'},{tx:'ADsP · 개념 훑기',c:'adsp',tm:'1시간'}],
+ '2026-12-25':[{tx:'토익 · 실전 모의',c:'toeic',tm:'4시간'},{tx:'컴활 실기 · 3차 대비 (1·2차 불합 시)',c:'office',tm:'1시간'},{tx:'ADsP · 개념 훑기',c:'adsp',tm:'1시간'}],
+ '2026-12-28':[{tx:'토익 · 2차 대비 오답',c:'toeic',tm:'2시간'},{tx:'ADsP · 이론',c:'adsp',tm:'2시간'},{tx:'재경관리사 · 재무회계 입문',c:'jae',tm:'1시간'}],
+ '2026-12-29':[{tx:'토익 · 2차 대비 오답',c:'toeic',tm:'2시간'},{tx:'ADsP · 이론',c:'adsp',tm:'2시간'},{tx:'재경관리사 · 재무회계 입문',c:'jae',tm:'1시간'}],
+ '2026-12-30':[{tx:'토익 · 2차 대비 오답',c:'toeic',tm:'2시간'},{tx:'ADsP · 이론',c:'adsp',tm:'2시간'},{tx:'재경관리사 · 재무회계 입문',c:'jae',tm:'1시간'}],
+ '2026-12-31':[{tx:'KBS 한국어 발표 확인',c:'rest',tm:'할 일',hot:1},{tx:'토익 · 2차 대비 오답',c:'toeic',tm:'2시간'},{tx:'ADsP · 이론',c:'adsp',tm:'2시간'},{tx:'재경관리사 · 재무회계 입문',c:'jae',tm:'1시간'}],
+ '2027-01-06':[{tx:'토익 성적 확인 → 900 미만이면 1월 재응시 접수',c:'rest',tm:'할 일',hot:1}],
 };
 const DOW=['일','월','화','수','목','금','토'];
 
@@ -940,14 +990,13 @@ function typeOf(g){return g.type||(g.job?'job':g.exam?'exam':'todo');}
 function dayPlan(ds){return (STATE.dayPlans&&STATE.dayPlans[ds])||DETAIL[ds];}
 function weekFlag(wn){return (STATE.weekFlags&&STATE.weekFlags[wn])||{};}
 function slotOf(dow){ if(dow===1||dow===3)return '20:00–21:30'; if(dow===2||dow===4||dow===5)return '낮 블록'; return '오전'; }
+const PLAN_FROM='2026-10-27'; /* 이 날짜부터 일자별 계획(DETAIL·dayPlans)을 하루 할 일에 표시 */
 function buildDay(w,date){
-  const ds=iso(date), dow=date.getDay(), it=[];
+  const ds=iso(date), it=[];
   const ex=EXAMS.find(x=>x.d===ds);
-  if(ex){
-    it.push({tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c});
-    it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
-    it.push({tm:'아침',tx:'몸무게 기록',c:'var(--hanneung)'});
-    return it;
+  if(ex) it.push({tm:'시험일',tx:ex.l+' 응시 🎯',exam:true,c:ex.c});
+  if(ds>=PLAN_FROM){
+    (dayPlan(ds)||[]).forEach(x=>it.push({tm:x.tm||'',tx:x.tx,c:(T[x.c]?T[x.c][1]:'var(--rest)'),hot:x.hot,lec:x.lec}));
   }
   it.push({tm:'식단',tx:'점심·저녁·간식 기록',c:'var(--rest)'});
   it.push({tm:'아침',tx:'몸무게 기록',c:'var(--hanneung)'});
@@ -1511,11 +1560,12 @@ function renderExam(){
 function renderGrid(){
   const grid=document.getElementById('grid');
   const nowWk=weekOf(now);
-  const months=[7,8,9,10,11,12];
-  const maxW=Math.max(...months.map(m=>W.filter(w=>w.m===m).length));
+  const months=[[2026,10],[2026,11],[2026,12],[2027,1],[2027,2],[2027,3],[2027,4],[2027,5],[2027,6]];
+  const inM=(w,y,m)=>w.m===m&&(w.y||2026)===y;
+  const maxW=Math.max(...months.map(([y,m])=>W.filter(w=>inM(w,y,m)).length));
   let out='';
-  months.forEach(m=>{
-    const ws=W.filter(w=>w.m===m).map(w=>getWeek(w.n));
+  months.forEach(([y,m])=>{
+    const ws=W.filter(w=>inM(w,y,m)).map(w=>getWeek(w.n));
     let cells='';
     ws.forEach(w=>{
       const isNow=(nowWk&&nowWk.n===w.n), isSel=(openWeekNum===w.n);
@@ -1587,7 +1637,7 @@ function renderPanel(){
 }
 function renderLegend(){
   const lg=document.getElementById('legend');let h='';
-  ['adsp','hanneung','sqld','opic','office','jlpt','study'].forEach(k=>{h+=`<div class="lg"><span class="sw" style="background:${T[k][1]}"></span>${T[k][0]}</div>`;});
+  ['sqld','adsp','office','korean','opic','toeic','jae','jlpt','study'].forEach(k=>{h+=`<div class="lg"><span class="sw" style="background:${T[k][1]}"></span>${T[k][0]}</div>`;});
   lg.innerHTML=h;
 }
 function renderAll(){if(cur&&cur.n)cur=getWeek(cur.n);renderTodo();renderHero();renderExam();renderGrid();renderLegend();renderPanel();renderCardsGrid();renderJobsView();renderLedgerView();renderDietView();}
@@ -2344,30 +2394,20 @@ function daysLeftInMonth(ym){
 }
 function manwon(n){/* 만원 단위 읽기 좋게 */const v=Math.round(n/10000);return v.toLocaleString()+'만원';}
 function livingHTML(ym,income,expense){
-  const bud=monthBudget(ym);
-  const base=(bud!=null)?bud:income;      // 예산 있으면 예산, 없으면 이번 달 수입
-  const usingBudget=(bud!=null);
-  // 수입도 예산도 없으면 안내
-  if(base<=0){
-    return `<div class="lg-live empty"><div class="lab">이번 월급기간 생활비</div><div class="big">아직 계산 전</div><div class="sub">월급(수입)을 등록하면 남은 생활비가 계산돼요. (월급일~다음 월급일 전날 기준)</div></div>`;
+  /* 순수 계산: 남은 돈 = 수입 − 지출 (예산 설정은 쓰지 않음) */
+  if(income<=0&&expense<=0){
+    return `<div class="lg-live empty"><div class="lab">이번 월급기간 잔액</div><div class="big">₩0</div><div class="sub">수입이나 지출을 등록하면 수입 − 지출로 바로 계산돼요. (월급일~다음 월급일 전날 기준)</div></div>`;
   }
-  const left=base-expense;
-  const dleft=daysLeftInMonth(ym);
-  const perDay=(dleft>0&&left>0)?Math.floor(left/dleft):0;
-  const spentPct=Math.min(100,Math.max(0,Math.round(expense/base*100)));
-  let cls='',daily='';
-  if(left<0)cls='over';
-  else if(spentPct>=85)cls='warn';
-  if(dleft>0&&left>0)daily=`· 하루 약 ${won(perDay)} 쓸 수 있어요`;
-  const headline=left>=0
-    ? `이번 월급기간 생활비 <b>${manwon(left)}</b> 남았어요`
-    : `이번 월급기간 예산보다 <b>${manwon(-left)}</b> 더 썼어요`;
+  const left=income-expense;
+  const spentPct=income>0?Math.min(100,Math.max(0,Math.round(expense/income*100))):100;
+  const cls=left<0?'over':(spentPct>=85?'warn':'');
+  const headline=left>=0?`수입보다 <b>${manwon(left)}</b> 덜 썼어요`:`수입보다 <b>${manwon(-left)}</b> 더 썼어요`;
   return `<div class="lg-live ${cls}">
-    <div class="lab">${usingBudget?'이번 월급기간 생활비 (예산 기준)':'이번 월급기간 생활비 (수입 기준)'}</div>
+    <div class="lab">이번 월급기간 잔액 (수입 − 지출)</div>
     <div class="big">${won(left)}</div>
-    <div class="sub">${headline} ${daily}</div>
+    <div class="sub">${headline}</div>
     <div class="pbar"><span style="width:${spentPct}%"></span></div>
-    <div class="pmeta"><span>쓴 돈 ${won(expense)}</span><span>${usingBudget?'예산':'수입'} ${won(base)}</span></div>
+    <div class="pmeta"><span>지출 ${won(expense)}</span><span>수입 ${won(income)}</span></div>
   </div>`;
 }
 function openLedgerView(){
@@ -2733,10 +2773,12 @@ function trackStats(matchFn){
   return {done:items.filter(x=>x.done).length,total:items.length,items};
 }
 const CERT_DEFS=[
-  {label:'ADSP',color:'var(--adsp)',heart:'#7ec8ef',bg:'#e3f4fc',match:it=>it.c==='var(--adsp)'},
-  {label:'한능검',color:'var(--hanneung)',heart:'#e58bb5',bg:'#fdeaf3',match:it=>it.c==='var(--hanneung)'&&it.tx!=='몸무게 기록'},
-  {label:'SQLD',color:'var(--sqld)',heart:'#b6a3e6',bg:'#efeafb',match:it=>it.c==='var(--sqld)'},
-  {label:'사무자동화',color:'var(--office)',heart:'#f3a8c8',bg:'#fdeaf3',match:it=>it.c==='var(--office)'&&/사무자동화/.test(it.tx)},
+  {label:'SQLD·ADsP',color:'var(--sqld)',heart:'#b6a3e6',bg:'#efeafb',match:it=>it.c==='var(--sqld)'||it.c==='var(--adsp)'},
+  {label:'컴활·워드',color:'var(--office)',heart:'#9aa6e6',bg:'#eceefb',match:it=>it.c==='var(--office)'},
+  {label:'한국어',color:'var(--korean)',heart:'#7fb6e6',bg:'#e5f1fb',match:it=>it.c==='var(--korean)'},
+  {label:'OPIc·TOEIC',color:'var(--toeic)',heart:'#6fc0ac',bg:'#e3f5f0',match:it=>it.c==='var(--opic)'||it.c==='var(--toeic)'},
+  {label:'재경',color:'var(--jae)',heart:'#eba86a',bg:'#fcefe1',match:it=>it.c==='var(--jae)'},
+  {label:'JLPT·HSK',color:'var(--jlpt)',heart:'#a98ad6',bg:'#f2ecfb',match:it=>it.c==='var(--jlpt)'},
 ];
 
 /* ---- 아이콘 SVG ---- */
@@ -2757,16 +2799,13 @@ function renderCardsGrid(){
   const _ym=ymNow(),_arr=ledgerPeriodArr(_ym);
   const _inc=_arr.filter(e=>e.type==='in').reduce((a,b)=>a+(+b.amt||0),0);
   const _exp=_arr.filter(e=>e.type==='out').reduce((a,b)=>a+(+b.amt||0),0);
-  const _base=(monthBudget(_ym)!=null)?monthBudget(_ym):_inc;
-  const _left=_base-_exp,_lgPct=_base>0?Math.min(100,Math.round(_exp/_base*100)):0;
+  const _left=_inc-_exp,_lgPct=_inc>0?Math.min(100,Math.round(_exp/_inc*100)):(_exp>0?100:0);  /* 순수 수입 − 지출 */
   const _g=calGoal(),_net=dayNet(iso(now)),_dPct=_g?Math.min(100,Math.round((_net>0?_net:0)/_g*100)):0;
 
   const cards=[
     {k:'job',label:'공고',icon:iconBoard('#c26a8c'),bg:'#fdeaf3',stat:`${jDone}<small>/${jTot}</small>`,pct:jPct,bar:'var(--hanneung)'},
-    {k:'word',label:'JLPT',icon:iconKana('#8a6fc9'),bg:'#efeafb',stat:`${ws.total}<small>개</small>`,pct:wPct,bar:'var(--jlpt)'},
-    {k:'exercise',label:'운동',icon:iconDumbbell('#4a8fc0'),bg:'#e3f1fb',stat:`${es.weekDays}<small>회</small>`,pct:ePct,bar:'var(--opic)'},
-    {k:'ledger',label:'생활비',icon:iconWon('#3f9e78'),bg:'#e9f6ef',stat:_base>0?`${_left<0?'-':''}₩${Math.abs(_left).toLocaleString()}`:'—',pct:_lgPct,bar:_left<0?'#e08497':'#7fca9f'},
     {k:'diet',label:'다이어트',icon:iconApple('#a785bc'),bg:'#f2ecfb',stat:`${(_net>0?_net:0).toLocaleString()}<small>/${_g.toLocaleString()}</small>`,pct:_dPct,bar:'var(--jlpt)'},
+    {k:'ledger',label:'생활비',icon:iconWon('#3f9e78'),bg:'#e9f6ef',stat:(_inc||_exp)?`${_left<0?'-':''}₩${Math.abs(_left).toLocaleString()}`:'—',pct:_lgPct,bar:_left<0?'#e08497':'#7fca9f'},
     ...CERT_DEFS.map((d,idx)=>{
       const s=trackStats(d.match);
       const pct=s.total?Math.round(s.done/s.total*100):0;
